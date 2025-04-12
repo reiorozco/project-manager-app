@@ -1,11 +1,12 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,8 +33,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { createClient } from "@/utils/supabase/client";
-// import { PrismaClient } from "../../../generated/prisma";
 
 const registerSchema = z.object({
   fullName: z
@@ -69,8 +68,8 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      // 1. Registrar usuario en Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
+      // Register user in Supabase Auth
+      const { error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -78,6 +77,8 @@ export default function RegisterPage() {
             full_name: values.fullName,
             role: values.role,
           },
+          // Make sure the confirmation link is allowed
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
@@ -85,8 +86,10 @@ export default function RegisterPage() {
         throw error;
       }
 
-      // 2. Redirigir a la página de confirmación
-      router.push(`/auth/confirm?email=${encodeURIComponent(values.email)}`);
+      // Redirect to the confirmation page
+      router.push(
+        `/auth/register/confirm?email=${encodeURIComponent(values.email)}`,
+      );
     } catch (error) {
       setError(error instanceof Error ? error.message : "Error al registrarse");
     } finally {
