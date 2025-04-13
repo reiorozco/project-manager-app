@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import * as ProjectService from "@/lib/services/project-service";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createClient(request);
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -29,7 +29,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createClient(request);
     const {
       data: { user },
     } = await supabase.auth.getUser();
