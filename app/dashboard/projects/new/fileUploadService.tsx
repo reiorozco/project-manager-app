@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { BUCKET_NAME, UploadedFile } from "./types";
 
 export const fileUploadService = {

@@ -43,7 +43,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserRole } from "@prisma/client";
 import { useAuth } from "@/app/auth/auth-context";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 
 interface ProjectParams {
   params: Promise<{ id: string }>;
