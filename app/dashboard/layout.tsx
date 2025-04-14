@@ -21,17 +21,6 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Si el usuario no está autenticado, redirigir al login
-  useEffect(() => {
-    if (!user) {
-      router.push("/auth/login");
-    }
-  }, [user, , router]);
-
-  if (!user) {
-    return null; // No renderizar nada mientras redirige
-  }
-
   const navigation = [
     {
       name: "Dashboard",
@@ -48,8 +37,8 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
   ];
 
   const handleSignOut = async () => {
-    await signOut();
     router.push("/auth/login");
+    await signOut();
   };
 
   return (
@@ -95,7 +84,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center">
-                      <span className="mr-2">{user.email?.split("@")[0]}</span>
+                      <span className="mr-2">{user?.email?.split("@")[0]}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -115,7 +104,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>
                       <div className="flex flex-col">
-                        <span>{user.email}</span>
+                        <span>{user?.email}</span>
                         <span className="text-xs text-gray-500">
                           {userRole === UserRole.CLIENT && "Cliente"}
                           {userRole === UserRole.PROJECT_MANAGER &&
@@ -186,16 +175,16 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
                 <div className="flex-shrink-0">
                   <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                     <span className="text-gray-600">
-                      {user.email?.charAt(0).toUpperCase()}
+                      {user?.email?.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 </div>
                 <div className="ml-3">
                   <div className="text-base font-medium text-gray-800">
-                    {user.email?.split("@")[0]}
+                    {user?.email?.split("@")[0]}
                   </div>
                   <div className="text-sm font-medium text-gray-500">
-                    {user.email}
+                    {user?.email}
                   </div>
                 </div>
               </div>

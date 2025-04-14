@@ -15,7 +15,7 @@ interface ProjectStats {
 }
 
 export default function DashboardPage() {
-  const { userRole } = useAuth();
+  const { userRole, user } = useAuth();
   const router = useRouter();
   const [projectStats, setProjectStats] = useState<ProjectStats>({
     total: 0,
@@ -49,6 +49,14 @@ export default function DashboardPage() {
 
     void fetchStats();
   }, []);
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        Cargando dashboard...
+      </div>
+    );
+  }
 
   const getRoleText = () => {
     switch (userRole) {
