@@ -56,7 +56,6 @@ interface Project {
 
 export default function ProjectsPage() {
   const { user, userRole } = useAuth();
-  console.log(user);
 
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
