@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,28 +25,24 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/app/auth/auth-context";
-import { createClient } from "@/utils/supabase/client";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-
-const projectSchema = z.object({
-  title: z
-    .string()
-    .min(3, { message: "El título debe tener al menos 3 caracteres" }),
-  description: z.string().optional(),
-  files: z.array(z.instanceof(File)).optional(),
-});
+// Importaciones de componentes y servicios modularizados
+import { projectSchema, ProjectFormValues } from "./types";
+import { fileUploadService } from "./fileUploadService";
+import { projectService } from "./projectService";
+import { FileSelector } from "./FileSelector";
 
 export default function NewProjectPage() {
+  // Hooks y estado
   const { user } = useAuth();
-
   const router = useRouter();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const supabase = createClient();
 
-  const form = useForm<z.infer<typeof projectSchema>>({
+  // Formulario con validación
+  const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
       title: "",
@@ -56,81 +51,38 @@ export default function NewProjectPage() {
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    console.log("files", files);
+  // Verifica que el usuario esté autenticado al cargar la página
+  useEffect(() => {
+    if (!user) {
+      console.log("Usuario no autenticado");
+    }
+  }, [user]);
 
-    // Validar tamaño de archivos
-    const oversizedFiles = files.filter((file) => file.size > MAX_FILE_SIZE);
-    if (oversizedFiles.length > 0) {
-      setError(
-        `Algunos archivos exceden el tamaño máximo de 5 MB: ${oversizedFiles.map((f) => f.name).join(", ")}`,
-      );
+  const onSubmit = async (values: ProjectFormValues) => {
+    // Verificar autenticación
+    if (!user) {
+      setError("No se pudo crear el proyecto: Usuario no autenticado");
       return;
     }
-
-    setSelectedFiles(files);
-    form.setValue("files", files);
-  };
-
-  const onSubmit = async (values: z.infer<typeof projectSchema>) => {
-    if (!user) return;
 
     setIsSubmitting(true);
     setError(null);
 
     try {
-      // 1. Subir archivos a Supabase Storage si existen
-      const uploadedFiles = [];
-
-      if (selectedFiles.length > 0) {
-        for (const file of selectedFiles) {
-          const fileExt = file.name.split(".").pop();
-          const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-          const filePath = `projects/${user.id}/${fileName}`;
-
-          const { error: uploadError } = await supabase.storage
-            .from("project-files")
-            .upload(filePath, file);
-
-          if (uploadError) {
-            throw new Error(
-              `Error al subir el archivo ${file.name}: ${uploadError.message}`,
-            );
-          }
-
-          // Obtener URL pública
-          const {
-            data: { publicUrl },
-          } = supabase.storage.from("project-files").getPublicUrl(filePath);
-
-          uploadedFiles.push({
-            filename: file.name,
-            path: `public/${filePath}`,
-            size: file.size,
-          });
-        }
-      }
+      // 1. Subir archivos (si existen)
+      const uploadedFiles = await fileUploadService.uploadMultipleFiles(
+        selectedFiles,
+        user.id,
+      );
 
       // 2. Crear el proyecto con los archivos subidos
-      const response = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: values.title,
-          description: values.description || "",
-          files: uploadedFiles,
-        }),
-      });
+      await projectService.createProject(
+        values.title,
+        values.description || "",
+        uploadedFiles,
+      );
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Error al crear el proyecto");
-      }
-
-      // Redireccionar a la lista de proyectos
+      // 3. Redireccionar a la lista de proyectos
       router.push("/dashboard/projects");
       router.refresh();
     } catch (err) {
@@ -150,14 +102,17 @@ export default function NewProjectPage() {
           <CardDescription>Crea un nuevo proyecto de diseño</CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Mostrar mensajes de error */}
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
+          {/* Formulario */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Campo de título */}
               <FormField
                 control={form.control}
                 name="title"
@@ -172,6 +127,7 @@ export default function NewProjectPage() {
                 )}
               />
 
+              {/* Campo de descripción */}
               <FormField
                 control={form.control}
                 name="description"
@@ -190,44 +146,22 @@ export default function NewProjectPage() {
                 )}
               />
 
+              {/* Campo de archivos */}
               <FormField
                 control={form.control}
                 name="files"
                 render={({ field: { value, onChange, ...field } }) => (
-                  <FormItem>
-                    <FormLabel>Archivos</FormLabel>
-                    <FormControl>
-                      <div className="flex flex-col space-y-2">
-                        <Input
-                          type="file"
-                          multiple
-                          onChange={handleFileChange}
-                          {...field}
-                        />
-                        {selectedFiles.length > 0 && (
-                          <div className="bg-gray-50 p-3 rounded-md">
-                            <p className="text-sm font-medium mb-2">
-                              Archivos seleccionados:
-                            </p>
-                            <ul className="text-sm space-y-1">
-                              {selectedFiles.map((file, index) => (
-                                <li key={index} className="flex items-center">
-                                  <span className="truncate">{file.name}</span>
-                                  <span className="ml-2 text-gray-500">
-                                    ({(file.size / 1024).toFixed(2)} KB)
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  <FileSelector
+                    field={field}
+                    selectedFiles={selectedFiles}
+                    setSelectedFiles={setSelectedFiles}
+                    setError={setError}
+                    onFilesChange={(files) => form.setValue("files", files)}
+                  />
                 )}
               />
 
+              {/* Botón de envío */}
               <div className="pt-4">
                 <Button
                   type="submit"
