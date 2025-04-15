@@ -16,12 +16,14 @@ interface Props {
 
 function ActionButton({ onClick, icon, label, variant = "default" }: Props) {
   return (
-    <Button onClick={onClick} className="h-auto py-6" variant={variant}>
-      <div className="flex flex-col items-center">
-        {icon}
+    <Button
+      onClick={onClick}
+      className="h-auto py-4 flex flex-col items-center justify-center"
+      variant={variant}
+    >
+      {icon}
 
-        <span>{label}</span>
-      </div>
+      <span>{label}</span>
     </Button>
   );
 }

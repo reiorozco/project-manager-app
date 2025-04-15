@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import DashboardHeader from "@/app/components/dashboard/DashboardHeader";
-import ProjectStats from "@/app/components/dashboard/ProjectStats";
-import QuickActions from "@/app/components/dashboard/QuickActions";
+import {
+  DashboardHeader,
+  ProjectStats,
+  QuickActions,
+} from "@/app/components/dashboard";
 
 export default async function DashboardPage() {
   const supabase = await createClient();

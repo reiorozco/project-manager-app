@@ -1,6 +1,8 @@
 import React from "react";
 import { UserRole } from "@prisma/client";
 import { ROLE_DISPLAY_MAP } from "@/lib/constants";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   userRole: UserRole;
@@ -11,8 +13,8 @@ function DashboardHeader({ userRole }: Props) {
   const roleText = ROLE_DISPLAY_MAP[userRole];
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="px-6 py-12 md:px-12 text-center md:text-left">
+    <Card className="border-none shadow-md">
+      <CardContent className="px-6 py-10 md:px-12 text-center md:text-left">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
           Bienvenido a Project Manager
         </h1>
@@ -21,11 +23,17 @@ function DashboardHeader({ userRole }: Props) {
           Panel de gestión de proyectos de diseño
         </p>
 
-        <div className="mt-2 text-sm text-gray-500">
-          Estás conectado como <strong>{roleText}</strong>
+        <div className="mt-4 flex items-center justify-center md:justify-start">
+          <span className="text-sm text-gray-500 mr-2">
+            Estás conectado como
+          </span>
+
+          <Badge variant="outline" className="font-medium">
+            {roleText}
+          </Badge>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

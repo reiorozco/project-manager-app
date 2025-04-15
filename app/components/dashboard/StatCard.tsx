@@ -1,23 +1,26 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Loading from "@/app/components/Loading";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   title: string;
   value: number;
   loading?: boolean;
+  icon?: React.ReactNode;
 }
 
-function StatsCard({ title, value, loading }: Props) {
+function StatCard({ title, value, loading, icon }: Props) {
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{title}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+
+        {icon}
       </CardHeader>
 
       <CardContent>
         {loading ? (
-          <Loading />
+          <Skeleton className="h-8 w-20" />
         ) : (
           <div className="text-3xl font-bold">{value}</div>
         )}
@@ -26,4 +29,4 @@ function StatsCard({ title, value, loading }: Props) {
   );
 }
 
-export default StatsCard;
+export default StatCard;

@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Project Manager",
-  description: "Project Manager app",
+  description: "App de gestión de proyectos de diseño",
 };
 
 export default function RootLayout({
