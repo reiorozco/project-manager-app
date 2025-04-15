@@ -76,14 +76,17 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
+
           <CardDescription>
             Ingresa a tu cuenta para gestionar tus proyectos
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />
+
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -124,6 +127,7 @@ export default function LoginPage() {
             </form>
           </Form>
         </CardContent>
+
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-500">
             ¿No tienes una cuenta?{" "}

@@ -1,6 +1,3 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,9 +9,12 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 
-export default function ConfirmPage() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email");
+interface Props {
+  searchParams: Promise<{ email: string }>;
+}
+
+export default async function ConfirmPage({ searchParams }: Props) {
+  const { email } = await searchParams;
 
   return (
     <div className="flex items-center justify-center bg-gray-50">

@@ -97,8 +97,10 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Crear cuenta</CardTitle>
+
           <CardDescription>Completa tus datos para registrarte</CardDescription>
         </CardHeader>
+
         <CardContent>
           {error && (
             <Alert variant="destructive" className="mb-6">
@@ -184,6 +186,7 @@ export default function RegisterPage() {
             </form>
           </Form>
         </CardContent>
+
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-500">
             ¿Ya tienes una cuenta?{" "}
