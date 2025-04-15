@@ -21,4 +21,6 @@ export const ROUTES = {
   DASHBOARD: "/",
   PROJECTS: "/projects",
   NEW_PROJECT: "/projects/new",
+  PROJECT_DETAILS: (projectId: string) => `/projects/${projectId}`,
+  EDIT_PROJECT: (projectId: string) => `/projects/${projectId}/edit`,
 };

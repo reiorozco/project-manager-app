@@ -10,7 +10,7 @@ import DesktopNavigation from "@/app/components/navigation/DesktopNavigation";
 import MobileNavigation from "@/app/components/navigation/MobileNavigation";
 import UserDropdown from "@/app/components/navigation/UserDropdown";
 
-export function Navbar() {
+function Navbar() {
   const router = useRouter();
   const { user, userRole, signOut } = useAuth();
   const pathname = usePathname();
@@ -49,28 +49,32 @@ export function Navbar() {
             <NavLogo />
 
             {/* Links de navegación en desktop */}
-            <DesktopNavigation navItems={visibleNavItems} />
+            {user && <DesktopNavigation navItems={visibleNavItems} />}
           </div>
 
           {/* Componentes para escritorio y móvil */}
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            <UserDropdown
-              user={user}
-              userRole={userRole}
-              onSignOut={handleSignOut}
-            />
-          </div>
+          {user && (
+            <>
+              <div className="hidden sm:ml-6 sm:flex sm:items-center">
+                <UserDropdown
+                  user={user}
+                  userRole={userRole}
+                  onSignOut={handleSignOut}
+                />
+              </div>
 
-          {/* Botón de hamburguesa para móvil */}
-          <MobileMenuButton
-            isOpen={isMobileMenuOpen}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          />
+              {/* Botón de hamburguesa para móvil */}
+              <MobileMenuButton
+                isOpen={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              />
+            </>
+          )}
         </div>
       </div>
 
       {/* Menú móvil */}
-      {isMobileMenuOpen && (
+      {user && isMobileMenuOpen && (
         <MobileNavigation
           navItems={visibleNavItems}
           user={user}
@@ -105,3 +109,5 @@ function MobileMenuButton({
     </div>
   );
 }
+
+export default Navbar;

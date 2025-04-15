@@ -7,6 +7,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
+import { ROUTES } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,7 +28,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { createClient } from "@/lib/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Correo electrónico inválido" }),
@@ -63,7 +64,7 @@ export default function LoginPage() {
         throw error;
       }
 
-      router.push("/dashboard");
+      router.push(ROUTES.DASHBOARD);
       router.refresh();
     } catch (error) {
       setError(
@@ -75,7 +76,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+    <div className="flex justify-center items-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Iniciar sesión</CardTitle>

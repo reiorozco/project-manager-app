@@ -17,7 +17,7 @@ export default function ConfirmPage() {
   const email = searchParams.get("email");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">

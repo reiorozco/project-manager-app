@@ -100,6 +100,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   // Función para cerrar sesión
   const signOut = async () => {
+    setUser(null);
+    setUserRole(null);
     await supabase.auth.signOut();
   };
 
