@@ -20,7 +20,7 @@ export async function DELETE(
     const fileId = params.fileId;
 
     try {
-      await ProjectService.removeFileFromProject(fileId, userId);
+      await ProjectService.removeFileFromProject(fileId, userId, supabase);
       return NextResponse.json({ success: true });
     } catch (error) {
       const errorMessage =

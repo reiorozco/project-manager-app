@@ -1,10 +1,9 @@
 // lib/services/project-service.ts
 
-import { createClient } from "@/lib/supabase/client";
+// import { createClient } from "@/lib/supabase/server";
 import { UserRole } from "@prisma/client";
 import prisma from "@/lib/prisma";
-
-const supabaseAdmin = createClient();
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export interface CreateProjectInput {
   title: string;
@@ -201,7 +200,12 @@ export async function updateProject(
   });
 }
 
-export async function deleteProject(projectId: string, userId: string) {
+export async function deleteProject(
+  projectId: string,
+  userId: string,
+  supabaseAdmin: SupabaseClient,
+) {
+  // const supabaseAdmin = await createClient();
   const canManage = await canManageProject(userId, projectId);
 
   if (!canManage) {
@@ -249,7 +253,13 @@ export async function addFilesToProject(
   });
 }
 
-export async function removeFileFromProject(fileId: string, userId: string) {
+export async function removeFileFromProject(
+  fileId: string,
+  userId: string,
+  supabaseAdmin: SupabaseClient,
+) {
+  // const supabaseAdmin = await createClient();
+
   const file = await prisma.file.findUnique({
     where: { id: fileId },
     include: { project: true },

@@ -102,7 +102,7 @@ export async function DELETE(
     const projectId = params.id;
 
     try {
-      await ProjectService.deleteProject(projectId, userId);
+      await ProjectService.deleteProject(projectId, userId, supabase);
       return NextResponse.json({ success: true });
     } catch (error) {
       const errorMessage =
