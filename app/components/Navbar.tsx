@@ -1,113 +1,216 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { Menu } from "lucide-react";
-
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { LogOut, Menu, X, Home, FolderKanban } from "lucide-react";
 import { useAuth } from "@/app/auth/auth-context";
-import NavLogo from "@/app/components/navigation/NavLogo";
-import DesktopNavigation from "@/app/components/navigation/DesktopNavigation";
-import MobileNavigation from "@/app/components/navigation/MobileNavigation";
-import UserDropdown from "@/app/components/navigation/UserDropdown";
+import { ROLE_DISPLAY_MAP, ROUTES } from "@/lib/constants";
 
-function Navbar() {
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+
+export default function Navbar() {
+  const { user, userRole, signOut, isLoading } = useAuth();
   const router = useRouter();
-  const { user, userRole, signOut } = useAuth();
-  const pathname = usePathname();
-
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Definición de enlaces de navegación
-  const navigation = [
-    {
-      name: "Dashboard",
-      href: "/",
-      active: pathname === "/",
-      visible: true,
-    },
-    {
-      name: "Proyectos",
-      href: "/projects",
-      active: pathname.startsWith("/projects"),
-      visible: true,
-    },
-  ];
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
-    router.push("/auth/login");
-    await signOut();
+    try {
+      setIsSigningOut(true);
+      await signOut();
+      router.push(ROUTES.LOGIN);
+    } catch (error) {
+      console.error("Error during sign out:", error);
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
-  // Filtrar solo los elementos visibles para el usuario actual
-  const visibleNavItems = navigation.filter((item) => item.visible);
+  const getUserInitials = () => {
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return "U";
+  };
 
   return (
-    <nav className="bg-white shadow">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-14 justify-between">
-          <div className="flex">
-            <NavLogo />
+    <header className="bg-background border-b">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link
+            href={user ? ROUTES.DASHBOARD : "/"}
+            className="font-bold text-xl"
+          >
+            Project-Manager
+          </Link>
 
-            {/* Links de navegación en desktop */}
-            {user && <DesktopNavigation navItems={visibleNavItems} />}
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+              <span className="sr-only">Toggle menu</span>
+            </Button>
           </div>
 
-          {/* Componentes para escritorio y móvil */}
-          {user && (
-            <>
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                <UserDropdown
-                  user={user}
-                  userRole={userRole}
-                  onSignOut={handleSignOut}
-                />
-              </div>
+          {/* Desktop navigation */}
+          <nav className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <>
+                <Link href={ROUTES.DASHBOARD}>
+                  <Button variant="ghost" className="flex gap-2">
+                    <Home className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link href={ROUTES.PROJECTS}>
+                  <Button variant="ghost" className="flex gap-2">
+                    <FolderKanban className="h-4 w-4" />
+                    Proyectos
+                  </Button>
+                </Link>
 
-              {/* Botón de hamburguesa para móvil */}
-              <MobileMenuButton
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </>
-          )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-4 gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback className="text-xs">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                      {user.email}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col">
+                        <span>Mi cuenta</span>
+                        {userRole && (
+                          <Badge variant="outline" className="mt-1 w-fit">
+                            {ROLE_DISPLAY_MAP[userRole]}
+                          </Badge>
+                        )}
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      disabled={isSigningOut || isLoading}
+                      className="text-destructive focus:text-destructive cursor-pointer"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>
+                        {isSigningOut || isLoading
+                          ? "Cerrando sesión..."
+                          : "Cerrar sesión"}
+                      </span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Link href={ROUTES.LOGIN}>
+                  <Button variant="ghost">Iniciar sesión</Button>
+                </Link>
+                <Link href={ROUTES.REGISTER}>
+                  <Button>Registrarse</Button>
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
+
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="md:hidden py-3 border-t">
+            {user ? (
+              <>
+                <div className="px-2 pt-2 pb-3 space-y-2">
+                  <div className="flex items-center gap-3 p-2 mb-2">
+                    <Avatar>
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{user.email}</p>
+                      {userRole && (
+                        <Badge variant="outline" className="mt-1">
+                          {ROLE_DISPLAY_MAP[userRole]}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <Separator className="my-2" />
+                  <Link
+                    href={ROUTES.DASHBOARD}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Home className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link
+                    href={ROUTES.PROJECTS}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Button variant="ghost" className="w-full justify-start">
+                      <FolderKanban className="mr-2 h-4 w-4" />
+                      Proyectos
+                    </Button>
+                  </Link>
+                  <Separator className="my-2" />
+                  <Button
+                    variant="destructive"
+                    className="w-full justify-start"
+                    onClick={handleSignOut}
+                    disabled={isSigningOut || isLoading}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    {isSigningOut || isLoading
+                      ? "Cerrando sesión..."
+                      : "Cerrar sesión"}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="px-2 pt-2 pb-3 space-y-2">
+                <Link href={ROUTES.LOGIN} onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full">
+                    Iniciar sesión
+                  </Button>
+                </Link>
+                <Link
+                  href={ROUTES.REGISTER}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Button className="w-full">Registrarse</Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-
-      {/* Menú móvil */}
-      {user && isMobileMenuOpen && (
-        <MobileNavigation
-          navItems={visibleNavItems}
-          user={user}
-          onClose={() => setIsMobileMenuOpen(false)}
-          onSignOut={handleSignOut}
-        />
-      )}
-    </nav>
+    </header>
   );
 }
-
-/**
- * Componente para el botón de menú en móvil
- */
-function MobileMenuButton({
-  onClick,
-}: {
-  onClick: () => void;
-  isOpen?: boolean;
-}) {
-  return (
-    <div className="flex items-center sm:hidden">
-      <button
-        type="button"
-        className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
-        onClick={onClick}
-      >
-        <span className="sr-only">Abrir menú principal</span>
-
-        <Menu />
-      </button>
-    </div>
-  );
-}
-
-export default Navbar;

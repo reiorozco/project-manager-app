@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/app/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -48,10 +48,11 @@ const registerSchema = z.object({
 });
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { signUp } = useAuth();
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const supabase = createClient();
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -69,17 +70,11 @@ export default function RegisterPage() {
 
     try {
       // Register user in Supabase Auth
-      const { error } = await supabase.auth.signUp({
+      const { error } = await signUp({
         email: values.email,
         password: values.password,
-        options: {
-          data: {
-            full_name: values.fullName,
-            role: values.role,
-          },
-          // Make sure the confirmation link is allowed
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        fullName: values.fullName,
+        role: values.role,
       });
 
       if (error) {

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/app/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,10 +37,10 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, isLoading } = useAuth();
   const router = useRouter();
-  const supabase = createClient();
+
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -51,11 +51,10 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
-    setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await signIn({
         email: values.email,
         password: values.password,
       });
@@ -65,13 +64,10 @@ export default function LoginPage() {
       }
 
       router.push(ROUTES.DASHBOARD);
-      router.refresh();
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Error al iniciar sesión",
       );
-    } finally {
-      setIsLoading(false);
     }
   }
 
