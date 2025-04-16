@@ -24,22 +24,19 @@ export default function ProjectsPage() {
   const { user, userRole } = useAuth();
   const router = useRouter();
 
-  const { projects, loading, error, deleteProject } = useProjects();
+  const { projects, isLoading, error, deleteProject, isDeleting } =
+    useProjects();
 
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = () => {
     if (!projectToDelete) return;
 
-    try {
-      await deleteProject(projectToDelete);
-      setProjectToDelete(null);
-    } catch (err) {
-      console.log(
-        "Error eliminando in deleteProject: ",
-        err instanceof Error ? err.message : "",
-      );
-    }
+    deleteProject(projectToDelete, {
+      onSuccess: () => {
+        setProjectToDelete(null);
+      },
+    });
   };
 
   // Permisos basados en rol
@@ -50,7 +47,7 @@ export default function ProjectsPage() {
     (userRole === UserRole.CLIENT && project.createdById === user?.id);
 
   // Renderizado condicional para diferentes estados
-  if (loading) {
+  if (isLoading) {
     return <LoadingState />;
   }
 
@@ -85,6 +82,7 @@ export default function ProjectsPage() {
         isOpen={!!projectToDelete}
         onClose={() => setProjectToDelete(null)}
         onConfirm={handleDeleteConfirm}
+        isDeleting={isDeleting}
       />
     </div>
   );

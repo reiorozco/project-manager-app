@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/app/auth/auth-context";
 import Navbar from "@/app/components/Navbar";
+import QueryClientProvider from "@/app/QueryClientProvider";
 
 import "./globals.css";
 
@@ -31,17 +32,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <div className="min-h-screen bg-gray-50">
-            {/* Navegación superior */}
-            <Navbar />
+        <QueryClientProvider>
+          <AuthProvider>
+            <div className="min-h-screen bg-gray-50">
+              {/* Navegación superior */}
+              <Navbar />
 
-            {/* Contenido principal */}
-            <main className="py-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              {children}
-            </main>
-          </div>
-        </AuthProvider>
+              {/* Contenido principal */}
+              <main className="py-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                {children}
+              </main>
+            </div>
+          </AuthProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

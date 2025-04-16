@@ -1,49 +1,31 @@
-import { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Project } from "@/app/projects/_utils/types";
 
-type ProjectsState = {
-  projects: Project[];
-  loading: boolean;
-  error: string | null;
-};
+export function useProjects() {
+  const queryClient = useQueryClient();
 
-type ProjectsActions = {
-  deleteProject: (projectId: string) => Promise<void>;
-};
+  // Query para obtener todos los proyectos
+  const {
+    data: projects = [],
+    isLoading,
+    error,
+  } = useQuery<Project[], Error>({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const response = await fetch("/api/projects");
 
-export function useProjects(): ProjectsState & ProjectsActions {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Cargar proyectos al iniciar
-  useEffect(() => {
-    async function fetchProjects() {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/projects");
-
-        if (!response.ok) {
-          throw new Error("Error al cargar los proyectos");
-        }
-
-        const data = await response.json();
-        setProjects(data.projects);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Error al cargar los proyectos",
-        );
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("Error al cargar los proyectos");
       }
-    }
 
-    void fetchProjects();
-  }, []);
+      const data = await response.json();
+      return data.projects;
+    },
+  });
 
-  // Función para eliminar un proyecto
-  const deleteProject = async (projectId: string) => {
-    try {
+  // Mutation para eliminar un proyecto
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
       const response = await fetch(`/api/projects/${projectId}`, {
         method: "DELETE",
       });
@@ -52,20 +34,26 @@ export function useProjects(): ProjectsState & ProjectsActions {
         throw new Error("Error al eliminar el proyecto");
       }
 
-      // Actualizar lista de proyectos
-      setProjects(projects.filter((p) => p.id !== projectId));
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Error al eliminar el proyecto",
+      return projectId;
+    },
+    // Actualizar caché al eliminar proyecto
+    onSuccess: (deletedProjectId) => {
+      // Actualizar la lista de proyectos en caché
+      queryClient.setQueryData<Project[]>(["projects"], (oldProjects) =>
+        oldProjects ? oldProjects.filter((p) => p.id !== deletedProjectId) : [],
       );
-      throw err; // Propagar el error para que el componente pueda manejarlo
-    }
-  };
+
+      // Invalidar posibles queries relacionadas
+      void queryClient.invalidateQueries({ queryKey: ["project-details"] });
+    },
+  });
 
   return {
     projects,
-    loading,
-    error,
-    deleteProject,
+    isLoading,
+    error: error ? error.message : null,
+    deleteProject: deleteProjectMutation.mutate,
+    isDeleting: deleteProjectMutation.isPending,
+    deleteError: deleteProjectMutation.error?.message || null,
   };
 }
