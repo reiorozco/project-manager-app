@@ -8,7 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ControllerRenderProps } from "react-hook-form";
-import { MAX_FILE_SIZE, MAX_FILES, ProjectFormValues } from "./types";
+import { MAX_FILE_SIZE, MAX_FILES, ProjectFormValues } from "../../projects/_utils/types";
 
 interface FileSelectorProps {
   field: Omit<
