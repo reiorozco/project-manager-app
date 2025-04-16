@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, Menu, X, Home, FolderKanban } from "lucide-react";
+import { LogOut, Menu, X, Home, FolderKanban, Folders } from "lucide-react";
 import { useAuth } from "@/app/auth/auth-context";
 import { ROLE_DISPLAY_MAP, ROUTES } from "@/lib/constants";
 
@@ -19,6 +19,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import NavLogo from "@/app/components/NavLogo";
 
 export default function Navbar() {
   const { user, userRole, signOut, isLoading } = useAuth();
@@ -54,7 +55,10 @@ export default function Navbar() {
             href={user ? ROUTES.DASHBOARD : "/"}
             className="font-bold text-xl"
           >
-            Project-Manager
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <Folders size="2rem" className="text-blue-600" />
+              Project-Manager
+            </div>
           </Link>
 
           {/* Mobile menu button */}
