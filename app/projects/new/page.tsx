@@ -28,13 +28,14 @@ import { useAuth } from "@/app/auth/auth-context";
 
 // Importaciones de componentes y servicios modularizados
 import { projectSchema, ProjectFormValues } from "./types";
-import { fileUploadService } from "./fileUploadService";
+import { FileUploadService } from "./fileUploadService";
 import { projectService } from "./projectService";
 import { FileSelector } from "./FileSelector";
+import { ROUTES } from "@/lib/constants";
 
 export default function NewProjectPage() {
   // Hooks y estado
-  const { user } = useAuth();
+  const { user, supabase } = useAuth();
   const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,6 +51,7 @@ export default function NewProjectPage() {
       files: [],
     },
   });
+  const fileUploadService = new FileUploadService(supabase);
 
   // Verifica que el usuario esté autenticado al cargar la página
   useEffect(() => {
@@ -83,7 +85,7 @@ export default function NewProjectPage() {
       );
 
       // 3. Redireccionar a la lista de proyectos
-      router.push("/dashboard/projects");
+      router.push(ROUTES.PROJECTS);
       router.refresh();
     } catch (err) {
       setError(
@@ -177,7 +179,7 @@ export default function NewProjectPage() {
         <CardFooter className="flex justify-center border-t pt-6">
           <Button
             variant="outline"
-            onClick={() => router.push("/dashboard/projects")}
+            onClick={() => router.push(ROUTES.PROJECTS)}
           >
             Cancelar
           </Button>

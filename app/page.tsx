@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   } = user;
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
       <DashboardHeader userRole={role} />
 
       <ProjectStats userId={user.id} />

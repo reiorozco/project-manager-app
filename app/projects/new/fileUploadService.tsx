@@ -1,18 +1,22 @@
-import { createClient } from "@/lib/supabase/client";
 import { BUCKET_NAME, UploadedFile } from "./types";
+import { useAuth } from "@/app/auth/auth-context";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-export const fileUploadService = {
+// Clase que recibe el cliente Supabase como dependencia
+export class FileUploadService {
+  constructor(private supabaseClient: SupabaseClient) {}
+
   async uploadFile(file: File, userId: string): Promise<UploadedFile> {
-    const supabase = createClient();
     const fileExt = file.name.split(".").pop();
     const randomName = Math.random().toString(36).substring(2, 15);
     const fileName = `${randomName}.${fileExt}`;
     const filePath = `projects/${userId}/${fileName}`;
 
     // Subir archivo
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(filePath, file);
+    const { data: uploadData, error: uploadError } =
+      await this.supabaseClient.storage
+        .from(BUCKET_NAME)
+        .upload(filePath, file);
 
     if (uploadError) {
       throw new Error(
@@ -21,7 +25,7 @@ export const fileUploadService = {
     }
 
     // Obtener URL pública
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = this.supabaseClient.storage
       .from(BUCKET_NAME)
       .getPublicUrl(filePath);
 
@@ -31,7 +35,7 @@ export const fileUploadService = {
       size: file.size,
       url: urlData.publicUrl,
     };
-  },
+  }
 
   async uploadMultipleFiles(
     files: File[],
@@ -60,5 +64,11 @@ export const fileUploadService = {
     });
 
     return uploadedFiles;
-  },
-};
+  }
+}
+
+// Hook que proporciona el servicio ya configurado con el cliente Supabase centralizado
+export function useFileUploadService() {
+  const { supabase } = useAuth();
+  return new FileUploadService(supabase);
+}

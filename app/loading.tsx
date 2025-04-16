@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function Loading() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
       {/* Skeleton para el header */}
       <Skeleton className="h-32 w-full mb-6" />
       <Skeleton className="h-8 w-48 mb-4" />
