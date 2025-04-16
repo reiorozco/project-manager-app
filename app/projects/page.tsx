@@ -12,9 +12,9 @@ import {
   DeleteProjectDialog,
   EmptyState,
   ErrorState,
+  LoadingState,
   ProjectsList,
 } from "@/app/components/projects";
-import { LoadingState } from "@/app/projects/_utils/utility-components";
 
 // Hooks y tipos
 import { useProjects } from "@/app/projects/_hooks/useProjects";
