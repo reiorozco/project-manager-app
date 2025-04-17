@@ -1,17 +1,22 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { use } from "react";
 import { useRouter } from "next/navigation";
-import { Project, UserRole, File as PrismaFile } from "@prisma/client";
+import { File as PrismaFile } from "@prisma/client";
 import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-import { useAuth } from "@/app/auth/auth-context";
-import { BUCKET_NAME, ProjectWithRelations } from "@/app/projects/_utils/types";
-import { projectService } from "@/app/projects/_utils/projectService";
+import { ChevronLeft, Clock, FileDown, FileText, User } from "lucide-react";
+import { ProjectWithRelations } from "@/app/projects/_utils/types";
 import { formatFileSize } from "@/app/projects/_utils/formatFileSize";
+import { formatDate } from "@/app/projects/_utils/dateUtils";
+import { useProjectDetails } from "@/app/projects/_hooks/useProjectDetails";
+import {
+  ErrorMessage,
+  ProjectDetails,
+  ProjectDetailSkeleton,
+} from "@/app/components/projects";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -21,177 +26,40 @@ export default function ProjectDetailPage({ params }: Props) {
   // Desenvolver params con React.use() según nueva API de Next.js
   const unwrappedParams = use(params);
   const projectId = unwrappedParams.id;
-
-  // Hooks y estado
   const router = useRouter();
-  const { user, userRole, supabase } = useAuth();
-  const [project, setProject] = useState<ProjectWithRelations | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Cargar datos del proyecto
-  useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const { project } = await projectService.getProject(projectId);
+  const { project, loading, error, canManageProject, downloadFile } =
+    useProjectDetails(projectId);
 
-        setProject(project);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Error al cargar el proyecto",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchProject();
-  }, [projectId]);
-
-  // Funciones auxiliares
-  const canManageProject = (project: Project) =>
-    userRole === UserRole.PROJECT_MANAGER ||
-    (userRole === UserRole.CLIENT && project.createdById === user?.id);
-
-  const getFormattedDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("es-ES", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
-
-  const downloadFile = async (file: PrismaFile): Promise<void> => {
-    try {
-      const { data, error: downloadError } = await supabase.storage
-        .from(BUCKET_NAME)
-        .download(file.path);
-
-      if (downloadError) throw downloadError;
-
-      // Crear blob URL y simular click para descargar
-      const url = URL.createObjectURL(data);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = file.filename;
-      document.body.appendChild(a);
-      a.click();
-
-      // Limpiar recursos
-      URL.revokeObjectURL(url);
-      a.remove();
-    } catch (err) {
-      setError(
-        `Error al descargar el archivo: ${err instanceof Error ? err.message : "error desconocido"}`,
-      );
-    }
-  };
-
-  // Componentes de estado de carga/error
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        Cargando proyecto...
-      </div>
-    );
+    return <ProjectDetailSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="container mx-auto max-w-3xl py-8">
-        <div className="p-6 bg-red-50 text-red-600 rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Error</h2>
-          <p>{error}</p>
-          <Button
-            onClick={() => router.push(ROUTES.PROJECTS)}
-            className="mt-4"
-            variant="outline"
-          >
-            Volver a proyectos
-          </Button>
-        </div>
-      </div>
+      <ErrorMessage
+        message={error}
+        onBack={() => router.push(ROUTES.PROJECTS)}
+      />
     );
   }
 
   if (!project) {
     return (
-      <div className="container mx-auto max-w-3xl py-8">
-        <div className="p-6 bg-orange-50 text-orange-600 rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Proyecto no encontrado</h2>
-          <p>
-            El proyecto que buscas no existe o no tienes permiso para verlo.
-          </p>
-          <Button
-            onClick={() => router.push(ROUTES.PROJECTS)}
-            className="mt-4"
-            variant="outline"
-          >
-            Volver a proyectos
-          </Button>
-        </div>
-      </div>
+      <ErrorMessage
+        message="El proyecto que buscas no existe o no tienes permiso para verlo."
+        onBack={() => router.push(ROUTES.PROJECTS)}
+      />
     );
   }
 
-  // Componentes para renderizar secciones específicas
-  const ProjectHeader = () => (
-    <div className="flex justify-between items-center mb-6">
-      <div>
-        <h1 className="text-3xl font-bold">{project.title}</h1>
-        <div className="flex items-center space-x-4 mt-2">
-          <p className="text-sm text-gray-500">
-            Creado: {getFormattedDate(project.createdAt.toString())}
-          </p>
-
-          {project.assignedTo ? (
-            <Badge variant="outline" className="bg-green-50">
-              Asignado a: {project.assignedTo.name || project.assignedTo.email}
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="bg-gray-50">
-              Sin asignar
-            </Badge>
-          )}
-        </div>
-      </div>
-
-      {canManageProject(project) && (
-        <Button onClick={() => router.push(ROUTES.EDIT_PROJECT(projectId))}>
-          Editar Proyecto
-        </Button>
-      )}
-    </div>
-  );
-
-  const FilesList = () => (
-    <ul className="divide-y">
-      {project.files.map((file) => (
-        <li key={file.id} className="py-3 flex justify-between items-center">
-          <div>
-            <p className="font-medium">{file.filename}</p>
-            <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
-          </div>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => downloadFile(file)}
-          >
-            Descargar
-          </Button>
-        </li>
-      ))}
-    </ul>
-  );
-
-  // Componente principal
   return (
-    <div className="container mx-auto max-w-4xl py-8">
-      <ProjectHeader />
+    <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
+      <ProjectHeader
+        project={project}
+        canManage={canManageProject(project)}
+        onEdit={() => router.push(ROUTES.EDIT_PROJECT(projectId))}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Columna principal */}
@@ -216,7 +84,7 @@ export default function ProjectDetailPage({ params }: Props) {
 
             <CardContent>
               {project.files.length > 0 ? (
-                <FilesList />
+                <FilesList files={project.files} onDownload={downloadFile} />
               ) : (
                 <p className="text-gray-500 italic">No hay archivos adjuntos</p>
               )}
@@ -226,51 +94,7 @@ export default function ProjectDetailPage({ params }: Props) {
 
         {/* Columna lateral */}
         <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Detalles</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">
-                    Creado por
-                  </h3>
-                  <p>{project.createdBy.name || project.createdBy.email}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">
-                    Fecha de creación
-                  </h3>
-                  <p>{getFormattedDate(project.createdAt.toString())}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">
-                    Última actualización
-                  </h3>
-                  <p>{getFormattedDate(project.createdAt.toString())}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Estado</h3>
-                  <p>
-                    {project.assignedTo
-                      ? `Asignado a ${project.assignedTo.name || project.assignedTo.email}`
-                      : "Sin asignar"}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">
-                    Archivos
-                  </h3>
-                  <p>{project.files.length} archivos</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ProjectDetails project={project} />
 
           <div className="mt-10">
             <Button
@@ -278,6 +102,7 @@ export default function ProjectDetailPage({ params }: Props) {
               className="w-full"
               onClick={() => router.push(ROUTES.PROJECTS)}
             >
+              <ChevronLeft className="mr-2 h-4 w-4" />
               Volver a proyectos
             </Button>
           </div>
@@ -286,3 +111,65 @@ export default function ProjectDetailPage({ params }: Props) {
     </div>
   );
 }
+
+const ProjectHeader = ({
+  project,
+  canManage,
+  onEdit,
+}: {
+  project: ProjectWithRelations;
+  canManage: boolean;
+  onEdit: () => void;
+}) => (
+  <div className="flex justify-between items-center mb-6">
+    <div>
+      <h1 className="text-3xl font-bold">{project.title}</h1>
+      <div className="flex items-center space-x-4 mt-2">
+        <p className="text-sm text-gray-500">
+          <Clock className="inline mr-1 h-4 w-4" />
+          Creado: {formatDate(project.createdAt.toString())}
+        </p>
+
+        {project.assignedTo ? (
+          <Badge variant="outline" className="bg-green-50">
+            <User className="mr-1 h-3 w-3" />
+            Asignado a: {project.assignedTo.name || project.assignedTo.email}
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="bg-gray-50">
+            Sin asignar
+          </Badge>
+        )}
+      </div>
+    </div>
+
+    {canManage && <Button onClick={onEdit}>Editar Proyecto</Button>}
+  </div>
+);
+
+const FilesList = ({
+  files,
+  onDownload,
+}: {
+  files: PrismaFile[];
+  onDownload: (file: PrismaFile) => Promise<void>;
+}) => (
+  <ul className="divide-y">
+    {files.map((file) => (
+      <li key={file.id} className="py-3 flex justify-between items-center">
+        <div className="flex items-center">
+          <FileText className="mr-2 h-4 w-4 text-gray-500" />
+          <div>
+            <p className="font-medium">{file.filename}</p>
+            <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
+          </div>
+        </div>
+
+        <Button size="sm" variant="outline" onClick={() => onDownload(file)}>
+          <FileDown className="mr-2 h-4 w-4" />
+          Descargar
+        </Button>
+      </li>
+    ))}
+  </ul>
+);

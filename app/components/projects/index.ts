@@ -1,6 +1,9 @@
 export { default as DeleteProjectDialog } from "./DeleteProjectDialog";
 export { default as EmptyState } from "./EmptyState";
+export { default as ErrorMessage } from "./ErrorMessage";
 export { default as ErrorState } from "./ErrorState";
 export { default as LoadingState } from "./LoadingState";
 export { default as ProjectCard } from "./ProjectCard";
+export { default as ProjectDetails } from "./ProjectDetails";
+export { default as ProjectDetailSkeleton } from "./ProjectDetailSkeleton";
 export { default as ProjectsList } from "./ProjectsList";
