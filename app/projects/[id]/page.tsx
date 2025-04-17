@@ -1,73 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { use } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { Project, UserRole, File as PrismaFile } from "@prisma/client";
+import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UserRole } from "@prisma/client";
-import { useAuth } from "@/app/auth/auth-context";
-import { createClient } from "@/lib/supabase/client";
 
-// Tipos
-interface ProjectParams {
+import { useAuth } from "@/app/auth/auth-context";
+import { BUCKET_NAME, ProjectWithRelations } from "@/app/projects/_utils/types";
+import { projectService } from "@/app/projects/_utils/projectService";
+import { formatFileSize } from "@/app/projects/_utils/formatFileSize";
+
+interface Props {
   params: Promise<{ id: string }>;
 }
 
-interface ProjectFile {
-  id: string;
-  filename: string;
-  path: string;
-  size: number;
-}
-
-interface ProjectUser {
-  name: string | null;
-  email: string;
-}
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  createdById: string;
-  assignedToId: string | null;
-  createdBy: ProjectUser;
-  assignedTo: ProjectUser | null;
-  files: ProjectFile[];
-}
-
-export default function ProjectDetailPage({ params }: ProjectParams) {
+export default function ProjectDetailPage({ params }: Props) {
   // Desenvolver params con React.use() según nueva API de Next.js
   const unwrappedParams = use(params);
   const projectId = unwrappedParams.id;
 
   // Hooks y estado
   const router = useRouter();
-  const { user, userRole } = useAuth();
-  const [project, setProject] = useState<Project | null>(null);
+  const { user, userRole, supabase } = useAuth();
+  const [project, setProject] = useState<ProjectWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
 
   // Cargar datos del proyecto
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(`/api/projects/${projectId}`);
+        const { project } = await projectService.getProject(projectId);
 
-        if (!response.ok) {
-          if (response.status === 403) {
-            throw new Error("No tienes permiso para ver este proyecto");
-          }
-          throw new Error("Error al cargar el proyecto");
-        }
-
-        const data = await response.json();
-        setProject(data.project);
+        setProject(project);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Error al cargar el proyecto",
@@ -77,18 +45,13 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
       }
     };
 
-    fetchProject().catch(console.error);
+    void fetchProject();
   }, [projectId]);
 
   // Funciones auxiliares
-  const canManageProject = (): boolean => {
-    if (!project || !user) return false;
-
-    return (
-      userRole === UserRole.PROJECT_MANAGER ||
-      (userRole === UserRole.CLIENT && project.createdById === user.id)
-    );
-  };
+  const canManageProject = (project: Project) =>
+    userRole === UserRole.PROJECT_MANAGER ||
+    (userRole === UserRole.CLIENT && project.createdById === user?.id);
 
   const getFormattedDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -101,20 +64,11 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
     }).format(date);
   };
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} bytes`;
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(2)} KB`;
-    return `${(bytes / 1048576).toFixed(2)} MB`;
-  };
-
-  const downloadFile = async (file: ProjectFile): Promise<void> => {
+  const downloadFile = async (file: PrismaFile): Promise<void> => {
     try {
-      // Eliminar 'public/' del path para acceder al storage correctamente
-      const path = file.path.replace("public/", "");
-
       const { data, error: downloadError } = await supabase.storage
-        .from("project-files")
-        .download(path);
+        .from(BUCKET_NAME)
+        .download(file.path);
 
       if (downloadError) throw downloadError;
 
@@ -152,7 +106,7 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
           <h2 className="text-lg font-semibold mb-2">Error</h2>
           <p>{error}</p>
           <Button
-            onClick={() => router.push("/dashboard/projects")}
+            onClick={() => router.push(ROUTES.PROJECTS)}
             className="mt-4"
             variant="outline"
           >
@@ -172,7 +126,7 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
             El proyecto que buscas no existe o no tienes permiso para verlo.
           </p>
           <Button
-            onClick={() => router.push("/dashboard/projects")}
+            onClick={() => router.push(ROUTES.PROJECTS)}
             className="mt-4"
             variant="outline"
           >
@@ -190,8 +144,9 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
         <h1 className="text-3xl font-bold">{project.title}</h1>
         <div className="flex items-center space-x-4 mt-2">
           <p className="text-sm text-gray-500">
-            Creado: {getFormattedDate(project.createdAt)}
+            Creado: {getFormattedDate(project.createdAt.toString())}
           </p>
+
           {project.assignedTo ? (
             <Badge variant="outline" className="bg-green-50">
               Asignado a: {project.assignedTo.name || project.assignedTo.email}
@@ -204,10 +159,8 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
         </div>
       </div>
 
-      {canManageProject() && (
-        <Button
-          onClick={() => router.push(`/dashboard/projects/${project.id}/edit`)}
-        >
+      {canManageProject(project) && (
+        <Button onClick={() => router.push(ROUTES.EDIT_PROJECT(projectId))}>
           Editar Proyecto
         </Button>
       )}
@@ -222,6 +175,7 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
             <p className="font-medium">{file.filename}</p>
             <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
           </div>
+
           <Button
             size="sm"
             variant="outline"
@@ -259,6 +213,7 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
             <CardHeader>
               <CardTitle className="text-lg">Archivos</CardTitle>
             </CardHeader>
+
             <CardContent>
               {project.files.length > 0 ? (
                 <FilesList />
@@ -288,14 +243,14 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
                   <h3 className="text-sm font-medium text-gray-500">
                     Fecha de creación
                   </h3>
-                  <p>{getFormattedDate(project.createdAt)}</p>
+                  <p>{getFormattedDate(project.createdAt.toString())}</p>
                 </div>
 
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Última actualización
                   </h3>
-                  <p>{getFormattedDate(project.updatedAt)}</p>
+                  <p>{getFormattedDate(project.createdAt.toString())}</p>
                 </div>
 
                 <div>
@@ -321,7 +276,7 @@ export default function ProjectDetailPage({ params }: ProjectParams) {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => router.push("/dashboard/projects")}
+              onClick={() => router.push(ROUTES.PROJECTS)}
             >
               Volver a proyectos
             </Button>

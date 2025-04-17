@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { MAX_FILE_SIZE, MAX_FILES } from "@/app/projects/_utils/types";
+import { formatFileSize } from "@/app/projects/_utils/formatFileSize";
 
 interface Props {
   selectedFiles: File[];
@@ -101,12 +102,6 @@ export function FileUploader({
 
     const files = Array.from(e.dataTransfer.files);
     processFiles(files);
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + " bytes";
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
-    else return (bytes / 1048576).toFixed(2) + " MB";
   };
 
   return (
