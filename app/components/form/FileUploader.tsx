@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -7,8 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { X } from "lucide-react";
-import { MAX_FILE_SIZE, MAX_FILES } from "../../projects/_utils/types";
+import { MAX_FILE_SIZE, MAX_FILES } from "@/app/projects/_utils/types";
 
 interface Props {
   selectedFiles: File[];
@@ -43,7 +43,7 @@ export function FileUploader({
       return;
     }
 
-    // Validar número de archivos
+    // Comprobar si supera el límite de archivos
     const totalFiles = [...selectedFiles, ...newFiles];
     if (totalFiles.length > MAX_FILES) {
       setFileError(
@@ -67,6 +67,7 @@ export function FileUploader({
     const files = Array.from(e.target.files || []);
     processFiles(files);
 
+    // Importante: resetear el valor del input para permitir seleccionar el mismo archivo de nuevo
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -102,10 +103,10 @@ export function FileUploader({
     processFiles(files);
   };
 
-  const formatFileSize = (size: number) => {
-    if (size < 1024) return `${size} B`;
-    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
+    else return (bytes / 1048576).toFixed(2) + " MB";
   };
 
   return (
@@ -127,8 +128,8 @@ export function FileUploader({
                 Arrastra archivos aquí o haz clic para seleccionar
               </p>
               <p className="text-xs text-gray-500">
-                Formatos permitidos: PDF, Office, imágenes, ZIP (máx.{" "}
-                {MAX_FILES} archivos)
+                Formatos permitidos: PDF, Office, imágenes, ZIP (máx. 5 MB por
+                archivo)
               </p>
             </div>
           </div>

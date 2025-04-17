@@ -1,10 +1,11 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { Project } from "@prisma/client";
 import { ROUTES } from "@/lib/constants";
-import { Project } from "@/app/projects/_utils/types";
 import { ProjectCard } from "@/app/components/projects";
+import { ProjectWithRelations } from "@/app/projects/_utils/types";
 
 interface ProjectsListProps {
-  projects: Project[];
+  projects: ProjectWithRelations[];
   canManageProject: (project: Project) => boolean;
   onDelete: (projectId: string) => void;
   router: AppRouterInstance;

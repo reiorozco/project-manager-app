@@ -13,10 +13,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
-import { Project } from "@/app/projects/_utils/types";
+import { ProjectWithRelations } from "@/app/projects/_utils/types";
 
 interface ProjectCardProps {
-  project: Project;
+  project: ProjectWithRelations;
   canManage: boolean;
   onDelete: (projectId: string) => void;
   onViewDetails: () => void;
@@ -64,7 +64,7 @@ function ProjectCard({
   );
 }
 
-function ProjectCardDetails({ project }: { project: Project }) {
+function ProjectCardDetails({ project }: { project: ProjectWithRelations }) {
   return (
     <div className="text-xs text-gray-500 space-y-1">
       <div>

@@ -1,12 +1,15 @@
-import { UploadedFile } from "@/app/projects/_utils/types";
-import { Project } from "@prisma/client";
+import {
+  PrismaFilePreview,
+  ProjectPreview,
+  ProjectWithRelations,
+} from "@/app/projects/_utils/types";
 
 class ProjectService {
   async createProject(
     title: string,
     description: string = "",
-    files: UploadedFile[] = [],
-  ): Promise<Project> {
+    files: PrismaFilePreview[] = [],
+  ): Promise<ProjectWithRelations> {
     try {
       const response = await fetch("/api/projects", {
         method: "POST",
@@ -32,7 +35,9 @@ class ProjectService {
     }
   }
 
-  async getProject(projectId: string): Promise<Project> {
+  async getProject(
+    projectId: string,
+  ): Promise<{ project: ProjectWithRelations }> {
     try {
       // Ejemplo de implementación
       const response = await fetch(`/api/projects/${projectId}`);
@@ -49,7 +54,9 @@ class ProjectService {
     }
   }
 
-  async getProjects(userId?: string): Promise<Project[]> {
+  async getProjects(
+    userId?: string,
+  ): Promise<{ projects: ProjectWithRelations[] }> {
     try {
       // Ejemplo de implementación
       const url = userId ? `/api/projects?userId=${userId}` : "/api/projects";
@@ -69,10 +76,10 @@ class ProjectService {
 
   async updateProject(
     projectId: string,
-    data: Partial<Pick<Project, "title" | "description">> & {
-      files?: File[];
+    data: Partial<ProjectPreview> & {
+      files?: PrismaFilePreview[];
     },
-  ): Promise<Project> {
+  ): Promise<ProjectWithRelations> {
     try {
       // Ejemplo de implementación
       const response = await fetch(`/api/projects/${projectId}`, {
@@ -95,7 +102,7 @@ class ProjectService {
     }
   }
 
-  async deleteProject(projectId: string): Promise<void> {
+  async deleteProject(projectId: string): Promise<string> {
     try {
       // Ejemplo de implementación
       const response = await fetch(`/api/projects/${projectId}`, {
@@ -106,6 +113,8 @@ class ProjectService {
         const errorData = await response.json();
         throw new Error(errorData.message || "Error al eliminar el proyecto");
       }
+
+      return projectId;
     } catch (error) {
       console.error("Error en deleteProject:", error);
       throw error;

@@ -1,33 +1,30 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { UploadedFile } from "@/app/projects/_utils/types";
+import { BUCKET_NAME, PrismaFilePreview } from "@/app/projects/_utils/types";
 
 export class FileUploadService {
   constructor(private supabase: SupabaseClient) {}
 
-  async uploadFile(file: File, userId: string): Promise<UploadedFile> {
+  async uploadFile(file: File, userId: string): Promise<PrismaFilePreview> {
     try {
       const filePath = `projects/${userId}/${Date.now()}-${file.name}`;
 
       // Subir el archivo a Supabase Storage
       const { data, error } = await this.supabase.storage
-        .from("project-files")
+        .from(BUCKET_NAME)
         .upload(filePath, file);
 
       if (error) throw new Error(`Error al subir archivo: ${error.message}`);
       if (!data) throw new Error("No se obtuvo respuesta del servidor");
 
       // Obtener URL pública del archivo
-      const { data: urlData } = this.supabase.storage
-        .from("project-files")
-        .getPublicUrl(filePath);
+      // const { data: urlData } = this.supabase.storage
+      //   .from("project-files")
+      //   .getPublicUrl(filePath);
 
       return {
-        id: data.path,
         filename: file.name,
         path: data.path,
         size: file.size,
-        type: file.type,
-        url: urlData.publicUrl,
       };
     } catch (error) {
       console.error("Error en uploadFile:", error);
@@ -38,7 +35,7 @@ export class FileUploadService {
   async uploadMultipleFiles(
     files: File[],
     userId: string,
-  ): Promise<UploadedFile[]> {
+  ): Promise<PrismaFilePreview[]> {
     try {
       if (!files.length) return [];
 
@@ -54,7 +51,7 @@ export class FileUploadService {
   async deleteFile(filePath: string): Promise<void> {
     try {
       const { error } = await this.supabase.storage
-        .from("project-files")
+        .from(BUCKET_NAME)
         .remove([filePath]);
 
       if (error) throw new Error(`Error al eliminar archivo: ${error.message}`);
@@ -69,7 +66,7 @@ export class FileUploadService {
       if (!filePaths.length) return;
 
       const { error } = await this.supabase.storage
-        .from("project-files")
+        .from(BUCKET_NAME)
         .remove(filePaths);
 
       if (error)

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -16,19 +16,48 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ProjectFormValues, projectSchema } from "@/app/projects/_utils/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FileUploader } from "@/app/components/form/FileUploader";
 
+import { File as PrismaFile, User } from "@prisma/client";
+import { ProjectFormValues, projectSchema } from "@/app/projects/_utils/types";
+
 interface ProjectFormProps {
-  onSubmit: (values: ProjectFormValues, files: File[]) => Promise<void>;
+  onSubmit: (
+    values: ProjectFormValues,
+    files: File[],
+    projectId?: string,
+  ) => Promise<void>;
   isSubmitting: boolean;
   error: string | null;
   onCancel: () => void;
+  initialValues?: ProjectFormValues;
+  existingFiles?: PrismaFile[];
+  isEditMode?: boolean;
+  onDeleteFile?: (fileId: string) => Promise<void>;
+  designers?: User[];
+  canAssignToDesigner?: boolean;
+  projectId?: string;
 }
 
 export function ProjectForm({
@@ -36,109 +65,238 @@ export function ProjectForm({
   isSubmitting,
   error,
   onCancel,
+  initialValues,
+  existingFiles = [],
+  isEditMode = false,
+  onDeleteFile,
+  designers = [],
+  canAssignToDesigner = false,
+  projectId,
 }: ProjectFormProps) {
-  const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  // Diálogo de confirmación de eliminación
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null);
 
   // Configuración del formulario con validación
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       title: "",
       description: "",
+      assignedToId: "",
       files: [],
     },
   });
 
   const handleFormSubmit = (values: ProjectFormValues) => {
-    void onSubmit(values, selectedFiles);
+    void onSubmit(values, selectedFiles, projectId);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (fileToDelete && onDeleteFile) {
+      await onDeleteFile(fileToDelete);
+      setFileToDelete(null);
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + " bytes";
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
+    else return (bytes / 1048576).toFixed(2) + " MB";
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Nuevo Proyecto</CardTitle>
-        <CardDescription>Crea un nuevo proyecto de diseño</CardDescription>
-      </CardHeader>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {isEditMode ? "Editar Proyecto" : "Nuevo Proyecto"}
+          </CardTitle>
+          <CardDescription>
+            {isEditMode
+              ? "Modifica los detalles del proyecto"
+              : "Crea un nuevo proyecto de diseño"}
+          </CardDescription>
+        </CardHeader>
 
-      <CardContent>
-        {/* Alerta de error */}
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+        <CardContent>
+          {/* Alerta de error */}
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-        {/* Formulario */}
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleFormSubmit)}
-            className="space-y-6"
-          >
-            {/* Campo de título */}
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nombre del proyecto" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* Formulario */}
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleFormSubmit)}
+              className="space-y-6"
+            >
+              {/* Campo de título */}
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nombre del proyecto" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Campo de descripción */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe brevemente el proyecto..."
-                      className="min-h-32"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              {/* Campo de descripción */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descripción</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe brevemente el proyecto..."
+                        className="min-h-32"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Selector de archivos */}
-            <FormField
-              control={form.control}
-              name="files"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FileUploader
-                  {...field}
-                  selectedFiles={selectedFiles}
-                  onFilesChange={(files) => {
-                    setSelectedFiles(files);
-                    form.setValue("files", files);
-                  }}
+              {/* Campo de asignación a diseñador (solo para project managers) */}
+              {canAssignToDesigner && (
+                <FormField
+                  control={form.control}
+                  name="assignedToId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Asignar a diseñador</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar diseñador" />
+                          </SelectTrigger>
+                        </FormControl>
+
+                        <SelectContent>
+                          <SelectItem value="sin-asignar">
+                            Sin asignar
+                          </SelectItem>
+                          {designers.map((designer) => (
+                            <SelectItem key={designer.id} value={designer.id}>
+                              {designer.name || designer.email}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               )}
-            />
 
-            {/* Botones de acción */}
-            <div className="pt-4">
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Creando proyecto..." : "Crear Proyecto"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
+              {/* Mostrar archivos existentes en modo edición */}
+              {isEditMode && existingFiles.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Archivos actuales</h3>
+                  <div className="border rounded-md divide-y">
+                    {existingFiles.map((file) => (
+                      <div
+                        key={file.id}
+                        className="flex items-center justify-between p-3"
+                      >
+                        <div className="flex-1 truncate">
+                          <p className="text-sm font-medium">{file.filename}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatFileSize(file.size)}
+                          </p>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => setFileToDelete(file.id)}
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-      <CardFooter className="flex justify-center border-t pt-6">
-        <Button variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-      </CardFooter>
-    </Card>
+              {/* Selector de archivos nuevos */}
+              <FormField
+                control={form.control}
+                name="files"
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                render={({ field: { value, onChange, ...field } }) => (
+                  <FileUploader
+                    {...field}
+                    selectedFiles={selectedFiles}
+                    onFilesChange={(files) => {
+                      setSelectedFiles(files);
+                      form.setValue("files", files);
+                    }}
+                    labelText={isEditMode ? "Añadir más archivos" : "Archivos"}
+                  />
+                )}
+              />
+
+              {/* Botones de acción */}
+              <div className="pt-4 flex space-x-2">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting
+                    ? isEditMode
+                      ? "Guardando..."
+                      : "Creando proyecto..."
+                    : isEditMode
+                      ? "Guardar cambios"
+                      : "Crear Proyecto"}
+                </Button>
+
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {/* Diálogo de confirmación para eliminar archivos */}
+      <AlertDialog
+        open={!!fileToDelete}
+        onOpenChange={() => setFileToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar archivo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El archivo será eliminado
+              permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

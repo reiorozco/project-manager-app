@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Prisma, File as PrismaFile, Project } from "@prisma/client";
 
 // Constantes para validación de archivos
 export const MAX_FILES = 5;
@@ -15,6 +16,7 @@ export const projectSchema = z.object({
     .string()
     .max(500, { message: "La descripción no puede exceder los 500 caracteres" })
     .optional(),
+  assignedToId: z.string().optional().nullable(),
   files: z
     .array(z.instanceof(File))
     .max(MAX_FILES, {
@@ -26,42 +28,23 @@ export const projectSchema = z.object({
 // Tipo para los valores del formulario derivado del esquema
 export type ProjectFormValues = z.infer<typeof projectSchema>;
 
-// Tipo para archivos subidos (resultado del servicio de carga)
-export interface UploadedFile {
-  id: string;
-  filename: string;
-  path: string;
-  size: number;
-  type: string;
-  url: string;
-}
-
-// Interfaces compartidas para el módulo de proyectos
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  createdById: string;
-  assignedToId: string | null;
-  createdBy: {
-    name: string | null;
-    email: string;
+export type ProjectWithRelations = Prisma.ProjectGetPayload<{
+  include: {
+    files: true;
+    assignedTo: true;
+    createdBy: true;
   };
-  assignedTo: {
-    name: string | null;
-    email: string;
-  } | null;
-  files: {
-    id: string;
-    filename: string;
-    path: string;
-    size: number;
-  }[];
-}
+}>;
 
-// Tipo para los permisos de usuario sobre un proyecto
-export type ProjectPermissions = {
-  canManageProject: (project: Project) => boolean;
-};
+export type PrismaFilePreview = Pick<PrismaFile, "filename" | "path" | "size">;
+export type ProjectPreview = Pick<
+  Project,
+  "title" | "description" | "assignedToId"
+>;
+
+// Tipo para respuestas de error de la API
+export interface ApiError {
+  message: string;
+  code?: string;
+  details?: any;
+}

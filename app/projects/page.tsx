@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/constants";
 import { useAuth } from "@/app/auth/auth-context";
-import { UserRole } from "@prisma/client";
+import { Project, UserRole } from "@prisma/client";
 
 // Componentes
 import {
@@ -18,7 +18,6 @@ import {
 
 // Hooks y tipos
 import { useProjects } from "@/app/projects/_hooks/useProjects";
-import { Project } from "@/app/projects/_utils/types";
 
 export default function ProjectsPage() {
   const { user, userRole } = useAuth();

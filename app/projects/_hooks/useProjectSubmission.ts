@@ -60,8 +60,62 @@ export function useProjectSubmission({
     }
   };
 
+  const handleUpdateSubmit = async (
+    values: ProjectFormValues,
+    newFiles: File[],
+    projectId?: string,
+  ) => {
+    // Verificar autenticación y projectId
+    if (!user) {
+      const errorMessage =
+        "No se pudo crear el proyecto: Usuario no autenticado";
+      setError(errorMessage);
+      onError?.(errorMessage);
+      return;
+    }
+    if (!projectId) {
+      const errorMessage =
+        "No se pudo crear el proyecto: ProjectId no definido";
+      setError(errorMessage);
+      onError?.(errorMessage);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // 1. Subir archivos (si existen)
+      const uploadedFiles = await fileUploadService.uploadMultipleFiles(
+        newFiles,
+        user.id,
+      );
+
+      // 2. Actualizar el proyecto con los archivos subidos
+      await projectService.updateProject(projectId, {
+        title: values.title,
+        description: values.description || "",
+        assignedToId:
+          values.assignedToId === "sin-asignar" ? null : values.assignedToId,
+        files: uploadedFiles,
+      });
+
+      // 3. Ejecutar callback de éxito si existe
+      onSuccess?.();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al crear el proyecto";
+
+      setError(errorMessage);
+      onError?.(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
     handleSubmit,
+    handleUpdateSubmit,
     isSubmitting,
     error,
     setError,

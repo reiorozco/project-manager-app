@@ -63,6 +63,10 @@ export async function PUT(
     }
 
     try {
+      if (body.files && body.files.length > 0) {
+        await ProjectService.addFilesToProject(projectId, userId, body.files);
+      }
+
       const project = await ProjectService.updateProject(projectId, userId, {
         title: body.title,
         description: body.description,
