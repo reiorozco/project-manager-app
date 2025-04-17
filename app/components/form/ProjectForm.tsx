@@ -48,14 +48,14 @@ interface ProjectFormProps {
     values: ProjectFormValues,
     files: File[],
     projectId?: string,
-  ) => Promise<void>;
+  ) => void;
   isSubmitting: boolean;
   error: string | null;
   onCancel: () => void;
   initialValues?: ProjectFormValues;
   existingFiles?: PrismaFile[];
   isEditMode?: boolean;
-  onDeleteFile?: (fileId: string) => Promise<void>;
+  onDeleteFile?: (fileId: string) => void;
   designers?: User[];
   canAssignToDesigner?: boolean;
   projectId?: string;
@@ -96,7 +96,7 @@ export function ProjectForm({
 
   const handleDeleteConfirm = async () => {
     if (fileToDelete && onDeleteFile) {
-      await onDeleteFile(fileToDelete);
+      onDeleteFile(fileToDelete);
       setFileToDelete(null);
     }
   };
@@ -220,6 +220,7 @@ export function ProjectForm({
                           size="sm"
                           type="button"
                           onClick={() => setFileToDelete(file.id)}
+                          disabled={isSubmitting}
                         >
                           Eliminar
                         </Button>
@@ -259,7 +260,12 @@ export function ProjectForm({
                       : "Crear Proyecto"}
                 </Button>
 
-                <Button type="button" variant="outline" onClick={onCancel}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  disabled={isSubmitting}
+                >
                   Cancelar
                 </Button>
               </div>
@@ -282,10 +288,14 @@ export function ProjectForm({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isSubmitting}>
+              Cancelar
+            </AlertDialogCancel>
+
             <AlertDialogAction
-              onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={handleDeleteConfirm}
+              disabled={isSubmitting}
             >
               Eliminar
             </AlertDialogAction>

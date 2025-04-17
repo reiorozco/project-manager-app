@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { File as PrismaFile, Project, UserRole } from "@prisma/client";
 import { useAuth } from "@/app/auth/auth-context";
 import { BUCKET_NAME, ProjectWithRelations } from "@/app/projects/_utils/types";
@@ -6,33 +6,24 @@ import { projectService } from "@/app/projects/_utils/projectService";
 
 export const useProjectDetails = (projectId: string) => {
   const { user, userRole, supabase } = useAuth();
-  const [project, setProject] = useState<ProjectWithRelations | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const { project } = await projectService.getProject(projectId);
-        setProject(project);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Error al cargar el proyecto",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Consulta del proyecto
+  const { data, isLoading, error, refetch } = useQuery<{
+    project: ProjectWithRelations;
+  }>({
+    queryKey: ["project", projectId],
+    queryFn: async () => await projectService.getProject(projectId),
+    enabled: !!projectId, // Solo ejecutar si hay un projectId
+  });
 
-    void fetchProject();
-  }, [projectId]);
-
+  // Función para verificar permisos
   const canManageProject = (project: Project) =>
     userRole === UserRole.PROJECT_MANAGER ||
     (userRole === UserRole.CLIENT && project.createdById === user?.id);
 
-  const downloadFile = async (file: PrismaFile): Promise<void> => {
-    try {
+  // Mutación para descargar archivos
+  const downloadFileMutation = useMutation({
+    mutationFn: async (file: PrismaFile): Promise<void> => {
       const { data, error: downloadError } = await supabase.storage
         .from(BUCKET_NAME)
         .download(file.path);
@@ -50,18 +41,23 @@ export const useProjectDetails = (projectId: string) => {
       // Limpiar recursos
       URL.revokeObjectURL(url);
       a.remove();
-    } catch (err) {
-      setError(
-        `Error al descargar el archivo: ${err instanceof Error ? err.message : "error desconocido"}`,
-      );
-    }
+    },
+  });
+
+  // Función simplificada para uso externo
+  const downloadFile = async (file: PrismaFile): Promise<void> => {
+    await downloadFileMutation.mutateAsync(file);
   };
 
   return {
-    project,
-    loading,
-    error,
+    project: data ? data.project : null,
+    loading: isLoading,
+    error:
+      error instanceof Error ? error.message : error ? String(error) : null,
     canManageProject,
     downloadFile,
+    isDownloading: downloadFileMutation.isPending,
+    downloadError: downloadFileMutation.error,
+    refetchProject: refetch,
   };
 };

@@ -1,29 +1,15 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/constants";
-import { useAuth } from "@/app/auth/auth-context";
 import { useProjectSubmission } from "@/app/projects/_hooks/useProjectSubmission";
 import { ProjectForm } from "@/app/components/form/ProjectForm";
 
 export default function NewProjectPage() {
-  const { user } = useAuth();
   const router = useRouter();
 
-  const { handleSubmit, isSubmitting, error } = useProjectSubmission({
-    onSuccess: () => {
-      router.push(ROUTES.PROJECTS);
-      router.refresh();
-    },
-  });
-
-  useEffect(() => {
-    if (!user) {
-      router.push(ROUTES.LOGIN);
-      console.log("Usuario no autenticado");
-    }
-  }, [user, router]);
+  const { handleSubmit, isSubmitting, error } = useProjectSubmission();
 
   return (
     <div className="container mx-auto max-w-3xl py-8">

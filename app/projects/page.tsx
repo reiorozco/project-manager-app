@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/constants";
-import { useAuth } from "@/app/auth/auth-context";
-import { Project, UserRole } from "@prisma/client";
 
 // Componentes
 import {
@@ -16,17 +14,21 @@ import {
   ProjectsList,
 } from "@/app/components/projects";
 
-// Hooks y tipos
 import { useProjects } from "@/app/projects/_hooks/useProjects";
 
 export default function ProjectsPage() {
-  const { user, userRole } = useAuth();
   const router = useRouter();
-
-  const { projects, isLoading, error, deleteProject, isDeleting } =
-    useProjects();
-
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+
+  const {
+    projects,
+    isLoading,
+    error,
+    deleteProject,
+    isDeleting,
+    canCreateProject,
+    canManageProject,
+  } = useProjects();
 
   const handleDeleteConfirm = () => {
     if (!projectToDelete) return;
@@ -37,13 +39,6 @@ export default function ProjectsPage() {
       },
     });
   };
-
-  // Permisos basados en rol
-  const canCreateProject =
-    userRole === UserRole.CLIENT || userRole === UserRole.PROJECT_MANAGER;
-  const canManageProject = (project: Project) =>
-    userRole === UserRole.PROJECT_MANAGER ||
-    (userRole === UserRole.CLIENT && project.createdById === user?.id);
 
   // Renderizado condicional para diferentes estados
   if (isLoading) {
@@ -78,7 +73,7 @@ export default function ProjectsPage() {
       )}
 
       <DeleteProjectDialog
-        isOpen={!!projectToDelete}
+        isOpen={!!projectToDelete || isDeleting}
         onClose={() => setProjectToDelete(null)}
         onConfirm={handleDeleteConfirm}
         isDeleting={isDeleting}

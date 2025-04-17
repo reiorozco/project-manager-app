@@ -9,7 +9,7 @@ class ProjectService {
     title: string,
     description: string = "",
     files: PrismaFilePreview[] = [],
-  ): Promise<ProjectWithRelations> {
+  ): Promise<{ project: ProjectWithRelations }> {
     try {
       const response = await fetch("/api/projects", {
         method: "POST",
@@ -79,7 +79,7 @@ class ProjectService {
     data: Partial<ProjectPreview> & {
       files?: PrismaFilePreview[];
     },
-  ): Promise<ProjectWithRelations> {
+  ): Promise<{ project: ProjectWithRelations }> {
     try {
       // Ejemplo de implementación
       const response = await fetch(`/api/projects/${projectId}`, {

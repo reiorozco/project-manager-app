@@ -28,8 +28,14 @@ export default function ProjectDetailPage({ params }: Props) {
   const projectId = unwrappedParams.id;
   const router = useRouter();
 
-  const { project, loading, error, canManageProject, downloadFile } =
-    useProjectDetails(projectId);
+  const {
+    project,
+    loading,
+    error,
+    canManageProject,
+    downloadFile,
+    isDownloading,
+  } = useProjectDetails(projectId);
 
   if (loading) {
     return <ProjectDetailSkeleton />;
@@ -84,7 +90,11 @@ export default function ProjectDetailPage({ params }: Props) {
 
             <CardContent>
               {project.files.length > 0 ? (
-                <FilesList files={project.files} onDownload={downloadFile} />
+                <FilesList
+                  files={project.files}
+                  onDownload={downloadFile}
+                  isDownloading={isDownloading}
+                />
               ) : (
                 <p className="text-gray-500 italic">No hay archivos adjuntos</p>
               )}
@@ -150,9 +160,11 @@ const ProjectHeader = ({
 const FilesList = ({
   files,
   onDownload,
+  isDownloading,
 }: {
   files: PrismaFile[];
   onDownload: (file: PrismaFile) => Promise<void>;
+  isDownloading?: boolean;
 }) => (
   <ul className="divide-y">
     {files.map((file) => (
@@ -165,7 +177,12 @@ const FilesList = ({
           </div>
         </div>
 
-        <Button size="sm" variant="outline" onClick={() => onDownload(file)}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onDownload(file)}
+          disabled={isDownloading}
+        >
           <FileDown className="mr-2 h-4 w-4" />
           Descargar
         </Button>

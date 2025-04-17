@@ -170,6 +170,8 @@ export async function createProject(data: CreateProjectInput) {
         : undefined,
     },
     include: {
+      createdBy: { select: { name: true, email: true } },
+      assignedTo: { select: { name: true, email: true } },
       files: true,
     },
   });
@@ -196,6 +198,11 @@ export async function updateProject(
           ? { connect: { id: data.assignedToId } }
           : { disconnect: true },
       }),
+    },
+    include: {
+      createdBy: { select: { name: true, email: true } },
+      assignedTo: { select: { name: true, email: true } },
+      files: true,
     },
   });
 }
