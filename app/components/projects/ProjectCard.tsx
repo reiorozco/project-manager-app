@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
+import { ChevronDown, ChevronUp, MoreVertical } from "lucide-react";
 import { ProjectWithRelations } from "@/app/projects/_utils/types";
 
 interface ProjectCardProps {
@@ -31,8 +32,8 @@ function ProjectCard({
   onEdit,
 }: ProjectCardProps) {
   return (
-    <Card className="flex justify-between">
-      <CardHeader>
+    <Card className="flex flex-col h-full">
+      <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg">{project.title}</CardTitle>
 
@@ -45,22 +46,66 @@ function ProjectCard({
         </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="mb-4">
-          <p className="text-sm text-gray-500">
-            {project.description || "Sin descripción"}
-          </p>
-        </div>
+      <CardContent className="flex-grow">
+        <TruncatedDescription
+          description={project.description || "Sin descripción"}
+        />
 
-        <ProjectCardDetails project={project} />
+        <div className="mt-4">
+          <ProjectCardDetails project={project} />
+        </div>
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="pt-4">
         <Button variant="outline" className="w-full" onClick={onViewDetails}>
           Ver detalles
         </Button>
       </CardFooter>
     </Card>
+  );
+}
+
+function TruncatedDescription({ description }: { description: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLongText = description.length > 120;
+
+  const maxLines = 3;
+
+  const toggleExpanded = () => {
+    setExpanded(!expanded);
+  };
+
+  return (
+    <div className="mb-2">
+      <div
+        className={`text-sm text-gray-600 overflow-hidden transition-all duration-200 ${
+          !expanded && isLongText ? `line-clamp-${maxLines}` : ""
+        }`}
+      >
+        {description}
+      </div>
+
+      {isLongText && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-1 h-6 px-2 text-xs text-muted-foreground hover:text-primary"
+          onClick={toggleExpanded}
+        >
+          {expanded ? (
+            <>
+              <ChevronUp className="h-3 w-3 mr-1" />
+              Mostrar menos
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-3 w-3 mr-1" />
+              Mostrar más
+            </>
+          )}
+        </Button>
+      )}
+    </div>
   );
 }
 
