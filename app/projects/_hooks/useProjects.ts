@@ -18,8 +18,9 @@ export function useProjects() {
     { projects: ProjectWithRelations[] },
     Error
   >({
-    queryKey: ["projects"],
+    queryKey: ["projects", user?.id],
     queryFn: async () => await projectService.getProjects(),
+    enabled: !!user,
   });
 
   // Eliminar un proyecto

@@ -3,14 +3,19 @@
 import React, {
   createContext,
   PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
-  useState,
-  useCallback,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { UserRole } from "@prisma/client";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 type SignInParams = {
   email: string;
@@ -36,6 +41,7 @@ type AuthContextType = {
   user: User | null;
   userRole: UserRole | null;
   isLoading: boolean;
+  isError: boolean;
   signIn: (params: SignInParams) => Promise<{ error: Error | null }>;
   signUp: (params: SignUpParams) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -49,149 +55,80 @@ type AuthContextType = {
   supabase: ReturnType<typeof createClient>;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Query keys
+const queryKeys = {
+  user: ["auth", "user"] as const,
+  userRole: ["auth", "userRole"] as const,
+};
 
 // Creamos una única instancia del cliente Supabase para toda la aplicación
 const supabase = createClient();
 
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const queryClient = useQueryClient();
 
-  // Función para actualizar el usuario y su rol
-  const updateUserAndRole = useCallback(async (currentUser: User | null) => {
-    // Actualizar inmediatamente el usuario para evitar problemas de UI
-    setUser(currentUser);
-
-    if (!currentUser) {
-      setUserRole(null);
-      return;
-    }
-
-    try {
-      // Obtener el rol del usuario
-      const { data } = await supabase
-        .from("User")
-        .select("role")
-        .eq("id", currentUser.id)
-        .single();
-
-      setUserRole(data?.role || null);
-    } catch (error) {
-      console.error("Error fetching user role:", error);
-      setUserRole(null);
-    }
-  }, []);
-
-  // Función para refrescar los datos del usuario actual
-  const refreshUser = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await supabase.auth.getUser();
-      await updateUserAndRole(data.user);
-    } catch (error) {
-      console.error("Error refreshing user:", error);
-      setUser(null);
-      setUserRole(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateUserAndRole]);
-
-  // Inicializar autenticación y configurar listener
-  useEffect(() => {
-    let mounted = true;
-
-    // Verificar autenticación inicial
-    const initAuth = async () => {
-      setIsLoading(true);
+  // Obtener usuario actual
+  const userQuery: UseQueryResult<User | null> = useQuery({
+    queryKey: queryKeys.user,
+    queryFn: async () => {
       try {
-        // Usar getUser() como recomienda Supabase para autenticación segura
-        const { data } = await supabase.auth.getUser();
-        if (mounted) {
-          await updateUserAndRole(data.user);
-        }
+        const { data, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        return data.user;
       } catch (error) {
-        console.error("Error initializing auth:", error);
-        if (mounted) {
-          setUser(null);
-          setUserRole(null);
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
+        console.error("Error fetching user:", error);
+        return null;
       }
-    };
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
 
-    void initAuth();
+  const userId = userQuery.data?.id;
 
-    // Suscribirse a cambios de autenticación
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-
-      if (mounted) {
-        setIsLoading(true);
-      }
+  // Obtener rol de usuario cuando hay un usuario autenticado
+  const userRoleQuery: UseQueryResult<UserRole | null> = useQuery({
+    queryKey: [...queryKeys.userRole, userId],
+    queryFn: async () => {
+      if (!userId) return null;
 
       try {
-        if (event === "SIGNED_OUT") {
-          // Manejar específicamente el evento de cierre de sesión
-          if (mounted) {
-            setUser(null);
-            setUserRole(null);
-          }
-        } else {
-          // Para otros eventos, verificar con getUser
-          const { data } = await supabase.auth.getUser();
-          if (mounted) {
-            await updateUserAndRole(data.user);
-          }
-        }
+        const { data, error } = await supabase
+          .from("User")
+          .select("role")
+          .eq("id", userId)
+          .single();
+
+        if (error) throw error;
+        return data?.role || null;
       } catch (error) {
-        console.error("Error in auth state change:", error);
-        if (mounted) {
-          setUser(null);
-          setUserRole(null);
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
+        console.error("Error fetching user role:", error);
+        return null;
       }
-    });
+    },
+    enabled: !!userId, // Solo ejecutar cuando hay un usuario
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
 
-    // Limpiar suscripción al desmontar
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [updateUserAndRole]);
-
-  // Función para iniciar sesión
-  const signIn = async ({ email, password }: SignInParams) => {
-    setIsLoading(true);
-    try {
+  // Mutación: iniciar sesión
+  const { mutateAsync: signInAsync } = useMutation({
+    mutationFn: async ({ email, password }: SignInParams) => {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
       return { error: error as Error | null };
-    } catch (err) {
-      return { error: err as Error };
-    } finally {
-      // Nota: onAuthStateChange actualizará isLoading
-    }
-  };
+    },
+    onSuccess: () => {
+      // Invalidar consultas para refrescar datos
+      void queryClient.invalidateQueries({ queryKey: queryKeys.user });
+    },
+  });
 
-  // Función para registrarse
-  const signUp = async ({ email, password, fullName, role }: SignUpParams) => {
-    setIsLoading(true);
-    try {
+  // Mutación: registrarse
+  const { mutateAsync: signUpAsync } = useMutation({
+    mutationFn: async ({ email, password, fullName, role }: SignUpParams) => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -203,26 +140,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-
       return { error: error as Error | null };
-    } catch (err) {
-      return { error: err as Error };
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  // Función para cerrar sesión
-  const signOut = async () => {
-    console.log("Signing out...");
-    setIsLoading(true);
-
-    try {
-      // Limpiar manualmente el estado primero
-      setUser(null);
-      setUserRole(null);
-
-      // Luego cerrar sesión en Supabase
+  // Mutación: cerrar sesión
+  const { mutateAsync: signOutAsync } = useMutation({
+    mutationFn: async () => {
+      console.log("Signing out...");
       const { error } = await supabase.auth.signOut();
 
       if (error) {
@@ -231,52 +156,118 @@ export function AuthProvider({ children }: PropsWithChildren) {
       }
 
       console.log("Sign out successful");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    } finally {
-      // Asegurarnos de que isLoading sea false
-      setIsLoading(false);
-    }
-  };
+    },
+    onSuccess: () => {
+      // Resetear el estado manual e inmediatamente
+      queryClient.setQueryData(queryKeys.user, null);
+      queryClient.setQueryData(queryKeys.userRole, null);
+    },
+  });
 
-  // Función para solicitar restablecimiento de contraseña
-  const resetPassword = async ({ email }: ResetPasswordParams) => {
-    setIsLoading(true);
-    try {
+  // Mutación: restablecer contraseña
+  const { mutateAsync: resetPasswordAsync } = useMutation({
+    mutationFn: async ({ email }: ResetPasswordParams) => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-
       return { error: error as Error | null };
-    } catch (err) {
-      return { error: err as Error };
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  // Función para actualizar contraseña
-  const updatePassword = async ({ password }: UpdatePasswordParams) => {
-    setIsLoading(true);
-    try {
+  // Mutación: actualizar contraseña
+  const { mutateAsync: updatePasswordAsync } = useMutation({
+    mutationFn: async ({ password }: UpdatePasswordParams) => {
       const { error } = await supabase.auth.updateUser({
         password,
       });
-
       return { error: error as Error | null };
-    } catch (err) {
-      return { error: err as Error };
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.user });
+    },
+  });
+
+  // Escuchar cambios de autenticación
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
+
+      if (event === "SIGNED_OUT") {
+        // Resetear estado inmediatamente
+        queryClient.setQueryData(queryKeys.user, null);
+        queryClient.setQueryData(queryKeys.userRole, null);
+      } else {
+        // Para otros eventos, invalidar consultas
+        void queryClient.invalidateQueries({ queryKey: queryKeys.user });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [queryClient]);
+
+  // Funciones expuestas al contexto
+  // Fix: destructure mutateAsync antes de pasarlo a useCallback
+  const signIn = useCallback(
+    async (params: SignInParams) => {
+      return signInAsync(params);
+    },
+    [signInAsync],
+  );
+
+  const signUp = useCallback(
+    async (params: SignUpParams) => {
+      return signUpAsync(params);
+    },
+    [signUpAsync],
+  );
+
+  const signOut = useCallback(async () => {
+    await signOutAsync();
+  }, [signOutAsync]);
+
+  const resetPassword = useCallback(
+    async (params: ResetPasswordParams) => {
+      return resetPasswordAsync(params);
+    },
+    [resetPasswordAsync],
+  );
+
+  const updatePassword = useCallback(
+    async (params: UpdatePasswordParams) => {
+      return updatePasswordAsync(params);
+    },
+    [updatePasswordAsync],
+  );
+
+  const refreshUser = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.user }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.userRole }),
+    ]);
+    // Al no devolver nada, la función retorna Promise<void> implícitamente
+  }, [queryClient]);
+
+  // Determinar estado de carga combinado
+  const isLoading =
+    userQuery.isLoading ||
+    userRoleQuery.isLoading ||
+    userQuery.isFetching ||
+    userRoleQuery.isFetching;
+
+  // Determinar estado de error combinado
+  const isError = userQuery.isError || userRoleQuery.isError;
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        userRole,
+        user: userQuery.data || null,
+        userRole: userRoleQuery.data || null,
         isLoading,
+        isError,
         signIn,
         signUp,
         signOut,
