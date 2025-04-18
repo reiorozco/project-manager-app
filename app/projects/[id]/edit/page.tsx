@@ -32,6 +32,7 @@ export default function EditProjectPage({ params }: ProjectParams) {
     project,
     loading: projectLoading,
     error: projectError,
+    canManageProject,
   } = useProjectDetails(projectId);
 
   // Consulta para cargar los diseñadores (solo si es PROJECT_MANAGER)
@@ -109,7 +110,7 @@ export default function EditProjectPage({ params }: ProjectParams) {
     (userRole === UserRole.PROJECT_MANAGER && designersError instanceof Error
       ? designersError
       : null);
-  if (loadError || !project) {
+  if (loadError || !project || !canManageProject(project)) {
     return (
       <div className="container mx-auto max-w-3xl py-8">
         <Alert variant="destructive">
@@ -119,7 +120,7 @@ export default function EditProjectPage({ params }: ProjectParams) {
               ? loadError.message
               : typeof loadError === "string"
                 ? loadError
-                : "Proyecto no encontrado"}
+                : "Proyecto no encontrado o no tienes permiso para editarlo."}
           </AlertDescription>
         </Alert>
 

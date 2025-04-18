@@ -180,7 +180,12 @@ export async function createProject(data: CreateProjectInput) {
 export async function updateProject(
   projectId: string,
   userId: string,
-  data: { title?: string; description?: string; assignedToId?: string | null },
+  data: {
+    title?: string;
+    description?: string;
+    assignedToId?: string | null;
+    files?: FileUpload[];
+  },
 ) {
   const canManage = await canManageProject(userId, projectId);
 
@@ -198,6 +203,15 @@ export async function updateProject(
           ? { connect: { id: data.assignedToId } }
           : { disconnect: true },
       }),
+      files: data.files
+        ? {
+            create: data.files.map((file) => ({
+              filename: file.filename,
+              path: file.path,
+              size: file.size,
+            })),
+          }
+        : undefined,
     },
     include: {
       createdBy: { select: { name: true, email: true } },

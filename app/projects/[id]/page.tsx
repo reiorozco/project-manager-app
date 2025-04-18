@@ -131,7 +131,7 @@ const ProjectHeader = ({
   canManage: boolean;
   onEdit: () => void;
 }) => (
-  <div className="flex justify-between items-center mb-6">
+  <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
     <div>
       <h1 className="text-3xl font-bold">{project.title}</h1>
       <div className="flex items-center space-x-4 mt-2">
