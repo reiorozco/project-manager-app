@@ -31,7 +31,7 @@ export function useProjects() {
     onSuccess: (deletedProjectId) => {
       // Actualizar la lista de proyectos en caché
       queryClient.setQueryData<{ projects: ProjectWithRelations[] }>(
-        ["projects"],
+        ["projects", user?.id],
         (old) => {
           if (!old) return { projects: [] };
 

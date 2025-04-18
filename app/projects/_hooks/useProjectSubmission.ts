@@ -53,7 +53,7 @@ export function useProjectSubmission({
     onSuccess: (data) => {
       // Actualizar consulta de proyectos
       queryClient.setQueryData<{ projects: ProjectWithRelations[] }>(
-        ["projects"],
+        ["projects", user?.id],
         (old) => {
           const oldProjects = old?.projects ?? [];
 
@@ -114,7 +114,7 @@ export function useProjectSubmission({
     onSuccess: (data) => {
       // Actualizar consultas de proyectos y la del proyecto específico
       queryClient.setQueryData<{ projects: ProjectWithRelations[] }>(
-        ["projects"],
+        ["projects", user?.id],
         (old) => {
           if (!old) return { projects: [] };
 
