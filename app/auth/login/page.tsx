@@ -37,9 +37,8 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
-  const { signIn, isLoading } = useAuth();
+  const { signIn, isSigningIn } = useAuth();
   const router = useRouter();
-
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -54,20 +53,22 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const { error } = await signIn({
+      const { error: authError } = await signIn({
         email: values.email,
         password: values.password,
       });
 
-      if (error) {
-        throw error;
+      if (authError) {
+        setError(authError.message);
+        return;
       }
 
       router.push(ROUTES.DASHBOARD);
-    } catch (error) {
+    } catch (err) {
       setError(
-        error instanceof Error ? error.message : "Error al iniciar sesión",
+        "Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.",
       );
+      console.error("Error inesperado durante el inicio de sesión:", err);
     }
   }
 
@@ -76,7 +77,6 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
-
           <CardDescription>
             Ingresa a tu cuenta para gestionar tus proyectos
           </CardDescription>
@@ -86,7 +86,6 @@ export default function LoginPage() {
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />
-
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -100,7 +99,11 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Correo electrónico</FormLabel>
                     <FormControl>
-                      <Input placeholder="tu@email.com" {...field} />
+                      <Input
+                        placeholder="tu@email.com"
+                        {...field}
+                        disabled={isSigningIn}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -114,15 +117,20 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Contraseña</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="••••••"
+                        {...field}
+                        disabled={isSigningIn}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+              <Button type="submit" className="w-full" disabled={isSigningIn}>
+                {isSigningIn ? "Iniciando sesión..." : "Iniciar sesión"}
               </Button>
             </form>
           </Form>
@@ -134,6 +142,7 @@ export default function LoginPage() {
             <Link
               href="/auth/register"
               className="text-blue-600 hover:underline"
+              tabIndex={isSigningIn ? -1 : 0}
             >
               Regístrate
             </Link>

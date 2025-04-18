@@ -41,6 +41,9 @@ type AuthContextType = {
   user: User | null;
   userRole: UserRole | null;
   isLoading: boolean;
+  isSigningIn: boolean;
+  isSigningUp: boolean;
+  isSigningOut: boolean;
   isError: boolean;
   signIn: (params: SignInParams) => Promise<{ error: Error | null }>;
   signUp: (params: SignUpParams) => Promise<{ error: Error | null }>;
@@ -78,7 +81,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         if (error) throw error;
         return data.user;
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.log("Error fetching user:", error);
         return null;
       }
     },
@@ -112,7 +115,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   });
 
   // Mutación: iniciar sesión
-  const { mutateAsync: signInAsync } = useMutation({
+  const { mutateAsync: signInAsync, isPending: isSigningIn } = useMutation({
     mutationFn: async ({ email, password }: SignInParams) => {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -127,7 +130,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   });
 
   // Mutación: registrarse
-  const { mutateAsync: signUpAsync } = useMutation({
+  const { mutateAsync: signUpAsync, isPending: isSigningUp } = useMutation({
     mutationFn: async ({ email, password, fullName, role }: SignUpParams) => {
       const { error } = await supabase.auth.signUp({
         email,
@@ -145,7 +148,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   });
 
   // Mutación: cerrar sesión
-  const { mutateAsync: signOutAsync } = useMutation({
+  const { mutateAsync: signOutAsync, isPending: isSigningOut } = useMutation({
     mutationFn: async () => {
       console.log("Signing out...");
       const { error } = await supabase.auth.signOut();
@@ -267,6 +270,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
         user: userQuery.data || null,
         userRole: userRoleQuery.data || null,
         isLoading,
+        isSigningIn,
+        isSigningUp,
+        isSigningOut,
         isError,
         signIn,
         signUp,

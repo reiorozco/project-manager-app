@@ -21,20 +21,17 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 export default function Navbar() {
-  const { user, userRole, signOut, isLoading } = useAuth();
+  const { user, userRole, signOut, isSigningOut } = useAuth();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
     try {
-      setIsSigningOut(true);
       await signOut();
+
       router.push(ROUTES.LOGIN);
     } catch (error) {
-      console.error("Error during sign out:", error);
-    } finally {
-      setIsSigningOut(false);
+      console.error("Unexpected error during logout:", error);
     }
   };
 
@@ -66,6 +63,7 @@ export default function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              disabled={isSigningOut}
             >
               {isMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -81,13 +79,21 @@ export default function Navbar() {
             {user ? (
               <>
                 <Link href={ROUTES.DASHBOARD}>
-                  <Button variant="ghost" className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    className="flex gap-2"
+                    disabled={isSigningOut}
+                  >
                     <Home className="h-4 w-4" />
                     Dashboard
                   </Button>
                 </Link>
                 <Link href={ROUTES.PROJECTS}>
-                  <Button variant="ghost" className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    className="flex gap-2"
+                    disabled={isSigningOut}
+                  >
                     <FolderKanban className="h-4 w-4" />
                     Proyectos
                   </Button>
@@ -95,7 +101,11 @@ export default function Navbar() {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="ml-4 gap-2">
+                    <Button
+                      variant="outline"
+                      className="ml-4 gap-2"
+                      disabled={isSigningOut}
+                    >
                       <Avatar className="h-6 w-6">
                         <AvatarFallback className="text-xs">
                           {getUserInitials()}
@@ -118,14 +128,12 @@ export default function Navbar() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleSignOut}
-                      disabled={isSigningOut || isLoading}
+                      disabled={isSigningOut}
                       className="text-destructive focus:text-destructive cursor-pointer"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>
-                        {isSigningOut || isLoading
-                          ? "Cerrando sesión..."
-                          : "Cerrar sesión"}
+                        {isSigningOut ? "Cerrando sesión..." : "Cerrar sesión"}
                       </span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -168,7 +176,11 @@ export default function Navbar() {
                     href={ROUTES.DASHBOARD}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Button variant="ghost" className="w-full justify-start">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      disabled={isSigningOut}
+                    >
                       <Home className="mr-2 h-4 w-4" />
                       Dashboard
                     </Button>
@@ -177,7 +189,11 @@ export default function Navbar() {
                     href={ROUTES.PROJECTS}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Button variant="ghost" className="w-full justify-start">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      disabled={isSigningOut}
+                    >
                       <FolderKanban className="mr-2 h-4 w-4" />
                       Proyectos
                     </Button>
@@ -187,12 +203,10 @@ export default function Navbar() {
                     variant="destructive"
                     className="w-full justify-start"
                     onClick={handleSignOut}
-                    disabled={isSigningOut || isLoading}
+                    disabled={isSigningOut}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    {isSigningOut || isLoading
-                      ? "Cerrando sesión..."
-                      : "Cerrar sesión"}
+                    {isSigningOut ? "Cerrando sesión..." : "Cerrar sesión"}
                   </Button>
                 </div>
               </>

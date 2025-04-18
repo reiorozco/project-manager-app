@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { z } from "zod";
+import { AlertCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/app/auth/auth-context";
 import { Button } from "@/components/ui/button";
@@ -49,10 +50,8 @@ const registerSchema = z.object({
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { signUp } = useAuth();
-
+  const { signUp, isSigningUp } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -65,30 +64,31 @@ export default function RegisterPage() {
   });
 
   async function onSubmit(values: z.infer<typeof registerSchema>) {
-    setIsLoading(true);
     setError(null);
 
     try {
       // Register user in Supabase Auth
-      const { error } = await signUp({
+      const { error: authError } = await signUp({
         email: values.email,
         password: values.password,
         fullName: values.fullName,
         role: values.role,
       });
 
-      if (error) {
-        throw error;
+      if (authError) {
+        setError(authError.message);
+        return;
       }
 
       // Redirect to the confirmation page
       router.push(
         `/auth/register/confirm?email=${encodeURIComponent(values.email)}`,
       );
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Error al registrarse");
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      setError(
+        "Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.",
+      );
+      console.error("Error inesperado durante el registro:", err);
     }
   }
 
@@ -97,13 +97,13 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Crear cuenta</CardTitle>
-
           <CardDescription>Completa tus datos para registrarte</CardDescription>
         </CardHeader>
 
         <CardContent>
           {error && (
             <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -117,7 +117,11 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>Nombre completo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Tu nombre completo" {...field} />
+                      <Input
+                        placeholder="Tu nombre completo"
+                        {...field}
+                        disabled={isSigningUp}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -131,7 +135,11 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>Correo electrónico</FormLabel>
                     <FormControl>
-                      <Input placeholder="tu@email.com" {...field} />
+                      <Input
+                        placeholder="tu@email.com"
+                        {...field}
+                        disabled={isSigningUp}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -145,7 +153,12 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>Contraseña</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="••••••"
+                        {...field}
+                        disabled={isSigningUp}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -161,6 +174,7 @@ export default function RegisterPage() {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isSigningUp}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -180,8 +194,8 @@ export default function RegisterPage() {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Registrando..." : "Registrarse"}
+              <Button type="submit" className="w-full" disabled={isSigningUp}>
+                {isSigningUp ? "Registrando..." : "Registrarse"}
               </Button>
             </form>
           </Form>
@@ -190,7 +204,11 @@ export default function RegisterPage() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-500">
             ¿Ya tienes una cuenta?{" "}
-            <Link href="/auth/login" className="text-blue-600 hover:underline">
+            <Link
+              href="/auth/login"
+              className="text-blue-600 hover:underline"
+              tabIndex={isSigningUp ? -1 : 0}
+            >
               Inicia sesión
             </Link>
           </p>
