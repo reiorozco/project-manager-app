@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Prisma, File as PrismaFile, Project } from "@prisma/client";
+import { File as PrismaFile, Prisma, Project } from "@prisma/client";
 
 // Constantes para validación de archivos
 export const MAX_FILES = 5;
@@ -46,5 +46,4 @@ export type ProjectPreview = Pick<
 export interface ApiError {
   message: string;
   code?: string;
-  details?: any;
 }

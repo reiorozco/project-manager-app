@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import * as ProjectService from "@/lib/services/project-service";
 
+type Params = Promise<{ id: string }>;
+
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Params },
 ) {
   try {
+    const resolvedParams = await params;
+    const projectId = resolvedParams.id;
+
     const supabase = await createClient(request);
     const {
       data: { user },
@@ -17,7 +22,6 @@ export async function POST(
     }
 
     const userId = user.id;
-    const projectId = params.id;
 
     let body;
     try {

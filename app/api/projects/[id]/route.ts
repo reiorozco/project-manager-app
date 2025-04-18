@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import * as ProjectService from "@/lib/services/project-service";
 
+type Params = Promise<{ id: string }>;
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Params },
 ) {
   try {
+    const resolvedParams = await params;
+    const projectId = resolvedParams.id;
+
     const supabase = await createClient(request);
     const {
       data: { user },
@@ -17,7 +22,6 @@ export async function GET(
     }
 
     const userId = user.id;
-    const projectId = params.id;
 
     try {
       const project = await ProjectService.getProjectById(projectId, userId);
@@ -38,9 +42,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Params },
 ) {
   try {
+    const resolvedParams = await params;
+    const projectId = resolvedParams.id;
+
     const supabase = await createClient(request);
     const {
       data: { user },
@@ -51,7 +58,6 @@ export async function PUT(
     }
 
     const userId = user.id;
-    const projectId = params.id;
     const body = await request.json();
 
     // Validación básica
@@ -91,9 +97,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Params },
 ) {
   try {
+    const resolvedParams = await params;
+    const projectId = resolvedParams.id;
+
     const supabase = await createClient(request);
     const {
       data: { user },
@@ -104,7 +113,6 @@ export async function DELETE(
     }
 
     const userId = user.id;
-    const projectId = params.id;
 
     try {
       await ProjectService.deleteProject(projectId, userId, supabase);

@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import * as ProjectService from "@/lib/services/project-service";
 
+type Params = Promise<{ id: string; fileId: string }>;
+
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; fileId: string } },
+  { params }: { params: Params },
 ) {
   try {
+    const resolvedParams = await params;
+    const fileId = resolvedParams.fileId;
+
     const supabase = await createClient(request);
     const {
       data: { user },
@@ -17,7 +22,6 @@ export async function DELETE(
     }
 
     const userId = user.id;
-    const fileId = params.fileId;
 
     try {
       await ProjectService.removeFileFromProject(fileId, userId, supabase);
