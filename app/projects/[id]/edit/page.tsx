@@ -4,7 +4,7 @@ import React, { use } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth/auth-context";
 import { ROUTES } from "@/lib/constants";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/prisma";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Componentes

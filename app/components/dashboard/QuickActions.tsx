@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Folder, FolderPlus } from "lucide-react";
 import { ROLES_CAN_CREATE_PROJECTS, ROUTES } from "@/lib/constants";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/prisma";
 import ActionButton from "@/app/components/ActionButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { File as PrismaFile, Prisma, Project } from "@prisma/client";
+import { File as PrismaFile, Prisma, Project } from "@/generated/prisma";
 
 // Constantes para validación de archivos
 export const MAX_FILES = 5;

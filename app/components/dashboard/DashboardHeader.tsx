@@ -1,5 +1,5 @@
 import React from "react";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/prisma";
 import { ROLE_DISPLAY_MAP } from "@/lib/constants";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

@@ -1,7 +1,7 @@
 // lib/services/project-service.ts
 
 // import { createClient } from "@/lib/supabase/server";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import { SupabaseClient } from "@supabase/supabase-js";
 

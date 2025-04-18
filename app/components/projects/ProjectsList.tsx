@@ -1,5 +1,5 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { Project } from "@prisma/client";
+import { Project } from "@/generated/prisma";
 import { ROUTES } from "@/lib/constants";
 import { ProjectCard } from "@/app/components/projects";
 import { ProjectWithRelations } from "@/app/projects/_utils/types";

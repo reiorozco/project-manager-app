@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Project, UserRole } from "@prisma/client";
+import { Project, UserRole } from "@/generated/prisma";
 import { useAuth } from "@/app/auth/auth-context";
 import { ProjectWithRelations } from "@/app/projects/_utils/types";
 import { projectService } from "@/app/projects/_utils/projectService";

@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { File as PrismaFile } from "@prisma/client";
+import { File as PrismaFile } from "@/generated/prisma";
 import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

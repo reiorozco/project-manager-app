@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/prisma";
 
 /**
  * Mapeo de roles de usuario a texto legible

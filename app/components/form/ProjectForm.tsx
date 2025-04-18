@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { FileUploader } from "@/app/components/form/FileUploader";
 
-import { File as PrismaFile, User } from "@prisma/client";
+import { File as PrismaFile, User } from "@/generated/prisma";
 import { ProjectFormValues, projectSchema } from "@/app/projects/_utils/types";
 import { formatFileSize } from "@/app/projects/_utils/formatFileSize";
 

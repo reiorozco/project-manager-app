@@ -1,6 +1,6 @@
 // app/api/users/designers/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, UserRole } from "@prisma/client";
+import { PrismaClient, UserRole } from "@/generated/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 const prisma = new PrismaClient();

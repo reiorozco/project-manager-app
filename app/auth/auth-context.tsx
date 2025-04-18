@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/generated/prisma";
 import {
   useMutation,
   useQuery,
