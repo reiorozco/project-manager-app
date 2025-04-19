@@ -112,13 +112,13 @@ export function FileUploader({
           {/* Área para seleccionar archivos */}
           <div
             className={`border-2 ${isDragging ? "border-blue-400 bg-blue-50" : "border-dashed border-gray-300"} 
-                      rounded-md p-6 text-center cursor-pointer transition-colors`}
+                      rounded-md text-center cursor-pointer transition-colors`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
             {/* Agregamos un div interno que maneja el clic */}
-            <div onClick={handleClickArea}>
+            <div onClick={handleClickArea} className="p-6">
               <p className="text-sm font-medium mb-1">
                 Arrastra archivos aquí o haz clic para seleccionar
               </p>
