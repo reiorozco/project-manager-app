@@ -17,7 +17,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
   const { email } = await searchParams;
 
   return (
-    <div className="flex items-center justify-center bg-gray-50">
+    <div className="flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">

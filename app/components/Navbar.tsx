@@ -18,6 +18,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { ModeToggle } from "@/app/components/ModeToggle";
 
 export default function Navbar() {
   const { user, userRole, signOut, isSigningOut } = useAuth();
@@ -150,6 +151,8 @@ export default function Navbar() {
                 </Link>
               </>
             )}
+
+            <ModeToggle />
           </nav>
         </div>
 
@@ -159,18 +162,22 @@ export default function Navbar() {
             {user ? (
               <>
                 <div className="px-2 pt-2 pb-3 space-y-2">
-                  <div className="flex items-center gap-3 p-2 mb-2">
-                    <Avatar>
-                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{user.email}</p>
-                      {userRole && (
-                        <Badge variant="outline" className="mt-1">
-                          {ROLE_DISPLAY_MAP[userRole]}
-                        </Badge>
-                      )}
+                  <div className="flex items-center justify-between gap-3 p-2 mb-2">
+                    <div className="flex items-center gap-4">
+                      <Avatar>
+                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{user.email}</p>
+                        {userRole && (
+                          <Badge variant="outline" className="mt-1">
+                            {ROLE_DISPLAY_MAP[userRole]}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
+
+                    <ModeToggle />
                   </div>
                   <Separator className="my-2" />
                   <Link
@@ -213,17 +220,27 @@ export default function Navbar() {
               </>
             ) : (
               <div className="px-2 pt-2 pb-3 space-y-2">
-                <Link href={ROUTES.LOGIN} onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full">
+                <div className="mb-2">
+                  <ModeToggle />
+                </div>
+
+                <Button variant="ghost" className="w-full">
+                  <Link
+                    href={ROUTES.LOGIN}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Iniciar sesión
-                  </Button>
-                </Link>
-                <Link
-                  href={ROUTES.REGISTER}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Button className="w-full">Registrarse</Button>
-                </Link>
+                  </Link>
+                </Button>
+
+                <Button className="w-full">
+                  <Link
+                    href={ROUTES.REGISTER}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Registrarse
+                  </Link>
+                </Button>
               </div>
             )}
           </div>

@@ -141,14 +141,12 @@ const ProjectHeader = ({
         </p>
 
         {project.assignedTo ? (
-          <Badge variant="outline" className="bg-green-50">
+          <Badge variant="outline" className="bg-green-50 dark:bg-green-950">
             <User className="mr-1 h-3 w-3" />
             Asignado a: {project.assignedTo.name || project.assignedTo.email}
           </Badge>
         ) : (
-          <Badge variant="outline" className="bg-gray-50">
-            Sin asignar
-          </Badge>
+          <Badge variant="outline">Sin asignar</Badge>
         )}
       </div>
     </div>

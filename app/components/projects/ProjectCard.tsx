@@ -111,7 +111,10 @@ function ProjectCard({
           </div>
 
           <div className="flex justify-between items-center">
-            <Badge variant="outline" className="flex items-center">
+            <Badge
+              variant="outline"
+              className="flex items-center bg-blue-50 dark:bg-blue-950"
+            >
               <File className="h-3 w-3 mr-1" />
               {project.files.length} archivos
             </Badge>

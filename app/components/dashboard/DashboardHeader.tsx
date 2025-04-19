@@ -15,7 +15,7 @@ function DashboardHeader({ userRole }: Props) {
   return (
     <Card className="border-none shadow-md">
       <CardContent className="px-6 py-10 md:px-12 text-center md:text-left">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
+        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
           Bienvenido a Project Manager
         </h1>
 
