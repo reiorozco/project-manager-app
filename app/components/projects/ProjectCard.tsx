@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,7 +12,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, ChevronUp, MoreVertical } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { File, MoreVertical, User } from "lucide-react";
 import { ProjectWithRelations } from "@/app/projects/_utils/types";
 
 interface ProjectCardProps {
@@ -31,12 +33,36 @@ function ProjectCard({
   onViewDetails,
   onEdit,
 }: ProjectCardProps) {
-  return (
-    <Card className="flex flex-col h-full">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{project.title}</CardTitle>
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
 
+  const creatorName = project.createdBy.name || project.createdBy.email;
+  const assigneeName = project.assignedTo
+    ? project.assignedTo.name || project.assignedTo.email
+    : "Sin asignar";
+
+  const creatorInitials = project.createdBy.name
+    ? getInitials(project.createdBy.name)
+    : project.createdBy.email.substring(0, 2).toUpperCase();
+
+  const assigneeInitials = project.assignedTo?.name
+    ? getInitials(project.assignedTo.name)
+    : project.assignedTo
+      ? project.assignedTo.email.substring(0, 2).toUpperCase()
+      : "NA";
+
+  return (
+    <Card className="overflow-hidden border-muted hover:shadow-md transition-shadow duration-300 h-full flex flex-col">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-lg font-semibold">
+            {project.title}
+          </CardTitle>
           {canManage && (
             <ProjectCardMenu
               onEdit={onEdit}
@@ -46,18 +72,60 @@ function ProjectCard({
         </div>
       </CardHeader>
 
-      <CardContent className="flex-grow">
+      <CardContent className="flex flex-col justify-between flex-grow">
         <TruncatedDescription
           description={project.description || "Sin descripción"}
         />
 
-        <div className="mt-4">
-          <ProjectCardDetails project={project} />
+        <div className="flex flex-col space-y-2">
+          <Separator className="my-2" />
+
+          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+            <div className="flex items-center">
+              <User className="h-3 w-3 mr-1 opacity-70" />
+              <span className="font-medium mr-1">Creador:</span>
+              <div className="flex items-center">
+                <Avatar className="h-5 w-5 mr-1">
+                  <AvatarFallback className="text-[10px]">
+                    {creatorInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate max-w-32">{creatorName}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+            <div className="flex items-center">
+              <User className="h-3 w-3 mr-1 opacity-70" />
+              <span className="font-medium mr-1">Asignado:</span>
+              <div className="flex items-center">
+                <Avatar className="h-5 w-5 mr-1">
+                  <AvatarFallback className="text-[10px]">
+                    {assigneeInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate max-w-32">{assigneeName}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <Badge variant="outline" className="flex items-center">
+              <File className="h-3 w-3 mr-1" />
+              {project.files.length} archivos
+            </Badge>
+          </div>
         </div>
       </CardContent>
 
-      <CardFooter className="pt-4">
-        <Button variant="outline" className="w-full" onClick={onViewDetails}>
+      <CardFooter>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="w-full text-xs font-medium"
+          onClick={onViewDetails}
+        >
           Ver detalles
         </Button>
       </CardFooter>
@@ -66,64 +134,16 @@ function ProjectCard({
 }
 
 function TruncatedDescription({ description }: { description: string }) {
-  const [expanded, setExpanded] = useState(false);
   const isLongText = description.length > 120;
 
-  const toggleExpanded = () => {
-    setExpanded(!expanded);
-  };
-
   return (
-    <div className="mb-2">
+    <div>
       <div
-        className={`text-sm text-gray-600 overflow-hidden transition-all duration-200 ${
-          !expanded && isLongText ? `line-clamp-3` : ""
+        className={`text-sm text-muted-foreground overflow-hidden transition-all duration-200 ${
+          isLongText ? `line-clamp-3` : ""
         }`}
       >
         {description}
-      </div>
-
-      {isLongText && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mt-1 h-6 px-2 text-xs text-muted-foreground hover:text-primary"
-          onClick={toggleExpanded}
-        >
-          {expanded ? (
-            <>
-              <ChevronUp className="h-3 w-3 mr-1" />
-              Mostrar menos
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-3 w-3 mr-1" />
-              Mostrar más
-            </>
-          )}
-        </Button>
-      )}
-    </div>
-  );
-}
-
-function ProjectCardDetails({ project }: { project: ProjectWithRelations }) {
-  return (
-    <div className="text-xs text-gray-500 space-y-1">
-      <div>
-        <span className="font-medium">Creado por:</span>{" "}
-        {project.createdBy.name || project.createdBy.email}
-      </div>
-
-      <div>
-        <span className="font-medium">Asignado a:</span>{" "}
-        {project.assignedTo
-          ? project.assignedTo.name || project.assignedTo.email
-          : "Sin asignar"}
-      </div>
-
-      <div>
-        <span className="font-medium">Archivos:</span> {project.files.length}
       </div>
     </div>
   );
@@ -147,8 +167,10 @@ function ProjectCardMenu({
 
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onEdit}>Editar</DropdownMenuItem>
-
-        <DropdownMenuItem className="text-red-600" onClick={onDelete}>
+        <DropdownMenuItem
+          onClick={onDelete}
+          className="text-destructive focus:text-destructive"
+        >
           Eliminar
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -14,10 +14,14 @@ export function useProjects() {
   const queryClient = useQueryClient();
 
   // Obtener todos los proyectos
-  const { data, isLoading, error, refetch } = useQuery<
-    { projects: ProjectWithRelations[] },
-    Error
-  >({
+  const {
+    data,
+    isLoading: isLoadingQuery,
+    isFetching,
+    isFetched,
+    error,
+    refetch,
+  } = useQuery<{ projects: ProjectWithRelations[] }, Error>({
     queryKey: ["projects", user?.id],
     queryFn: async () => await projectService.getProjects(),
     enabled: !!user,
@@ -69,6 +73,11 @@ export function useProjects() {
   const canManageProject = (project: Project) =>
     userRole === UserRole.PROJECT_MANAGER ||
     (userRole === UserRole.CLIENT && project.createdById === user?.id);
+
+  const isLoading =
+    isLoadingQuery ||
+    (isFetching && (!data || data.projects.length === 0)) ||
+    !isFetched;
 
   return {
     projects: data ? data.projects : [],
