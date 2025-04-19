@@ -112,6 +112,8 @@ The project is built following the Next.js App Router architecture, which allows
 
 ### Project Management (CRUD)
 
+![DBML Schema](https://github.com/reiorozco/project-manager-app/blob/master/public/schema.svg)
+
 A complete project management system was implemented with the following functionalities:
 
 - **Create**: Form to create projects with title, description, and files
