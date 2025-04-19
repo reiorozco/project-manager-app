@@ -172,7 +172,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
@@ -191,8 +191,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider  = \"postgresql\"\n  url       = env(\"DATABASE_URL\")\n  directUrl = env(\"DIRECT_URL\")\n}\n\nenum UserRole {\n  CLIENT\n  PROJECT_MANAGER\n  DESIGNER\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n  name      String?\n  role      UserRole @default(CLIENT)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relations\n  createdProjects  Project[] @relation(\"CreatedBy\")\n  assignedProjects Project[] @relation(\"AssignedTo\")\n}\n\nmodel Project {\n  id          String   @id @default(cuid())\n  title       String\n  description String?\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n\n  // Relations\n  createdBy   User   @relation(\"CreatedBy\", fields: [createdById], references: [id])\n  createdById String\n\n  assignedTo   User?   @relation(\"AssignedTo\", fields: [assignedToId], references: [id])\n  assignedToId String?\n\n  // Files\n  files File[]\n}\n\nmodel File {\n  id        String   @id @default(cuid())\n  filename  String\n  path      String\n  size      Int\n  createdAt DateTime @default(now())\n\n  // Relations\n  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)\n  projectId String\n}\n",
-  "inlineSchemaHash": "e1a1d9a86d76ed619e828da99899fb9fae291bc8a69f2017cdef4171f7e3d260",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ngenerator dbml {\n  provider = \"prisma-dbml-generator\"\n}\n\ndatasource db {\n  provider  = \"postgresql\"\n  url       = env(\"DATABASE_URL\")\n  directUrl = env(\"DIRECT_URL\")\n}\n\nenum UserRole {\n  CLIENT\n  PROJECT_MANAGER\n  DESIGNER\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n  name      String?\n  role      UserRole @default(CLIENT)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  // Relations\n  createdProjects  Project[] @relation(\"CreatedBy\")\n  assignedProjects Project[] @relation(\"AssignedTo\")\n}\n\nmodel Project {\n  id          String   @id @default(cuid())\n  title       String\n  description String?\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n\n  // Relations\n  createdBy   User   @relation(\"CreatedBy\", fields: [createdById], references: [id])\n  createdById String\n\n  assignedTo   User?   @relation(\"AssignedTo\", fields: [assignedToId], references: [id])\n  assignedToId String?\n\n  // Files\n  files File[]\n}\n\nmodel File {\n  id        String   @id @default(cuid())\n  filename  String\n  path      String\n  size      Int\n  createdAt DateTime @default(now())\n\n  // Relations\n  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)\n  projectId String\n}\n",
+  "inlineSchemaHash": "e73d26cd205133f4c531f50b000a45228618b1b1a6f343b532a21a14a5a5659f",
   "copyEngine": true
 }
 
