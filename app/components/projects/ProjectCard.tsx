@@ -69,8 +69,6 @@ function TruncatedDescription({ description }: { description: string }) {
   const [expanded, setExpanded] = useState(false);
   const isLongText = description.length > 120;
 
-  const maxLines = 3;
-
   const toggleExpanded = () => {
     setExpanded(!expanded);
   };
@@ -79,7 +77,7 @@ function TruncatedDescription({ description }: { description: string }) {
     <div className="mb-2">
       <div
         className={`text-sm text-gray-600 overflow-hidden transition-all duration-200 ${
-          !expanded && isLongText ? `line-clamp-${maxLines}` : ""
+          !expanded && isLongText ? `line-clamp-3` : ""
         }`}
       >
         {description}
