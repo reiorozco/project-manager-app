@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       token_hash,
     });
     if (!error) {
-      // redirect user to specified redirect URL or root of app
+      // redirect user to the specified redirect URL or root of the app
       const redirectUrl = redirect_to ? `${redirect_to}` : next;
 
       redirect(redirectUrl);
