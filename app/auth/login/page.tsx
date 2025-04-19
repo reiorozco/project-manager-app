@@ -59,7 +59,9 @@ export default function LoginPage() {
           password: values.password,
         },
         {
-          onSuccess: () => router.replace(ROUTES.DASHBOARD),
+          onSuccess: () => {
+            router.replace(ROUTES.DASHBOARD);
+          },
         },
       );
 

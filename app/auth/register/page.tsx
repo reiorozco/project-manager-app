@@ -76,10 +76,11 @@ export default function RegisterPage() {
           role: values.role,
         },
         {
-          onSuccess: () =>
+          onSuccess: () => {
             router.replace(
               `/auth/register/confirm?email=${encodeURIComponent(values.email)}`,
-            ),
+            );
+          },
         },
       );
 

@@ -11,6 +11,7 @@ import React, {
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { UserRole } from "@/generated/prisma";
+import { ROUTES } from "@/lib/constants";
 import {
   useMutation,
   useQuery,
@@ -322,10 +323,40 @@ export function AuthProvider({ children }: PropsWithChildren) {
   // Funciones expuestas al contexto con soporte para callbacks
   const signIn = useCallback(
     async (params: SignInParams, options?: AuthOptions) => {
-      signInSuccessCallback.current = options?.onSuccess;
-      signInErrorCallback.current = options?.onError;
+      try {
+        const result = await signInAsync(params);
 
-      return signInAsync(params);
+        // Si la autenticación fue exitosa
+        if (!result.error) {
+          // Luego, pequeña pausa para permitir que React procese los cambios de estado
+          setTimeout(() => {
+            // Callback de éxito si existe
+            if (options?.onSuccess) {
+              options.onSuccess();
+            }
+
+            // Fallback: Si después de 500ms aún estamos en la misma página, forzar navegación
+            const redirectTimeout = setTimeout(() => {
+              // Comprobar si todavía estamos en una página de auth
+              if (window.location.pathname.includes("/auth/")) {
+                window.location.href = ROUTES.DASHBOARD;
+              }
+            }, 500);
+
+            // Limpiar el timeout si el componente se desmonta
+            return () => clearTimeout(redirectTimeout);
+          }, 50);
+        } else if (options?.onError) {
+          options.onError(result.error);
+        }
+
+        return result;
+      } catch (error) {
+        if (options?.onError) {
+          options.onError(error as Error);
+        }
+        return { error: error as Error };
+      }
     },
     [signInAsync],
   );

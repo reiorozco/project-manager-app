@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FolderKanban, Folders, Home, LogOut, Menu, X } from "lucide-react";
 import { useAuth } from "@/app/auth/auth-context";
 import { ROLE_DISPLAY_MAP, ROUTES } from "@/lib/constants";
@@ -22,12 +21,16 @@ import { Separator } from "@/components/ui/separator";
 
 export default function Navbar() {
   const { user, userRole, signOut, isSigningOut } = useAuth();
-  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
-      await signOut({ onSuccess: () => router.replace(ROUTES.LOGIN) });
+      await signOut({
+        onSuccess: () => {
+          // Redirección imperativa
+          window.location.href = ROUTES.LOGIN;
+        },
+      });
     } catch (error) {
       console.error("Unexpected error during logout:", error);
     }
