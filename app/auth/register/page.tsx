@@ -68,22 +68,25 @@ export default function RegisterPage() {
 
     try {
       // Register user in Supabase Auth
-      const { error: authError } = await signUp({
-        email: values.email,
-        password: values.password,
-        fullName: values.fullName,
-        role: values.role,
-      });
+      const { error: authError } = await signUp(
+        {
+          email: values.email,
+          password: values.password,
+          fullName: values.fullName,
+          role: values.role,
+        },
+        {
+          onSuccess: () =>
+            router.replace(
+              `/auth/register/confirm?email=${encodeURIComponent(values.email)}`,
+            ),
+        },
+      );
 
       if (authError) {
         setError(authError.message);
         return;
       }
-
-      // Redirect to the confirmation page
-      router.push(
-        `/auth/register/confirm?email=${encodeURIComponent(values.email)}`,
-      );
     } catch (err) {
       setError(
         "Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.",

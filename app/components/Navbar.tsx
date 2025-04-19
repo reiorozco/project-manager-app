@@ -27,9 +27,7 @@ export default function Navbar() {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-
-      router.push(ROUTES.LOGIN);
+      await signOut({ onSuccess: () => router.replace(ROUTES.LOGIN) });
     } catch (error) {
       console.error("Unexpected error during logout:", error);
     }

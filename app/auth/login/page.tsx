@@ -53,17 +53,20 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const { error: authError } = await signIn({
-        email: values.email,
-        password: values.password,
-      });
+      const { error: authError } = await signIn(
+        {
+          email: values.email,
+          password: values.password,
+        },
+        {
+          onSuccess: () => router.replace(ROUTES.DASHBOARD),
+        },
+      );
 
       if (authError) {
         setError(authError.message);
         return;
       }
-
-      router.push(ROUTES.DASHBOARD);
     } catch (err) {
       setError(
         "Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.",

@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -37,22 +38,37 @@ type UpdatePasswordParams = {
   password: string;
 };
 
+type AuthOptions = {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+};
+
 type AuthContextType = {
   user: User | null;
   userRole: UserRole | null;
   isLoading: boolean;
+  isError: boolean;
   isSigningIn: boolean;
   isSigningUp: boolean;
   isSigningOut: boolean;
-  isError: boolean;
-  signIn: (params: SignInParams) => Promise<{ error: Error | null }>;
-  signUp: (params: SignUpParams) => Promise<{ error: Error | null }>;
-  signOut: () => Promise<void>;
+  isResettingPassword: boolean;
+  isUpdatingPassword: boolean;
+  signIn: (
+    params: SignInParams,
+    options?: AuthOptions,
+  ) => Promise<{ error: Error | null }>;
+  signUp: (
+    params: SignUpParams,
+    options?: AuthOptions,
+  ) => Promise<{ error: Error | null }>;
+  signOut: (options?: AuthOptions) => Promise<void>;
   resetPassword: (
     params: ResetPasswordParams,
+    options?: AuthOptions,
   ) => Promise<{ error: Error | null }>;
   updatePassword: (
     params: UpdatePasswordParams,
+    options?: AuthOptions,
   ) => Promise<{ error: Error | null }>;
   refreshUser: () => Promise<void>;
   supabase: ReturnType<typeof createClient>;
@@ -114,6 +130,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     staleTime: 1000 * 60 * 5, // 5 minutos
   });
 
+  // Variables para almacenar callbacks externos
+  // Usamos refs para mantener las referencias estables entre renderizados
+  const signInSuccessCallback = useRef<(() => void) | undefined>(undefined);
+  const signInErrorCallback = useRef<((error: Error) => void) | undefined>(
+    undefined,
+  );
+
   // Mutación: iniciar sesión
   const { mutateAsync: signInAsync, isPending: isSigningIn } = useMutation({
     mutationFn: async ({ email, password }: SignInParams) => {
@@ -123,13 +146,28 @@ export function AuthProvider({ children }: PropsWithChildren) {
       });
       return { error: error as Error | null };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       // Invalidar consultas para refrescar datos
       void queryClient.invalidateQueries({ queryKey: queryKeys.user });
+
+      if (!result.error && signInSuccessCallback.current) {
+        signInSuccessCallback.current();
+      }
+      signInSuccessCallback.current = undefined;
+    },
+    onError: (error) => {
+      if (signInErrorCallback.current) {
+        signInErrorCallback.current(error as Error);
+      }
+      signInErrorCallback.current = undefined;
     },
   });
 
-  // Mutación: registrarse
+  const signUpSuccessCallback = useRef<(() => void) | undefined>(undefined);
+  const signUpErrorCallback = useRef<((error: Error) => void) | undefined>(
+    undefined,
+  );
+
   const { mutateAsync: signUpAsync, isPending: isSigningUp } = useMutation({
     mutationFn: async ({ email, password, fullName, role }: SignUpParams) => {
       const { error } = await supabase.auth.signUp({
@@ -145,9 +183,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
       });
       return { error: error as Error | null };
     },
+    onSuccess: (result) => {
+      if (!result.error && signUpSuccessCallback.current) {
+        signUpSuccessCallback.current();
+      }
+      signUpSuccessCallback.current = undefined;
+    },
+    onError: (error) => {
+      if (signUpErrorCallback.current) {
+        signUpErrorCallback.current(error as Error);
+      }
+      signUpErrorCallback.current = undefined;
+    },
   });
 
-  // Mutación: cerrar sesión
+  const signOutSuccessCallback = useRef<(() => void) | undefined>(undefined);
+  const signOutErrorCallback = useRef<((error: Error) => void) | undefined>(
+    undefined,
+  );
+
   const { mutateAsync: signOutAsync, isPending: isSigningOut } = useMutation({
     mutationFn: async () => {
       console.log("Signing out...");
@@ -164,31 +218,81 @@ export function AuthProvider({ children }: PropsWithChildren) {
       // Resetear el estado manual e inmediatamente
       queryClient.setQueryData(queryKeys.user, null);
       queryClient.setQueryData(queryKeys.userRole, null);
+
+      queryClient.removeQueries({ queryKey: ["projects"] });
+
+      if (signOutSuccessCallback.current) {
+        signOutSuccessCallback.current();
+      }
+      signOutSuccessCallback.current = undefined;
+    },
+    onError: (error) => {
+      if (signOutErrorCallback.current) {
+        signOutErrorCallback.current(error as Error);
+      }
+      signOutErrorCallback.current = undefined;
     },
   });
 
-  // Mutación: restablecer contraseña
-  const { mutateAsync: resetPasswordAsync } = useMutation({
-    mutationFn: async ({ email }: ResetPasswordParams) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      return { error: error as Error | null };
-    },
-  });
+  const resetPasswordSuccessCallback = useRef<(() => void) | undefined>(
+    undefined,
+  );
+  const resetPasswordErrorCallback = useRef<
+    ((error: Error) => void) | undefined
+  >(undefined);
 
-  // Mutación: actualizar contraseña
-  const { mutateAsync: updatePasswordAsync } = useMutation({
-    mutationFn: async ({ password }: UpdatePasswordParams) => {
-      const { error } = await supabase.auth.updateUser({
-        password,
-      });
-      return { error: error as Error | null };
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.user });
-    },
-  });
+  const { mutateAsync: resetPasswordAsync, isPending: isResettingPassword } =
+    useMutation({
+      mutationFn: async ({ email }: ResetPasswordParams) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        return { error: error as Error | null };
+      },
+      onSuccess: (result) => {
+        if (!result.error && resetPasswordSuccessCallback.current) {
+          resetPasswordSuccessCallback.current();
+        }
+        resetPasswordSuccessCallback.current = undefined;
+      },
+      onError: (error) => {
+        if (resetPasswordErrorCallback.current) {
+          resetPasswordErrorCallback.current(error as Error);
+        }
+        resetPasswordErrorCallback.current = undefined;
+      },
+    });
+
+  const updatePasswordSuccessCallback = useRef<(() => void) | undefined>(
+    undefined,
+  );
+  const updatePasswordErrorCallback = useRef<
+    ((error: Error) => void) | undefined
+  >(undefined);
+
+  const { mutateAsync: updatePasswordAsync, isPending: isUpdatingPassword } =
+    useMutation({
+      mutationFn: async ({ password }: UpdatePasswordParams) => {
+        const { error } = await supabase.auth.updateUser({
+          password,
+        });
+        return { error: error as Error | null };
+      },
+      onSuccess: (result) => {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.user });
+
+        if (!result.error && updatePasswordSuccessCallback.current) {
+          updatePasswordSuccessCallback.current();
+        }
+        updatePasswordSuccessCallback.current = undefined;
+      },
+      onError: (error) => {
+        if (updatePasswordErrorCallback.current) {
+          updatePasswordErrorCallback.current(error as Error);
+        }
+        updatePasswordErrorCallback.current = undefined;
+      },
+    });
 
   // Escuchar cambios de autenticación
   useEffect(() => {
@@ -201,6 +305,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
         // Resetear estado inmediatamente
         queryClient.setQueryData(queryKeys.user, null);
         queryClient.setQueryData(queryKeys.userRole, null);
+
+        // Limpiar datos relacionados con el usuario
+        queryClient.removeQueries({ queryKey: ["projects"] });
       } else {
         // Para otros eventos, invalidar consultas
         void queryClient.invalidateQueries({ queryKey: queryKeys.user });
@@ -212,35 +319,52 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
   }, [queryClient]);
 
-  // Funciones expuestas al contexto
-  // Fix: destructure mutateAsync antes de pasarlo a useCallback
+  // Funciones expuestas al contexto con soporte para callbacks
   const signIn = useCallback(
-    async (params: SignInParams) => {
+    async (params: SignInParams, options?: AuthOptions) => {
+      signInSuccessCallback.current = options?.onSuccess;
+      signInErrorCallback.current = options?.onError;
+
       return signInAsync(params);
     },
     [signInAsync],
   );
 
   const signUp = useCallback(
-    async (params: SignUpParams) => {
+    async (params: SignUpParams, options?: AuthOptions) => {
+      signUpSuccessCallback.current = options?.onSuccess;
+      signUpErrorCallback.current = options?.onError;
+
       return signUpAsync(params);
     },
     [signUpAsync],
   );
 
-  const signOut = useCallback(async () => {
-    await signOutAsync();
-  }, [signOutAsync]);
+  const signOut = useCallback(
+    async (options?: AuthOptions) => {
+      signOutSuccessCallback.current = options?.onSuccess;
+      signOutErrorCallback.current = options?.onError;
+
+      await signOutAsync();
+    },
+    [signOutAsync],
+  );
 
   const resetPassword = useCallback(
-    async (params: ResetPasswordParams) => {
+    async (params: ResetPasswordParams, options?: AuthOptions) => {
+      resetPasswordSuccessCallback.current = options?.onSuccess;
+      resetPasswordErrorCallback.current = options?.onError;
+
       return resetPasswordAsync(params);
     },
     [resetPasswordAsync],
   );
 
   const updatePassword = useCallback(
-    async (params: UpdatePasswordParams) => {
+    async (params: UpdatePasswordParams, options?: AuthOptions) => {
+      updatePasswordSuccessCallback.current = options?.onSuccess;
+      updatePasswordErrorCallback.current = options?.onError;
+
       return updatePasswordAsync(params);
     },
     [updatePasswordAsync],
@@ -251,10 +375,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       queryClient.invalidateQueries({ queryKey: queryKeys.user }),
       queryClient.invalidateQueries({ queryKey: queryKeys.userRole }),
     ]);
-    // Al no devolver nada, la función retorna Promise<void> implícitamente
   }, [queryClient]);
 
-  // Determinar estado de carga combinado
+  // Determinar estado de carga combinado para consultas
   const isLoading =
     userQuery.isLoading ||
     userRoleQuery.isLoading ||
@@ -270,10 +393,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
         user: userQuery.data || null,
         userRole: userRoleQuery.data || null,
         isLoading,
+        isError,
         isSigningIn,
         isSigningUp,
         isSigningOut,
-        isError,
+        isResettingPassword,
+        isUpdatingPassword,
         signIn,
         signUp,
         signOut,
