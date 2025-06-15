@@ -1,5 +1,5 @@
 // lib/services/project-service.ts
-import { UserRole } from "@/generated/prisma";
+import { Prisma, UserRole } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -172,8 +172,8 @@ export async function getProjectsForUser(userId: string) {
 async function getProjectsByUserRole(
   userId: string,
   userRole: UserRole | null,
-  include: any,
-  orderBy: any,
+  include: Prisma.ProjectInclude,
+  orderBy: Prisma.ProjectOrderByWithRelationInput,
 ) {
   switch (userRole) {
     case UserRole.PROJECT_MANAGER:
