@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://project-manager-app-cyan.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo"/></a>
-  <img src="https://img.shields.io/badge/Next.js_15-000?style=for-the-badge&logo=nextdotjs&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Next.js_16-000?style=for-the-badge&logo=nextdotjs&logoColor=white"/>
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white"/>
   <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white"/>
   <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white"/>
@@ -11,7 +11,19 @@
 
 > 🔗 **Live demo:** [project-manager-app-cyan.vercel.app](https://project-manager-app-cyan.vercel.app)
 
-A web application developed with Next.js 15, Tailwind CSS, Prisma, and Supabase that allows different types of users (Clients, Project Managers, and Designers) to manage design projects securely, intuitively, and functionally.
+## 🔑 Demo Credentials
+
+Try the live demo with these ready-to-use accounts (one per role) — no sign-up required:
+
+| Role | Email | Password |
+|------|-------|----------|
+| 👤 Client | `client@demo.com` | `demo1234` |
+| 🧑‍💼 Project Manager | `manager@demo.com` | `demo1234` |
+| 🎨 Designer | `designer@demo.com` | `demo1234` |
+
+Each role sees a different dashboard and set of permissions.
+
+A web application developed with Next.js 16, Tailwind CSS, Prisma, and Supabase that allows different types of users (Clients, Project Managers, and Designers) to manage design projects securely, intuitively, and functionally.
 
 ## Main Features
 
@@ -23,7 +35,7 @@ A web application developed with Next.js 15, Tailwind CSS, Prisma, and Supabase 
 
 ## Technologies Used
 
-- **Frontend**: Next.js 15 (App Router)
+- **Frontend**: Next.js 16 (App Router)
 - **Styling**: Tailwind CSS + ShadCN UI
 - **Backend**: Next.js API Routes
 - **Database**: PostgreSQL (Supabase)
