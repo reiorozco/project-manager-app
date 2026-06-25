@@ -51,5 +51,15 @@
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
     "typescript": "^5"
+  },
+  "overrides": {
+    "postcss": "^8.5.10",
+    "tmp": "^0.2.6",
+    "micromatch": {
+      "picomatch": "^2.3.2"
+    },
+    "tinyglobby": {
+      "picomatch": "^4.0.4"
+    }
   }
 }
