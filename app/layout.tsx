@@ -19,8 +19,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://project-manager-app-cyan.vercel.app"),
   title: "Project Manager",
-  description: "App de gestión de proyectos de diseño",
+  description: "App de gestión de proyectos de diseño con acceso multi-rol",
+  openGraph: {
+    title: "Project Manager — Multi-Role Project Management",
+    description:
+      "App full-stack de gestión de proyectos (Next.js, Prisma, Supabase) con acceso por roles, Row-Level Security y almacenamiento de archivos.",
+    url: "https://project-manager-app-cyan.vercel.app",
+    type: "website",
+    images: ["/og.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({
