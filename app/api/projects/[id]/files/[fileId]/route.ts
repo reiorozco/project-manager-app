@@ -18,7 +18,7 @@ export async function DELETE(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
@@ -28,13 +28,13 @@ export async function DELETE(
       return NextResponse.json({ success: true });
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Error al eliminar archivo.";
+        error instanceof Error ? error.message : "Failed to delete file.";
 
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "Error del servidor";
+      error instanceof Error ? error.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

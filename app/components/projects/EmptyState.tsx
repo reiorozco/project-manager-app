@@ -11,11 +11,11 @@ function EmptyState({ canCreateProject }: { canCreateProject: boolean }) {
       </div>
 
       <div className="max-w-sm space-y-1">
-        <h2 className="text-lg font-semibold">Aún no hay proyectos</h2>
+        <h2 className="text-lg font-semibold">No projects yet</h2>
         <p className="text-sm text-muted-foreground">
           {canCreateProject
-            ? "Crea tu primer proyecto para empezar a organizar briefs, archivos y avances en un solo lugar."
-            : "Cuando se te asigne un proyecto, aparecerá aquí."}
+            ? "Create your first project to start organizing briefs, files and progress in one place."
+            : "When a project is assigned to you, it will show up here."}
         </p>
       </div>
 
@@ -23,7 +23,7 @@ function EmptyState({ canCreateProject }: { canCreateProject: boolean }) {
         <Button asChild>
           <Link href={ROUTES.NEW_PROJECT}>
             <FolderPlus className="size-4" />
-            Crear proyecto
+            Create project
           </Link>
         </Button>
       )}

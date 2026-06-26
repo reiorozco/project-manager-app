@@ -7,7 +7,7 @@ import { ROUTES } from "@/lib/constants";
 import { UserRole } from "@/generated/prisma";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-// Componentes
+// Components
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,7 +36,7 @@ export default function EditProjectPage({ params }: ProjectParams) {
     canManageProject,
   } = useProjectDetails(projectId);
 
-  // Consulta para cargar los diseñadores (solo si es PROJECT_MANAGER)
+  // Query to load designers (only when the user is PROJECT_MANAGER)
   const {
     data: designers = [],
     isLoading: designersLoading,
@@ -46,22 +46,22 @@ export default function EditProjectPage({ params }: ProjectParams) {
     queryFn: async () => {
       const response = await fetch("/api/users/designers");
       if (!response.ok) {
-        throw new Error("Error al cargar los diseñadores");
+        throw new Error("Failed to load designers");
       }
       const data = await response.json();
       return data.designers;
     },
-    enabled: userRole === UserRole.PROJECT_MANAGER, // Solo ejecutar si es PROJECT_MANAGER
+    enabled: userRole === UserRole.PROJECT_MANAGER, // Only run for PROJECT_MANAGER
   });
 
-  // Hook para manejar la lógica de envío
+  // Hook to handle the submission logic
   const {
     handleUpdateSubmit,
     isSubmitting,
     error: submitError,
   } = useProjectSubmission();
 
-  // Mutación para eliminar archivo
+  // Mutation to delete a file
   const deleteFileMutation = useMutation({
     mutationFn: async (fileId: string) => {
       const response = await fetch(
@@ -72,23 +72,23 @@ export default function EditProjectPage({ params }: ProjectParams) {
       );
 
       if (!response.ok) {
-        throw new Error("Error al eliminar el archivo");
+        throw new Error("Failed to delete file");
       }
 
       return fileId;
     },
     onSuccess: () => {
-      // Invalidar la consulta del proyecto para recargar los datos
+      // Invalidate the project query to refetch the data
       void queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     },
   });
 
-  // Manejar la eliminación de archivos
+  // Handle file deletion
   const handleDeleteFile = (fileId: string) => {
     deleteFileMutation.mutate(fileId);
   };
 
-  // Estado de carga
+  // Loading state
   const isLoading =
     projectLoading ||
     (userRole === UserRole.PROJECT_MANAGER && designersLoading);
@@ -105,7 +105,7 @@ export default function EditProjectPage({ params }: ProjectParams) {
     );
   }
 
-  // Error de carga
+  // Load error
   const loadError =
     projectError ||
     (userRole === UserRole.PROJECT_MANAGER && designersError instanceof Error
@@ -121,7 +121,7 @@ export default function EditProjectPage({ params }: ProjectParams) {
               ? loadError.message
               : typeof loadError === "string"
                 ? loadError
-                : "Proyecto no encontrado o no tienes permiso para editarlo."}
+                : "Project not found or you don't have permission to edit it."}
           </AlertDescription>
         </Alert>
 
@@ -130,7 +130,7 @@ export default function EditProjectPage({ params }: ProjectParams) {
           className="mt-4"
           variant="outline"
         >
-          Volver a proyectos
+          Back to projects
         </Button>
       </div>
     );

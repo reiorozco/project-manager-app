@@ -77,10 +77,10 @@ export function ProjectForm({
 }: ProjectFormProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  // Diálogo de confirmación de eliminación
+  // Delete confirmation dialog
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
 
-  // Configuración del formulario con validación
+  // Form setup with validation
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: initialValues || {
@@ -109,54 +109,54 @@ export function ProjectForm({
       <Card>
         <CardHeader>
           <CardTitle>
-            {isEditMode ? "Editar Proyecto" : "Nuevo Proyecto"}
+            {isEditMode ? "Edit project" : "New project"}
           </CardTitle>
           <CardDescription>
             {isEditMode
-              ? "Modifica los detalles del proyecto"
-              : "Crea un nuevo proyecto de diseño"}
+              ? "Edit the project details"
+              : "Create a new design project"}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          {/* Alerta de error */}
+          {/* Error alert */}
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          {/* Formulario */}
+          {/* Form */}
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleFormSubmit)}
               className="space-y-6"
             >
-              {/* Campo de título */}
+              {/* Title field */}
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Título</FormLabel>
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nombre del proyecto" {...field} />
+                      <Input placeholder="Project name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Campo de descripción */}
+              {/* Description field */}
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descripción</FormLabel>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Describe brevemente el proyecto..."
+                        placeholder="Briefly describe the project..."
                         className="min-h-32"
                         {...field}
                         value={field.value || ""}
@@ -167,21 +167,21 @@ export function ProjectForm({
                 )}
               />
 
-              {/* Estado y fecha límite */}
+              {/* Status and due date */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Estado</FormLabel>
+                      <FormLabel>Status</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Seleccionar estado" />
+                            <SelectValue placeholder="Select a status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -202,7 +202,7 @@ export function ProjectForm({
                   name="dueDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fecha límite</FormLabel>
+                      <FormLabel>Due date</FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -216,27 +216,27 @@ export function ProjectForm({
                 />
               </div>
 
-              {/* Campo de asignación a diseñador (solo para project managers) */}
+              {/* Designer assignment field (project managers only) */}
               {canAssignToDesigner && (
                 <FormField
                   control={form.control}
                   name="assignedToId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Asignar a diseñador</FormLabel>
+                      <FormLabel>Assign to designer</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value || ""}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar diseñador" />
+                            <SelectValue placeholder="Select a designer" />
                           </SelectTrigger>
                         </FormControl>
 
                         <SelectContent>
                           <SelectItem value="sin-asignar">
-                            Sin asignar
+                            Unassigned
                           </SelectItem>
                           {designers.map((designer) => (
                             <SelectItem key={designer.id} value={designer.id}>
@@ -251,10 +251,10 @@ export function ProjectForm({
                 />
               )}
 
-              {/* Mostrar archivos existentes en modo edición */}
+              {/* Show existing files in edit mode */}
               {isEditMode && existingFiles.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Archivos actuales</h3>
+                  <h3 className="text-sm font-medium">Current files</h3>
                   <div className="border rounded-md divide-y">
                     {existingFiles.map((file) => (
                       <div
@@ -274,7 +274,7 @@ export function ProjectForm({
                           onClick={() => setFileToDelete(file.id)}
                           disabled={isSubmitting}
                         >
-                          Eliminar
+                          Delete
                         </Button>
                       </div>
                     ))}
@@ -282,7 +282,7 @@ export function ProjectForm({
                 </div>
               )}
 
-              {/* Selector de archivos nuevos */}
+              {/* New file selector */}
               <FormField
                 control={form.control}
                 name="files"
@@ -295,21 +295,21 @@ export function ProjectForm({
                       setSelectedFiles(files);
                       form.setValue("files", files);
                     }}
-                    labelText={isEditMode ? "Añadir más archivos" : "Archivos"}
+                    labelText={isEditMode ? "Add more files" : "Files"}
                   />
                 )}
               />
 
-              {/* Botones de acción */}
+              {/* Action buttons */}
               <div className="pt-4 flex space-x-2">
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting
                     ? isEditMode
-                      ? "Guardando..."
-                      : "Creando proyecto..."
+                      ? "Saving..."
+                      : "Creating project..."
                     : isEditMode
-                      ? "Guardar cambios"
-                      : "Crear Proyecto"}
+                      ? "Save changes"
+                      : "Create project"}
                 </Button>
 
                 <Button
@@ -318,7 +318,7 @@ export function ProjectForm({
                   onClick={onCancel}
                   disabled={isSubmitting}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
               </div>
             </form>
@@ -326,22 +326,22 @@ export function ProjectForm({
         </CardContent>
       </Card>
 
-      {/* Diálogo de confirmación para eliminar archivos */}
+      {/* Confirmation dialog for deleting files */}
       <AlertDialog
         open={!!fileToDelete}
         onOpenChange={() => setFileToDelete(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar archivo?</AlertDialogTitle>
+            <AlertDialogTitle>Delete file?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. El archivo será eliminado
-              permanentemente.
+              This action cannot be undone. The file will be permanently
+              deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSubmitting}>
-              Cancelar
+              Cancel
             </AlertDialogCancel>
 
             <AlertDialogAction
@@ -349,7 +349,7 @@ export function ProjectForm({
               onClick={handleDeleteConfirm}
               disabled={isSubmitting}
             >
-              Eliminar
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

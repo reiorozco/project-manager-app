@@ -13,12 +13,12 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
 
-    // Verificar si el usuario es Project Manager
+    // Check whether the user is a Project Manager
     const userRole = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
@@ -26,12 +26,12 @@ export async function GET(request: NextRequest) {
 
     if (userRole?.role !== UserRole.PROJECT_MANAGER) {
       return NextResponse.json(
-        { error: "No tienes permiso para acceder a esta información" },
+        { error: "You don't have permission to access this information" },
         { status: 403 },
       );
     }
 
-    // Obtener todos los diseñadores
+    // Get all designers
     const designers = await prisma.user.findMany({
       where: { role: UserRole.DESIGNER },
       select: {
@@ -43,10 +43,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ designers });
   } catch (error) {
-    console.error("Error al obtener diseñadores:", error);
+    console.error("Error fetching designers:", error);
 
     return NextResponse.json(
-      { error: "Error al procesar la solicitud" },
+      { error: "Failed to process the request" },
       { status: 500 },
     );
   }

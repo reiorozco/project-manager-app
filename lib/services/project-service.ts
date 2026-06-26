@@ -215,7 +215,9 @@ export async function getProjectById(projectId: string, userId: string) {
   const canView = await canViewProject(userId, projectId);
 
   if (!canView) {
-    throw new ProjectServiceError("No tienes permiso para ver este proyecto");
+    throw new ProjectServiceError(
+      "You don't have permission to view this project",
+    );
   }
 
   const project = await prisma.project.findUnique({
@@ -224,7 +226,7 @@ export async function getProjectById(projectId: string, userId: string) {
   });
 
   if (!project) {
-    throw new ProjectServiceError("Proyecto no encontrado");
+    throw new ProjectServiceError("Project not found");
   }
 
   return project;
@@ -274,7 +276,9 @@ export async function createProject(data: CreateProjectInput) {
   const canCreate = await canCreateProjects(data.userId);
 
   if (!canCreate) {
-    throw new ProjectServiceError("No tienes permiso para crear proyectos");
+    throw new ProjectServiceError(
+      "You don't have permission to create projects",
+    );
   }
 
   // Create the project with files
@@ -355,7 +359,7 @@ export async function updateProject(
 
   if (!canManage) {
     throw new ProjectServiceError(
-      "No tienes permiso para editar este proyecto",
+      "You don't have permission to edit this project",
     );
   }
 
@@ -408,7 +412,7 @@ export async function deleteProject(
 
   if (!canManage) {
     throw new ProjectServiceError(
-      "No tienes permiso para eliminar este proyecto",
+      "You don't have permission to delete this project",
     );
   }
 
@@ -419,7 +423,7 @@ export async function deleteProject(
   });
 
   if (!project) {
-    throw new ProjectServiceError("Proyecto no encontrado");
+    throw new ProjectServiceError("Project not found");
   }
 
   // Delete files from Supabase storage
@@ -448,12 +452,12 @@ export async function addFilesToProject(
 
   if (!canManage) {
     throw new ProjectServiceError(
-      "No tienes permiso para editar este proyecto",
+      "You don't have permission to edit this project",
     );
   }
 
   if (!files || files.length === 0) {
-    throw new ProjectServiceError("No se proporcionaron archivos para agregar");
+    throw new ProjectServiceError("No files were provided to add");
   }
 
   return prisma.file.createMany({
@@ -485,14 +489,14 @@ export async function removeFileFromProject(
   });
 
   if (!file) {
-    throw new ProjectServiceError("Archivo no encontrado");
+    throw new ProjectServiceError("File not found");
   }
 
   const canManage = await canManageProject(userId, file.project.id);
 
   if (!canManage) {
     throw new ProjectServiceError(
-      "No tienes permiso para eliminar este archivo",
+      "You don't have permission to delete this file",
     );
   }
 

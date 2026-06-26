@@ -21,10 +21,10 @@ export default async function ConfirmPage({ searchParams }: Props) {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">
-            Verifica tu correo electrónico
+            Verify your email
           </CardTitle>
           <CardDescription>
-            Hemos enviado un enlace de confirmación a tu correo
+            We&apos;ve sent a confirmation link to your email
           </CardDescription>
         </CardHeader>
 
@@ -42,28 +42,27 @@ export default async function ConfirmPage({ searchParams }: Props) {
                 clipRule="evenodd"
               />
             </svg>
-            Email de verificación enviado.
+            Verification email sent.
           </div>
 
           <p className="text-sm">
-            Por favor, revisa tu bandeja de entrada en <strong>{email}</strong>{" "}
-            y haz clic en el enlace de confirmación para activar tu cuenta.
+            Please check your inbox at <strong>{email}</strong>{" "}
+            and click the confirmation link to activate your account.
           </p>
 
           <p className="text-sm text-muted-foreground">
-            Si no encuentras el correo, revisa tu carpeta de spam o correo no
-            deseado.
+            If you can&apos;t find the email, check your spam or junk folder.
           </p>
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4">
           <Button asChild className="w-full">
-            <Link href="/auth/login">Ir a iniciar sesión</Link>
+            <Link href="/auth/login">Go to sign in</Link>
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">
-            Una vez que hayas confirmado tu correo, podrás iniciar sesión con
-            tus credenciales.
+            Once you&apos;ve confirmed your email, you can sign in with your
+            credentials.
           </p>
         </CardFooter>
       </Card>

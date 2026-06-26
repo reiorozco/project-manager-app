@@ -8,15 +8,15 @@ export class FileUploadService {
     try {
       const filePath = `projects/${userId}/${Date.now()}-${file.name}`;
 
-      // Subir el archivo a Supabase Storage
+      // Upload the file to Supabase Storage
       const { data, error } = await this.supabase.storage
         .from(BUCKET_NAME)
         .upload(filePath, file);
 
-      if (error) throw new Error(`Error al subir archivo: ${error.message}`);
-      if (!data) throw new Error("No se obtuvo respuesta del servidor");
+      if (error) throw new Error(`Failed to upload file: ${error.message}`);
+      if (!data) throw new Error("No response from the server");
 
-      // Obtener URL pública del archivo
+      // Get the file's public URL
       // const { data: urlData } = this.supabase.storage
       //   .from("project-files")
       //   .getPublicUrl(filePath);
@@ -27,7 +27,7 @@ export class FileUploadService {
         size: file.size,
       };
     } catch (error) {
-      console.error("Error en uploadFile:", error);
+      console.error("Error in uploadFile:", error);
       throw error;
     }
   }
@@ -39,11 +39,11 @@ export class FileUploadService {
     try {
       if (!files.length) return [];
 
-      // Subir cada archivo de forma concurrente
+      // Upload each file concurrently
       const uploadPromises = files.map((file) => this.uploadFile(file, userId));
       return await Promise.all(uploadPromises);
     } catch (error) {
-      console.error("Error en uploadMultipleFiles:", error);
+      console.error("Error in uploadMultipleFiles:", error);
       throw error;
     }
   }
@@ -54,9 +54,9 @@ export class FileUploadService {
         .from(BUCKET_NAME)
         .remove([filePath]);
 
-      if (error) throw new Error(`Error al eliminar archivo: ${error.message}`);
+      if (error) throw new Error(`Failed to delete file: ${error.message}`);
     } catch (error) {
-      console.error("Error en deleteFile:", error);
+      console.error("Error in deleteFile:", error);
       throw error;
     }
   }
@@ -70,9 +70,9 @@ export class FileUploadService {
         .remove(filePaths);
 
       if (error)
-        throw new Error(`Error al eliminar archivos: ${error.message}`);
+        throw new Error(`Failed to delete files: ${error.message}`);
     } catch (error) {
-      console.error("Error en deleteMultipleFiles:", error);
+      console.error("Error in deleteMultipleFiles:", error);
       throw error;
     }
   }

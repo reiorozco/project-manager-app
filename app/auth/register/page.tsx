@@ -38,13 +38,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 const registerSchema = z.object({
   fullName: z
     .string()
-    .min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
-  email: z.string().email({ message: "Correo electrónico inválido" }),
+    .min(3, { message: "Name must be at least 3 characters" }),
+  email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
-    .min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
+    .min(6, { message: "Password must be at least 6 characters" }),
   role: z.enum(["CLIENT", "PROJECT_MANAGER", "DESIGNER"], {
-    message: "Selecciona un rol válido",
+    message: "Select a valid role",
   }),
 });
 
@@ -68,7 +68,7 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      // Register user in Supabase Auth
+      // Register the user in Supabase Auth
       const { error: authError } = await signUp(
         {
           email: values.email,
@@ -90,10 +90,8 @@ export default function RegisterPage() {
         return;
       }
     } catch (err) {
-      setError(
-        "Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.",
-      );
-      console.error("Error inesperado durante el registro:", err);
+      setError("Something went wrong. Please try again later.");
+      console.error("Unexpected error during sign up:", err);
     }
   }
 
@@ -101,8 +99,8 @@ export default function RegisterPage() {
     <div className="flex justify-center items-center">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Crear cuenta</CardTitle>
-          <CardDescription>Completa tus datos para registrarte</CardDescription>
+          <CardTitle className="text-2xl">Sign up</CardTitle>
+          <CardDescription>Fill in your details to create an account</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -120,10 +118,10 @@ export default function RegisterPage() {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre completo</FormLabel>
+                    <FormLabel>Full name</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Tu nombre completo"
+                        placeholder="Your full name"
                         {...field}
                         disabled={isSigningUp}
                       />
@@ -138,10 +136,10 @@ export default function RegisterPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo electrónico</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="tu@email.com"
+                        placeholder="you@email.com"
                         {...field}
                         disabled={isSigningUp}
                       />
@@ -156,7 +154,7 @@ export default function RegisterPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -191,7 +189,7 @@ export default function RegisterPage() {
                 name="role"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Rol</FormLabel>
+                    <FormLabel>Role</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -199,15 +197,15 @@ export default function RegisterPage() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un rol" />
+                          <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="CLIENT">Cliente</SelectItem>
+                        <SelectItem value="CLIENT">Client</SelectItem>
                         <SelectItem value="PROJECT_MANAGER">
                           Project Manager
                         </SelectItem>
-                        <SelectItem value="DESIGNER">Diseñador</SelectItem>
+                        <SelectItem value="DESIGNER">Designer</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -216,7 +214,7 @@ export default function RegisterPage() {
               />
 
               <Button type="submit" className="w-full" disabled={isSigningUp}>
-                {isSigningUp ? "Registrando..." : "Registrarse"}
+                {isSigningUp ? "Signing up..." : "Sign up"}
               </Button>
             </form>
           </Form>
@@ -224,13 +222,13 @@ export default function RegisterPage() {
 
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            ¿Ya tienes una cuenta?{" "}
+            Already have an account?{" "}
             <Link
               href="/auth/login"
               className="font-medium text-primary hover:underline"
               tabIndex={isSigningUp ? -1 : 0}
             >
-              Inicia sesión
+              Sign in
             </Link>
           </p>
         </CardFooter>

@@ -3,7 +3,7 @@ import { ProjectStatus } from "@/generated/prisma";
 import { STATUS_DISPLAY_MAP } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-// Clases literales por estado (necesario para que Tailwind las detecte en build).
+// Literal classes per status (required so Tailwind can detect them at build time).
 const STATUS_STYLES: Record<ProjectStatus, string> = {
   DRAFT: "text-status-draft bg-status-draft/10 border-status-draft/25",
   IN_PROGRESS:

@@ -7,21 +7,21 @@ import { projectService } from "@/app/projects/_utils/projectService";
 export const useProjectDetails = (projectId: string) => {
   const { user, userRole, supabase } = useAuth();
 
-  // Consulta del proyecto
+  // Project query
   const { data, isLoading, error, refetch } = useQuery<{
     project: ProjectWithRelations;
   }>({
     queryKey: ["project", projectId],
     queryFn: async () => await projectService.getProject(projectId),
-    enabled: !!projectId, // Solo ejecutar si hay un projectId
+    enabled: !!projectId, // Only run when there is a projectId
   });
 
-  // Función para verificar permisos
+  // Function to check permissions
   const canManageProject = (project: Project) =>
     userRole === UserRole.PROJECT_MANAGER ||
     (userRole === UserRole.CLIENT && project.createdById === user?.id);
 
-  // Mutación para descargar archivos
+  // Mutation to download files
   const downloadFileMutation = useMutation({
     mutationFn: async (file: PrismaFile): Promise<void> => {
       const { data, error: downloadError } = await supabase.storage
@@ -30,7 +30,7 @@ export const useProjectDetails = (projectId: string) => {
 
       if (downloadError) throw downloadError;
 
-      // Crear blob URL y simular click para descargar
+      // Create a blob URL and simulate a click to download
       const url = URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
@@ -38,13 +38,13 @@ export const useProjectDetails = (projectId: string) => {
       document.body.appendChild(a);
       a.click();
 
-      // Limpiar recursos
+      // Clean up resources
       URL.revokeObjectURL(url);
       a.remove();
     },
   });
 
-  // Función simplificada para uso externo
+  // Simplified function for external use
   const downloadFile = async (file: PrismaFile): Promise<void> => {
     await downloadFileMutation.mutateAsync(file);
   };

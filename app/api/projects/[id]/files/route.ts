@@ -18,7 +18,7 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
@@ -27,16 +27,16 @@ export async function POST(
     try {
       body = await request.json();
     } catch (parseError) {
-      console.error("Error al parsear JSON:", parseError);
+      console.error("Error parsing JSON:", parseError);
       return NextResponse.json(
-        { error: "Formato de solicitud JSON inválido" },
+        { error: "Invalid JSON request format" },
         { status: 400 },
       );
     }
 
     if (!body.files || !Array.isArray(body.files) || body.files.length === 0) {
       return NextResponse.json(
-        { error: "No se proporcionaron archivos válidos" },
+        { error: "No valid files were provided" },
         { status: 400 },
       );
     }
@@ -48,12 +48,12 @@ export async function POST(
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Error desconocido al agregar archivos al proyecto";
+          : "Unknown error while adding files to the project";
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "Error del servidor";
+      error instanceof Error ? error.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

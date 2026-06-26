@@ -30,10 +30,10 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Correo electrónico inválido" }),
+  email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
-    .min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
+    .min(6, { message: "Password must be at least 6 characters" }),
 });
 
 export default function LoginPage() {
@@ -70,10 +70,8 @@ export default function LoginPage() {
         return;
       }
     } catch (err) {
-      setError(
-        "Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.",
-      );
-      console.error("Error inesperado durante el inicio de sesión:", err);
+      setError("Something went wrong. Please try again later.");
+      console.error("Unexpected error during sign in:", err);
     }
   }
 
@@ -81,9 +79,9 @@ export default function LoginPage() {
     <div className="flex justify-center items-center">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
+          <CardTitle className="text-2xl">Sign in</CardTitle>
           <CardDescription>
-            Ingresa a tu cuenta para gestionar tus proyectos
+            Sign in to manage your projects
           </CardDescription>
         </CardHeader>
 
@@ -102,10 +100,10 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo electrónico</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="tu@email.com"
+                        placeholder="you@email.com"
                         {...field}
                         disabled={isSigningIn}
                       />
@@ -120,7 +118,7 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
@@ -135,7 +133,7 @@ export default function LoginPage() {
               />
 
               <Button type="submit" className="w-full" disabled={isSigningIn}>
-                {isSigningIn ? "Iniciando sesión..." : "Iniciar sesión"}
+                {isSigningIn ? "Signing in..." : "Sign in"}
               </Button>
             </form>
           </Form>
@@ -143,13 +141,13 @@ export default function LoginPage() {
 
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            ¿No tienes una cuenta?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/auth/register"
               className="font-medium text-primary hover:underline"
               tabIndex={isSigningIn ? -1 : 0}
             >
-              Regístrate
+              Sign up
             </Link>
           </p>
         </CardFooter>

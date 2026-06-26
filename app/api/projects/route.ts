@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const errorMessage =
       error instanceof Error
         ? error.message
-        : "Error desconocido al obtener proyectos";
+        : "Unknown error while loading projects";
     return NextResponse.json({ error: errorMessage }, { status: 403 });
   }
 }
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
@@ -44,17 +44,17 @@ export async function POST(request: NextRequest) {
     try {
       body = await request.json();
     } catch (parseError) {
-      console.error("Error al parsear JSON:", parseError);
+      console.error("Error parsing JSON:", parseError);
       return NextResponse.json(
-        { error: "Formato de solicitud JSON inválido" },
+        { error: "Invalid JSON request format" },
         { status: 400 },
       );
     }
 
-    // Validación básica
+    // Basic validation
     if (!body.title) {
       return NextResponse.json(
-        { error: "El título del proyecto es obligatorio" },
+        { error: "Project title is required" },
         { status: 400 },
       );
     }
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     const errorMessage =
       error instanceof Error
         ? error.message
-        : "Error desconocido al crear el proyecto";
+        : "Unknown error while creating the project";
     return NextResponse.json({ error: errorMessage }, { status: 403 });
   }
 }

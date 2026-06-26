@@ -24,7 +24,7 @@ export function useProjectSubmission({
 
   const fileUploadService = new FileUploadService(supabase);
 
-  // Mutación para crear un proyecto
+  // Mutation to create a project
   const createProjectMutation = useMutation({
     mutationFn: async ({
       values,
@@ -34,16 +34,16 @@ export function useProjectSubmission({
       files: File[];
     }) => {
       if (!user) {
-        throw new Error("No se pudo crear el proyecto: Usuario no autenticado");
+        throw new Error("Couldn't create project: user not authenticated");
       }
 
-      // 1. Subir archivos (si existen)
+      // 1. Upload files (if any)
       const uploadedFiles = await fileUploadService.uploadMultipleFiles(
         files,
         user.id,
       );
 
-      // 2. Crear el proyecto con los archivos subidos
+      // 2. Create the project with the uploaded files
       return await projectService.createProject({
         title: values.title,
         description: values.description || "",
@@ -53,7 +53,7 @@ export function useProjectSubmission({
       });
     },
     onSuccess: (data) => {
-      // Refrescar la lista de proyectos (refetch al volver a /projects)
+      // Refresh the project list (refetch when returning to /projects)
       void queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       router.push(ROUTES.PROJECTS);
@@ -61,12 +61,12 @@ export function useProjectSubmission({
       onSuccess?.(data?.project);
     },
     onError: (error: Error) => {
-      const errorMessage = error.message || "Error al crear el proyecto";
+      const errorMessage = error.message || "Failed to create the project";
       onError?.(errorMessage);
     },
   });
 
-  // Mutación para actualizar un proyecto
+  // Mutation to update a project
   const updateProjectMutation = useMutation({
     mutationFn: async ({
       values,
@@ -78,24 +78,20 @@ export function useProjectSubmission({
       projectId: string;
     }) => {
       if (!user) {
-        throw new Error(
-          "No se pudo actualizar el proyecto: Usuario no autenticado",
-        );
+        throw new Error("Couldn't update project: user not authenticated");
       }
 
       if (!projectId) {
-        throw new Error(
-          "No se pudo actualizar el proyecto: ProjectId no definido",
-        );
+        throw new Error("Couldn't update project: projectId is not defined");
       }
 
-      // 1. Subir archivos (si existen)
+      // 1. Upload files (if any)
       const uploadedFiles = await fileUploadService.uploadMultipleFiles(
         files,
         user.id,
       );
 
-      // 2. Actualizar el proyecto con los archivos subidos
+      // 2. Update the project with the uploaded files
       return await projectService.updateProject(projectId, {
         title: values.title,
         description: values.description || "",
@@ -107,7 +103,7 @@ export function useProjectSubmission({
       });
     },
     onSuccess: (data) => {
-      // Actualizar la caché del proyecto específico y refrescar la lista
+      // Update the cache for this specific project and refresh the list
       queryClient.setQueryData<{ project: ProjectWithRelations }>(
         ["project", data?.project?.id],
         () => ({
@@ -121,7 +117,7 @@ export function useProjectSubmission({
       onSuccess?.(data?.project);
     },
     onError: (error: Error) => {
-      const errorMessage = error.message || "Error al actualizar el proyecto";
+      const errorMessage = error.message || "Failed to update the project";
       onError?.(errorMessage);
     },
   });
@@ -136,8 +132,7 @@ export function useProjectSubmission({
     projectId?: string,
   ) => {
     if (!projectId) {
-      const errorMessage =
-        "No se pudo actualizar el proyecto: ProjectId no definido";
+      const errorMessage = "Couldn't update project: projectId is not defined";
       onError?.(errorMessage);
       return;
     }

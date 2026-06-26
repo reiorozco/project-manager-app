@@ -38,12 +38,12 @@ class ProjectService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Error al crear el proyecto");
+        throw new Error(errorData.message || "Failed to create the project");
       }
 
       return await response.json();
     } catch (error) {
-      console.error("Error en createProject:", error);
+      console.error("Error in createProject:", error);
       throw error;
     }
   }
@@ -52,17 +52,16 @@ class ProjectService {
     projectId: string,
   ): Promise<{ project: ProjectWithRelations }> {
     try {
-      // Ejemplo de implementación
       const response = await fetch(`/api/projects/${projectId}`);
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Error al obtener el proyecto");
+        throw new Error(errorData.message || "Failed to load the project");
       }
 
       return await response.json();
     } catch (error) {
-      console.error("Error en getProject:", error);
+      console.error("Error in getProject:", error);
       throw error;
     }
   }
@@ -71,18 +70,17 @@ class ProjectService {
     userId?: string,
   ): Promise<{ projects: ProjectWithRelations[] }> {
     try {
-      // Ejemplo de implementación
       const url = userId ? `/api/projects?userId=${userId}` : "/api/projects";
       const response = await fetch(url);
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Error al obtener los proyectos");
+        throw new Error(errorData.message || "Failed to load projects");
       }
 
       return await response.json();
     } catch (error) {
-      console.error("Error en getProjects:", error);
+      console.error("Error in getProjects:", error);
       throw error;
     }
   }
@@ -96,7 +94,6 @@ class ProjectService {
     },
   ): Promise<{ project: ProjectWithRelations }> {
     try {
-      // Ejemplo de implementación
       const response = await fetch(`/api/projects/${projectId}`, {
         method: "PUT",
         headers: {
@@ -107,35 +104,34 @@ class ProjectService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Error al actualizar el proyecto");
+        throw new Error(errorData.message || "Failed to update the project");
       }
 
       return await response.json();
     } catch (error) {
-      console.error("Error en updateProject:", error);
+      console.error("Error in updateProject:", error);
       throw error;
     }
   }
 
   async deleteProject(projectId: string): Promise<string> {
     try {
-      // Ejemplo de implementación
       const response = await fetch(`/api/projects/${projectId}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Error al eliminar el proyecto");
+        throw new Error(errorData.message || "Failed to delete the project");
       }
 
       return projectId;
     } catch (error) {
-      console.error("Error en deleteProject:", error);
+      console.error("Error in deleteProject:", error);
       throw error;
     }
   }
 }
 
-// Exportar una instancia única del servicio
+// Export a single service instance
 export const projectService = new ProjectService();

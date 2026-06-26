@@ -4,7 +4,7 @@ interface Props {
   message?: string;
 }
 
-function LoadingText({ message = "Cargando..." }: Props) {
+function LoadingText({ message = "Loading..." }: Props) {
   return <div className="flex justify-center items-center h-64">{message}</div>;
 }
 

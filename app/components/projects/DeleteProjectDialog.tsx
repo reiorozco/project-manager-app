@@ -27,15 +27,15 @@ function DeleteProjectDialog({
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción no se puede deshacer. El proyecto y todos sus archivos
-            serán eliminados permanentemente.
+            This action cannot be undone. The project and all its files will be
+            permanently deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
 
           <AlertDialogAction
             onClick={onConfirm}
@@ -45,10 +45,10 @@ function DeleteProjectDialog({
             {isDeleting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Eliminando...
+                Deleting...
               </>
             ) : (
-              "Eliminar"
+              "Delete"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

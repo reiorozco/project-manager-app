@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 export async function createClient(request: NextRequest | null = null) {
   const cookieStore = await cookies();
 
-  // Configuración base
+  // Base configuration
   const config: {
     cookies: {
       getAll: () => { name: string; value: string }[];
@@ -37,13 +37,13 @@ export async function createClient(request: NextRequest | null = null) {
     },
   };
 
-  // Si se proporciona una request, buscar el header de Authorization
+  // If a request is provided, look for the Authorization header
   if (request) {
     const authHeader = request.headers.get("authorization");
     const token = authHeader?.split(" ")[1];
 
     if (token) {
-      // Si hay un token Bearer, lo añadimos a la configuración global
+      // If there is a Bearer token, add it to the global configuration
       config.global = {
         headers: {
           Authorization: `Bearer ${token}`,

@@ -46,7 +46,7 @@ function ProjectCard({
   const creatorName = project.createdBy.name || project.createdBy.email;
   const assigneeName = project.assignedTo
     ? project.assignedTo.name || project.assignedTo.email
-    : "Sin asignar";
+    : "Unassigned";
 
   const creatorInitials = project.createdBy.name
     ? getInitials(project.createdBy.name)
@@ -77,7 +77,7 @@ function ProjectCard({
 
       <CardContent className="flex flex-col justify-between flex-grow">
         <TruncatedDescription
-          description={project.description || "Sin descripción"}
+          description={project.description || "No description"}
         />
 
         <div className="flex flex-col space-y-2">
@@ -86,7 +86,7 @@ function ProjectCard({
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
             <div className="flex items-center">
               <User className="h-3 w-3 mr-1 opacity-70" />
-              <span className="font-medium mr-1">Creador:</span>
+              <span className="font-medium mr-1">Creator:</span>
               <div className="flex items-center">
                 <Avatar className="h-5 w-5 mr-1">
                   <AvatarFallback className="text-[10px]">
@@ -101,7 +101,7 @@ function ProjectCard({
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
             <div className="flex items-center">
               <User className="h-3 w-3 mr-1 opacity-70" />
-              <span className="font-medium mr-1">Asignado:</span>
+              <span className="font-medium mr-1">Assignee:</span>
               <div className="flex items-center">
                 <Avatar className="h-5 w-5 mr-1">
                   <AvatarFallback className="text-[10px]">
@@ -116,7 +116,7 @@ function ProjectCard({
           <div className="flex justify-between items-center">
             <Badge variant="secondary" className="flex items-center gap-1">
               <File className="h-3 w-3" />
-              {project.files.length} archivos
+              {project.files.length} files
             </Badge>
 
             {project.dueDate && (
@@ -136,7 +136,7 @@ function ProjectCard({
           className="w-full text-xs font-medium"
           onClick={onViewDetails}
         >
-          Ver detalles
+          View details
         </Button>
       </CardFooter>
     </Card>
@@ -170,18 +170,18 @@ function ProjectCardMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <span className="sr-only">Abrir menú</span>
+          <span className="sr-only">Open menu</span>
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onEdit}>Editar</DropdownMenuItem>
+        <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
         <DropdownMenuItem
           onClick={onDelete}
           className="text-destructive focus:text-destructive"
         >
-          Eliminar
+          Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

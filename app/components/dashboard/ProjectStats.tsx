@@ -15,23 +15,23 @@ function ProjectStats({ projects }: { projects: DashboardProject[] }) {
   return (
     <section className="mt-8">
       <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Resumen
+        Overview
       </h2>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
-          title="Proyectos totales"
+          title="Total projects"
           value={stats.total}
           icon={<Folders />}
           accent
         />
         <StatCard
-          title="Asignados"
+          title="Assigned"
           value={stats.assigned}
           icon={<UserCheck />}
         />
         <StatCard
-          title="Sin asignar"
+          title="Unassigned"
           value={stats.unassigned}
           icon={<CircleDashed />}
         />

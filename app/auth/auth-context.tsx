@@ -81,7 +81,7 @@ const queryKeys = {
   userRole: ["auth", "userRole"] as const,
 };
 
-// Creamos una única instancia del cliente Supabase para toda la aplicación
+// Create a single Supabase client instance for the whole app
 const supabase = createClient();
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -89,7 +89,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: PropsWithChildren) {
   const queryClient = useQueryClient();
 
-  // Obtener usuario actual
+  // Get the current user
   const userQuery: UseQueryResult<User | null> = useQuery({
     queryKey: queryKeys.user,
     queryFn: async () => {
@@ -102,12 +102,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
         return null;
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const userId = userQuery.data?.id;
 
-  // Obtener rol de usuario cuando hay un usuario autenticado
+  // Get the user role when there is an authenticated user
   const userRoleQuery: UseQueryResult<UserRole | null> = useQuery({
     queryKey: [...queryKeys.userRole, userId],
     queryFn: async () => {
@@ -127,18 +127,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
         return null;
       }
     },
-    enabled: !!userId, // Solo ejecutar cuando hay un usuario
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    enabled: !!userId, // Only run when there is a user
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Variables para almacenar callbacks externos
-  // Usamos refs para mantener las referencias estables entre renderizados
+  // Variables to store external callbacks
+  // We use refs to keep references stable across renders
   const signInSuccessCallback = useRef<(() => void) | undefined>(undefined);
   const signInErrorCallback = useRef<((error: Error) => void) | undefined>(
     undefined,
   );
 
-  // Mutación: iniciar sesión
+  // Mutation: sign in
   const { mutateAsync: signInAsync, isPending: isSigningIn } = useMutation({
     mutationFn: async ({ email, password }: SignInParams) => {
       const { error } = await supabase.auth.signInWithPassword({
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return { error: error as Error | null };
     },
     onSuccess: (result) => {
-      // Invalidar consultas para refrescar datos
+      // Invalidate queries to refresh data
       void queryClient.invalidateQueries({ queryKey: queryKeys.user });
 
       if (!result.error && signInSuccessCallback.current) {
@@ -216,7 +216,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       console.log("Sign out successful");
     },
     onSuccess: () => {
-      // Resetear el estado manual e inmediatamente
+      // Reset the state manually and immediately
       queryClient.setQueryData(queryKeys.user, null);
       queryClient.setQueryData(queryKeys.userRole, null);
 
@@ -295,7 +295,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       },
     });
 
-  // Escuchar cambios de autenticación
+  // Listen for authentication changes
   useEffect(() => {
     const {
       data: { subscription },
@@ -303,14 +303,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
       console.log("Auth state changed:", event, session?.user?.id);
 
       if (event === "SIGNED_OUT") {
-        // Resetear estado inmediatamente
+        // Reset state immediately
         queryClient.setQueryData(queryKeys.user, null);
         queryClient.setQueryData(queryKeys.userRole, null);
 
-        // Limpiar datos relacionados con el usuario
+        // Clear user-related data
         queryClient.removeQueries({ queryKey: ["projects"] });
       } else {
-        // Para otros eventos, invalidar consultas
+        // For other events, invalidate queries
         void queryClient.invalidateQueries({ queryKey: queryKeys.user });
       }
     });
@@ -320,30 +320,30 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
   }, [queryClient]);
 
-  // Funciones expuestas al contexto con soporte para callbacks
+  // Functions exposed to the context with callback support
   const signIn = useCallback(
     async (params: SignInParams, options?: AuthOptions) => {
       try {
         const result = await signInAsync(params);
 
-        // Si la autenticación fue exitosa
+        // If authentication succeeded
         if (!result.error) {
-          // Luego, pequeña pausa para permitir que React procese los cambios de estado
+          // Then, a short pause to let React process the state changes
           setTimeout(() => {
-            // Callback de éxito si existe
+            // Success callback if it exists
             if (options?.onSuccess) {
               options.onSuccess();
             }
 
-            // Fallback: Si después de 500ms aún estamos en la misma página, forzar navegación
+            // Fallback: if after 500ms we're still on the same page, force navigation
             const redirectTimeout = setTimeout(() => {
-              // Comprobar si todavía estamos en una página de auth
+              // Check whether we're still on an auth page
               if (window.location.pathname.includes("/auth/")) {
                 window.location.href = ROUTES.DASHBOARD;
               }
             }, 500);
 
-            // Limpiar el timeout si el componente se desmonta
+            // Clear the timeout if the component unmounts
             return () => clearTimeout(redirectTimeout);
           }, 50);
         } else if (options?.onError) {
@@ -408,14 +408,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
     ]);
   }, [queryClient]);
 
-  // Determinar estado de carga combinado para consultas
+  // Determine combined loading state for queries
   const isLoading =
     userQuery.isLoading ||
     userRoleQuery.isLoading ||
     userQuery.isFetching ||
     userRoleQuery.isFetching;
 
-  // Determinar estado de error combinado
+  // Determine combined error state
   const isError = userQuery.isError || userRoleQuery.isError;
 
   return (

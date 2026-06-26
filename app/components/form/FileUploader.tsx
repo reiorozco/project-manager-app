@@ -20,7 +20,7 @@ interface Props {
 export function FileUploader({
   selectedFiles,
   onFilesChange,
-  labelText = "Archivos",
+  labelText = "Files",
   ...fieldProps
 }: Props) {
   const [fileError, setFileError] = useState<string | null>(null);
@@ -35,25 +35,23 @@ export function FileUploader({
 
     if (newFiles.length === 0) return;
 
-    // Validar tamaño de archivos
+    // Validate file size
     const oversizedFiles = newFiles.filter((file) => file.size > MAX_FILE_SIZE);
     if (oversizedFiles.length > 0) {
       setFileError(
-        `Algunos archivos exceden el tamaño máximo de 5 MB: ${oversizedFiles.map((f) => f.name).join(", ")}`,
+        `Some files exceed the 5 MB maximum: ${oversizedFiles.map((f) => f.name).join(", ")}`,
       );
       return;
     }
 
-    // Comprobar si supera el límite de archivos
+    // Check whether the file limit is exceeded
     const totalFiles = [...selectedFiles, ...newFiles];
     if (totalFiles.length > MAX_FILES) {
-      setFileError(
-        `Solo puedes seleccionar un máximo de ${MAX_FILES} archivos`,
-      );
+      setFileError(`You can select a maximum of ${MAX_FILES} files`);
       return;
     }
 
-    // Combinar archivos evitando duplicados
+    // Merge files, avoiding duplicates
     const combinedFiles = [...selectedFiles];
     newFiles.forEach((newFile) => {
       if (!combinedFiles.some((file) => file.name === newFile.name)) {
@@ -68,7 +66,7 @@ export function FileUploader({
     const files = Array.from(e.target.files || []);
     processFiles(files);
 
-    // Importante: resetear el valor del input para permitir seleccionar el mismo archivo de nuevo
+    // Important: reset the input value so the same file can be selected again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -109,7 +107,7 @@ export function FileUploader({
       <FormLabel>{labelText}</FormLabel>
       <FormControl>
         <div className="space-y-2">
-          {/* Área para seleccionar archivos */}
+          {/* Area to select files */}
           <div
             className={`rounded-md border-2 text-center cursor-pointer transition-colors ${
               isDragging
@@ -120,19 +118,19 @@ export function FileUploader({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            {/* Agregamos un div interno que maneja el clic */}
+            {/* Inner div that handles the click */}
             <div onClick={handleClickArea} className="p-6">
               <p className="text-sm font-medium mb-1">
-                Arrastra archivos aquí o haz clic para seleccionar
+                Drag files here or click to select
               </p>
               <p className="text-xs text-muted-foreground">
-                Formatos permitidos: PDF, Office, imágenes, ZIP (máx. 5 MB por
-                archivo)
+                Allowed formats: PDF, Office, images, ZIP (max 5 MB per
+                file)
               </p>
             </div>
           </div>
 
-          {/* Input oculto para la selección de archivos */}
+          {/* Hidden input for file selection */}
           <Input
             type="file"
             multiple
@@ -144,17 +142,17 @@ export function FileUploader({
             ref={fileInputRef}
           />
 
-          {/* Mostrar error si existe */}
+          {/* Show error if any */}
           {fileError && (
             <p className="text-sm text-destructive">{fileError}</p>
           )}
 
-          {/* Lista de archivos seleccionados */}
+          {/* List of selected files */}
           {selectedFiles.length > 0 && (
             <div className="bg-muted rounded-md p-3">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-sm font-medium">
-                  Archivos seleccionados ({selectedFiles.length}/{MAX_FILES})
+                  Selected files ({selectedFiles.length}/{MAX_FILES})
                 </p>
                 {selectedFiles.length > 0 && (
                   <Button
@@ -164,7 +162,7 @@ export function FileUploader({
                     onClick={() => onFilesChange([])}
                     className="text-destructive text-xs h-6 px-2"
                   >
-                    Limpiar todo
+                    Clear all
                   </Button>
                 )}
               </div>

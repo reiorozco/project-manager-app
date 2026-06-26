@@ -34,7 +34,7 @@ export default function Navbar() {
     try {
       await signOut({
         onSuccess: () => {
-          // Redirección imperativa
+          // Imperative redirect
           window.location.href = ROUTES.LOGIN;
         },
       });
@@ -111,7 +111,7 @@ export default function Navbar() {
                     disabled={isSigningOut}
                   >
                     <FolderKanban className="h-4 w-4" />
-                    Proyectos
+                    Projects
                   </Button>
                 </Link>
 
@@ -133,7 +133,7 @@ export default function Navbar() {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>
                       <div className="flex flex-col">
-                        <span>Mi cuenta</span>
+                        <span>Account</span>
                         {userRole && (
                           <Badge variant="outline" className="mt-1 w-fit">
                             {ROLE_DISPLAY_MAP[userRole]}
@@ -149,7 +149,7 @@ export default function Navbar() {
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>
-                        {isSigningOut ? "Cerrando sesión..." : "Cerrar sesión"}
+                        {isSigningOut ? "Signing out..." : "Sign out"}
                       </span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -158,10 +158,10 @@ export default function Navbar() {
             ) : (
               <>
                 <Link href={ROUTES.LOGIN}>
-                  <Button variant="ghost">Iniciar sesión</Button>
+                  <Button variant="ghost">Sign in</Button>
                 </Link>
                 <Link href={ROUTES.REGISTER}>
-                  <Button>Registrarse</Button>
+                  <Button>Sign up</Button>
                 </Link>
               </>
             )}
@@ -217,7 +217,7 @@ export default function Navbar() {
                       disabled={isSigningOut}
                     >
                       <FolderKanban className="mr-2 h-4 w-4" />
-                      Proyectos
+                      Projects
                     </Button>
                   </Link>
                   <Separator className="my-2" />
@@ -228,7 +228,7 @@ export default function Navbar() {
                     disabled={isSigningOut}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    {isSigningOut ? "Cerrando sesión..." : "Cerrar sesión"}
+                    {isSigningOut ? "Signing out..." : "Sign out"}
                   </Button>
                 </div>
               </>
@@ -243,7 +243,7 @@ export default function Navbar() {
                     href={ROUTES.LOGIN}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Iniciar sesión
+                    Sign in
                   </Link>
                 </Button>
 
@@ -252,7 +252,7 @@ export default function Navbar() {
                     href={ROUTES.REGISTER}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Registrarse
+                    Sign up
                   </Link>
                 </Button>
               </div>

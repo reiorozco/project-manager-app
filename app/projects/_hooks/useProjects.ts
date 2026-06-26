@@ -13,7 +13,7 @@ export function useProjects() {
   const { user, userRole } = useAuth();
   const queryClient = useQueryClient();
 
-  // Obtener todos los proyectos
+  // Get all projects
   const {
     data,
     isLoading: isLoadingQuery,
@@ -27,13 +27,13 @@ export function useProjects() {
     enabled: !!user,
   });
 
-  // Eliminar un proyecto
+  // Delete a project
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: string) =>
       await projectService.deleteProject(projectId),
 
     onSuccess: (deletedProjectId) => {
-      // Actualizar la lista de proyectos en caché
+      // Update the cached project list
       queryClient.setQueryData<{ projects: ProjectWithRelations[] }>(
         ["projects", user?.id],
         (old) => {
@@ -45,14 +45,14 @@ export function useProjects() {
         },
       );
 
-      // Invalidar posibles queries relacionadas
+      // Invalidate any related queries
       void queryClient.invalidateQueries({
         queryKey: ["project", deletedProjectId],
       });
     },
   });
 
-  // Función para eliminar un proyecto con opciones de callback
+  // Function to delete a project with callback options
   const deleteProject = (projectId: string, options?: DeleteProjectOptions) => {
     deleteProjectMutation.mutate(projectId, {
       onSuccess: () => {
@@ -66,7 +66,7 @@ export function useProjects() {
     });
   };
 
-  // Permisos basados en rol
+  // Role-based permissions
   const canCreateProject =
     userRole === UserRole.CLIENT || userRole === UserRole.PROJECT_MANAGER;
 

@@ -1,4 +1,4 @@
-// Formatea una fecha a "yyyy-mm-dd" para inputs type="date"
+// Formats a date to "yyyy-mm-dd" for type="date" inputs
 export const toDateInputValue = (
   date: Date | string | null | undefined,
 ): string => {
@@ -8,11 +8,11 @@ export const toDateInputValue = (
   return d.toISOString().slice(0, 10);
 };
 
-// Formato compacto para mostrar una fecha límite (sin hora).
-// Se guarda a medianoche UTC, así que se formatea en UTC para evitar
-// desfases de un día según la zona horaria del navegador.
+// Compact format for displaying a due date (no time).
+// Stored at UTC midnight, so it is formatted in UTC to avoid
+// off-by-one-day shifts based on the browser's time zone.
 export const formatDueDate = (date: Date | string): string => {
-  return new Intl.DateTimeFormat("es-ES", {
+  return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -22,7 +22,7 @@ export const formatDueDate = (date: Date | string): string => {
 
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat("es-ES", {
+  return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -31,7 +31,7 @@ export const formatDate = (dateString: string): string => {
   }).format(date);
 };
 
-// Calcula la diferencia en días entre la fecha actual y una fecha dada
+// Calculates the difference in days between now and a given date
 export const getDaysSince = (dateString: string): number => {
   const date = new Date(dateString);
   const now = new Date();
@@ -39,7 +39,7 @@ export const getDaysSince = (dateString: string): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-// Verifica si una fecha es reciente (menos de 3 días)
+// Checks whether a date is recent (less than 3 days ago)
 export const isRecentDate = (dateString: string): boolean => {
   return getDaysSince(dateString) <= 3;
 };

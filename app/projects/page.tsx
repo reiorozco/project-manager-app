@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Componentes
+// Components
 import {
   DeleteProjectDialog,
   EmptyState,
@@ -105,18 +105,18 @@ export default function ProjectsPage() {
     <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Proyectos</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
           {hasProjects && (
             <p className="mt-1 text-sm text-muted-foreground">
               {projects.length}{" "}
-              {projects.length === 1 ? "proyecto" : "proyectos"} en total
+              {projects.length === 1 ? "project" : "projects"} in total
             </p>
           )}
         </div>
 
         {canCreateProject && (
           <Button onClick={() => router.push(ROUTES.NEW_PROJECT)}>
-            Nuevo proyecto
+            New project
           </Button>
         )}
       </div>
@@ -126,7 +126,7 @@ export default function ProjectsPage() {
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar por título o descripción..."
+              placeholder="Search by title or description..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="pl-9"
@@ -138,10 +138,10 @@ export default function ProjectsPage() {
             onValueChange={(v) => setStatusFilter(v as StatusFilter)}
           >
             <SelectTrigger className="w-full sm:w-44">
-              <SelectValue placeholder="Estado" />
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Todos los estados</SelectItem>
+              <SelectItem value="ALL">All statuses</SelectItem>
               {PROJECT_STATUS_ORDER.map((status) => (
                 <SelectItem key={status} value={status}>
                   {STATUS_DISPLAY_MAP[status]}
@@ -152,12 +152,12 @@ export default function ProjectsPage() {
 
           <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
             <SelectTrigger className="w-full sm:w-44">
-              <SelectValue placeholder="Ordenar" />
+              <SelectValue placeholder="Sort" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="recent">Más recientes</SelectItem>
-              <SelectItem value="title">Título (A–Z)</SelectItem>
-              <SelectItem value="status">Estado</SelectItem>
+              <SelectItem value="recent">Most recent</SelectItem>
+              <SelectItem value="title">Title (A–Z)</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -169,9 +169,9 @@ export default function ProjectsPage() {
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-16 text-center">
           <SearchX className="size-8 text-muted-foreground" />
           <div>
-            <p className="font-medium">Sin resultados</p>
+            <p className="font-medium">No results</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Ningún proyecto coincide con tu búsqueda o filtro.
+              No project matches your search or filter.
             </p>
           </div>
           <Button
@@ -182,7 +182,7 @@ export default function ProjectsPage() {
               setStatusFilter("ALL");
             }}
           >
-            Limpiar filtros
+            Clear filters
           </Button>
         </div>
       ) : (

@@ -18,7 +18,7 @@ export async function GET(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
@@ -30,12 +30,12 @@ export async function GET(
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Error desconocido al obtener el proyecto";
+          : "Unknown error while loading the project";
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "Error del servidor";
+      error instanceof Error ? error.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
@@ -54,16 +54,16 @@ export async function PUT(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
     const body = await request.json();
 
-    // Validación básica
+    // Basic validation
     if (!body.title) {
       return NextResponse.json(
-        { error: "El título es obligatorio" },
+        { error: "Title is required" },
         { status: 400 },
       );
     }
@@ -87,12 +87,12 @@ export async function PUT(
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Error desconocido al actualizar el proyecto";
+          : "Unknown error while updating the project";
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "Error del servidor";
+      error instanceof Error ? error.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
@@ -111,7 +111,7 @@ export async function DELETE(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
@@ -123,12 +123,12 @@ export async function DELETE(
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Error desconocido al eliminar el proyecto";
+          : "Unknown error while deleting the project";
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "Error del servidor";
+      error instanceof Error ? error.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

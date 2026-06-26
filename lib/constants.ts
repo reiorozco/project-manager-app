@@ -1,22 +1,22 @@
 import { ProjectStatus, UserRole } from "@/generated/prisma";
 
 /**
- * Mapeo de roles de usuario a texto legible
+ * Maps user roles to human-readable text
  */
 export const ROLE_DISPLAY_MAP: Record<UserRole, string> = {
-  [UserRole.CLIENT]: "Cliente",
+  [UserRole.CLIENT]: "Client",
   [UserRole.PROJECT_MANAGER]: "Project Manager",
-  [UserRole.DESIGNER]: "Diseñador",
+  [UserRole.DESIGNER]: "Designer",
 };
 
 /**
- * Estados del ciclo de vida del proyecto, en orden de avance
+ * Project lifecycle statuses, in order of progress
  */
 export const STATUS_DISPLAY_MAP: Record<ProjectStatus, string> = {
-  [ProjectStatus.DRAFT]: "Borrador",
-  [ProjectStatus.IN_PROGRESS]: "En progreso",
-  [ProjectStatus.REVIEW]: "En revisión",
-  [ProjectStatus.DONE]: "Completado",
+  [ProjectStatus.DRAFT]: "Draft",
+  [ProjectStatus.IN_PROGRESS]: "In progress",
+  [ProjectStatus.REVIEW]: "In review",
+  [ProjectStatus.DONE]: "Done",
 };
 
 export const PROJECT_STATUS_ORDER: ProjectStatus[] = [
@@ -32,7 +32,7 @@ export const ROLES_CAN_CREATE_PROJECTS = [
 ];
 
 /**
- * Rutas de navegación comunes
+ * Common navigation routes
  */
 export const ROUTES = {
   DASHBOARD: "/",

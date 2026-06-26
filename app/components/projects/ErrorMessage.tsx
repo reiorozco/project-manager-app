@@ -18,7 +18,7 @@ export const ErrorMessage = ({
         {message}
 
         <Button onClick={onBack} className="mt-4" variant="outline">
-          <ChevronLeft className="mr-2 h-4 w-4" /> Volver a proyectos
+          <ChevronLeft className="mr-2 h-4 w-4" /> Back to projects
         </Button>
       </AlertDescription>
     </Alert>

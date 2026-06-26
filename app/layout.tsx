@@ -21,11 +21,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://project-manager-app-cyan.vercel.app"),
   title: "Project Manager",
-  description: "App de gestión de proyectos de diseño con acceso multi-rol",
+  description: "Design project management app with multi-role access",
   openGraph: {
     title: "Project Manager — Multi-Role Project Management",
     description:
-      "App full-stack de gestión de proyectos (Next.js, Prisma, Supabase) con acceso por roles, Row-Level Security y almacenamiento de archivos.",
+      "Full-stack project management app (Next.js, Prisma, Supabase) with role-based access, Row-Level Security and file storage.",
     url: "https://project-manager-app-cyan.vercel.app",
     type: "website",
     images: ["/og.png"],
@@ -54,10 +54,10 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <div className="min-h-screen bg-muted/40">
-                {/* Navegación superior */}
+                {/* Top navigation */}
                 <Navbar />
 
-                {/* Contenido principal */}
+                {/* Main content */}
                 <main className="py-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                   {children}
                 </main>

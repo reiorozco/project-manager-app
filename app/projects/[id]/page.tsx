@@ -30,7 +30,7 @@ interface Props {
 }
 
 export default function ProjectDetailPage({ params }: Props) {
-  // Desenvolver params con React.use() según nueva API de Next.js
+  // Unwrap params with React.use() per the new Next.js API
   const unwrappedParams = use(params);
   const projectId = unwrappedParams.id;
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function ProjectDetailPage({ params }: Props) {
   if (!project) {
     return (
       <ErrorMessage
-        message="El proyecto que buscas no existe o no tienes permiso para verlo."
+        message="This project doesn't exist or you don't have permission to view it."
         onBack={() => router.push(ROUTES.PROJECTS)}
       />
     );
@@ -75,24 +75,24 @@ export default function ProjectDetailPage({ params }: Props) {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Columna principal */}
+        {/* Main column */}
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Descripción</CardTitle>
+              <CardTitle className="text-lg">Description</CardTitle>
             </CardHeader>
             <CardContent>
               {project.description ? (
                 <p className="whitespace-pre-line">{project.description}</p>
               ) : (
-                <p className="text-muted-foreground italic">Sin descripción</p>
+                <p className="text-muted-foreground italic">No description</p>
               )}
             </CardContent>
           </Card>
 
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle className="text-lg">Archivos</CardTitle>
+              <CardTitle className="text-lg">Files</CardTitle>
             </CardHeader>
 
             <CardContent>
@@ -103,13 +103,13 @@ export default function ProjectDetailPage({ params }: Props) {
                   isDownloading={isDownloading}
                 />
               ) : (
-                <p className="text-muted-foreground italic">No hay archivos adjuntos</p>
+                <p className="text-muted-foreground italic">No files attached</p>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Columna lateral */}
+        {/* Side column */}
         <div>
           <ProjectDetails project={project} />
 
@@ -120,7 +120,7 @@ export default function ProjectDetailPage({ params }: Props) {
               onClick={() => router.push(ROUTES.PROJECTS)}
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Volver a proyectos
+              Back to projects
             </Button>
           </div>
         </div>
@@ -148,26 +148,26 @@ const ProjectHeader = ({
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <Clock className="h-4 w-4" />
-          Creado {formatDate(project.createdAt.toString())}
+          Created {formatDate(project.createdAt.toString())}
         </span>
 
         <span className="inline-flex items-center gap-1.5">
           <User className="h-4 w-4" />
           {project.assignedTo
             ? project.assignedTo.name || project.assignedTo.email
-            : "Sin asignar"}
+            : "Unassigned"}
         </span>
 
         {project.dueDate && (
           <span className="inline-flex items-center gap-1.5">
             <CalendarClock className="h-4 w-4" />
-            Vence {formatDueDate(project.dueDate)}
+            Due {formatDueDate(project.dueDate)}
           </span>
         )}
       </div>
     </div>
 
-    {canManage && <Button onClick={onEdit}>Editar Proyecto</Button>}
+    {canManage && <Button onClick={onEdit}>Edit project</Button>}
   </div>
 );
 
@@ -198,7 +198,7 @@ const FilesList = ({
           disabled={isDownloading}
         >
           <FileDown className="mr-2 h-4 w-4" />
-          Descargar
+          Download
         </Button>
       </li>
     ))}

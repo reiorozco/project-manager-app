@@ -34,7 +34,7 @@ function ProjectRow({ project }: { project: DashboardProject }) {
             {project.files.length}
           </span>
           <span className="truncate">
-            {assignee ? `Asignado a ${assignee}` : "Sin asignar"}
+            {assignee ? `Assigned to ${assignee}` : "Unassigned"}
           </span>
         </div>
       </div>
@@ -61,14 +61,14 @@ function RecentProjects({ projects }: { projects: DashboardProject[] }) {
     <section className="mt-8">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Proyectos recientes
+          Recent projects
         </h2>
         {projects.length > 0 && (
           <Link
             href={ROUTES.PROJECTS}
             className="text-sm font-medium text-primary hover:underline"
           >
-            Ver todos
+            View all
           </Link>
         )}
       </div>
@@ -85,7 +85,7 @@ function RecentProjects({ projects }: { projects: DashboardProject[] }) {
             <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
               <FolderOpen className="size-7 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Aún no hay proyectos. Crea el primero para empezar.
+                No projects yet. Create your first one to get started.
               </p>
             </div>
           )}

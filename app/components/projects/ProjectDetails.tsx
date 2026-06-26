@@ -31,45 +31,45 @@ export const ProjectDetails = ({
 }) => (
   <Card>
     <CardHeader>
-      <CardTitle className="text-base">Detalles</CardTitle>
+      <CardTitle className="text-base">Details</CardTitle>
     </CardHeader>
 
     <CardContent>
       <dl className="divide-y divide-border/60">
-        <DetailRow icon={<Tag />} label="Estado">
+        <DetailRow icon={<Tag />} label="Status">
           <StatusBadge status={project.status} />
         </DetailRow>
 
         <DetailRow
           icon={project.dueDate ? <CalendarClock /> : <CalendarOff />}
-          label="Fecha límite"
+          label="Due date"
         >
           {project.dueDate ? (
             formatDueDate(project.dueDate)
           ) : (
             <span className="font-normal text-muted-foreground">
-              Sin fecha
+              No date
             </span>
           )}
         </DetailRow>
 
-        <DetailRow icon={<User />} label="Creado por">
+        <DetailRow icon={<User />} label="Created by">
           {project.createdBy.name || project.createdBy.email}
         </DetailRow>
 
-        <DetailRow icon={<Clock />} label="Creado">
+        <DetailRow icon={<Clock />} label="Created">
           {formatDate(project.createdAt.toString())}
         </DetailRow>
 
-        <DetailRow icon={<CalendarClock />} label="Última actualización">
+        <DetailRow icon={<CalendarClock />} label="Last updated">
           {formatDate(
             project.updatedAt?.toString() || project.createdAt.toString(),
           )}
         </DetailRow>
 
-        <DetailRow icon={<FileText />} label="Archivos">
+        <DetailRow icon={<FileText />} label="Files">
           {project.files.length}{" "}
-          {project.files.length === 1 ? "archivo" : "archivos"}
+          {project.files.length === 1 ? "file" : "files"}
         </DetailRow>
       </dl>
     </CardContent>
