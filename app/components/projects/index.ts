@@ -7,3 +7,4 @@ export { default as ProjectCard } from "./ProjectCard";
 export { default as ProjectDetails } from "./ProjectDetails";
 export { default as ProjectDetailSkeleton } from "./ProjectDetailSkeleton";
 export { default as ProjectsList } from "./ProjectsList";
+export { default as StatusBadge } from "./StatusBadge";

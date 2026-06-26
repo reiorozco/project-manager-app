@@ -76,6 +76,8 @@ export async function PUT(
       const project = await ProjectService.updateProject(projectId, userId, {
         title: body.title,
         description: body.description,
+        status: body.status,
+        dueDate: body.dueDate,
         assignedToId: body.assignedToId,
         files: body.files,
       });

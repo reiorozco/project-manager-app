@@ -1,15 +1,26 @@
+import { ProjectStatus } from "@/generated/prisma";
 import {
   PrismaFilePreview,
   ProjectPreview,
   ProjectWithRelations,
 } from "@/app/projects/_utils/types";
 
+interface CreateProjectArgs {
+  title: string;
+  description?: string;
+  status?: ProjectStatus;
+  dueDate?: string | null;
+  files?: PrismaFilePreview[];
+}
+
 class ProjectService {
-  async createProject(
-    title: string,
-    description: string = "",
-    files: PrismaFilePreview[] = [],
-  ): Promise<{ project: ProjectWithRelations }> {
+  async createProject({
+    title,
+    description = "",
+    status,
+    dueDate,
+    files = [],
+  }: CreateProjectArgs): Promise<{ project: ProjectWithRelations }> {
     try {
       const response = await fetch("/api/projects", {
         method: "POST",
@@ -19,6 +30,8 @@ class ProjectService {
         body: JSON.stringify({
           title,
           description,
+          status,
+          dueDate,
           files,
         }),
       });
@@ -77,6 +90,8 @@ class ProjectService {
   async updateProject(
     projectId: string,
     data: Partial<ProjectPreview> & {
+      status?: ProjectStatus;
+      dueDate?: string | null;
       files?: PrismaFilePreview[];
     },
   ): Promise<{ project: ProjectWithRelations }> {

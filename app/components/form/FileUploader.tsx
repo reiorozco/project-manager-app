@@ -111,8 +111,11 @@ export function FileUploader({
         <div className="space-y-2">
           {/* Área para seleccionar archivos */}
           <div
-            className={`border-2 ${isDragging ? "border-blue-400 bg-blue-50" : "border-dashed border-gray-300"} 
-                      rounded-md text-center cursor-pointer transition-colors`}
+            className={`rounded-md border-2 text-center cursor-pointer transition-colors ${
+              isDragging
+                ? "border-primary bg-primary/5"
+                : "border-dashed border-input hover:border-primary/40 hover:bg-accent/40"
+            }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -122,7 +125,7 @@ export function FileUploader({
               <p className="text-sm font-medium mb-1">
                 Arrastra archivos aquí o haz clic para seleccionar
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Formatos permitidos: PDF, Office, imágenes, ZIP (máx. 5 MB por
                 archivo)
               </p>
@@ -142,11 +145,13 @@ export function FileUploader({
           />
 
           {/* Mostrar error si existe */}
-          {fileError && <p className="text-sm text-red-500">{fileError}</p>}
+          {fileError && (
+            <p className="text-sm text-destructive">{fileError}</p>
+          )}
 
           {/* Lista de archivos seleccionados */}
           {selectedFiles.length > 0 && (
-            <div className="bg-gray-50 rounded-md p-3">
+            <div className="bg-muted rounded-md p-3">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-sm font-medium">
                   Archivos seleccionados ({selectedFiles.length}/{MAX_FILES})
@@ -157,7 +162,7 @@ export function FileUploader({
                     variant="ghost"
                     size="sm"
                     onClick={() => onFilesChange([])}
-                    className="text-red-500 text-xs h-6 px-2"
+                    className="text-destructive text-xs h-6 px-2"
                   >
                     Limpiar todo
                   </Button>
@@ -168,11 +173,11 @@ export function FileUploader({
                 {selectedFiles.map((file, index) => (
                   <li
                     key={index}
-                    className="flex justify-between items-center p-2 bg-white rounded"
+                    className="flex justify-between items-center p-2 bg-background rounded border"
                   >
                     <div className="truncate max-w-[250px]">
                       <span className="text-sm">{file.name}</span>
-                      <span className="text-xs text-gray-500 ml-2">
+                      <span className="text-xs text-muted-foreground ml-2">
                         ({formatFileSize(file.size)})
                       </span>
                     </div>
@@ -181,7 +186,7 @@ export function FileUploader({
                       variant="ghost"
                       size="sm"
                       onClick={() => removeFile(index)}
-                      className="text-red-500 h-6 w-6 p-0"
+                      className="text-destructive h-6 w-6 p-0"
                     >
                       <X className="h-4 w-4" />
                     </Button>

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FolderKanban, Folders, Home, LogOut, Menu, X } from "lucide-react";
 import { useAuth } from "@/app/auth/auth-context";
+import { cn } from "@/lib/utils";
 import { ROLE_DISPLAY_MAP, ROUTES } from "@/lib/constants";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,10 @@ import { ModeToggle } from "@/app/components/ModeToggle";
 export default function Navbar() {
   const { user, userRole, signOut, isSigningOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (href: string) =>
+    href === ROUTES.DASHBOARD ? pathname === href : pathname.startsWith(href);
 
   const handleSignOut = async () => {
     try {
@@ -54,7 +60,7 @@ export default function Navbar() {
             className="font-bold text-xl"
           >
             <div className="flex flex-shrink-0 items-center gap-2">
-              <Folders size="2rem" className="text-blue-600" />
+              <Folders size="2rem" className="text-primary" />
               Project-Manager
             </div>
           </Link>
@@ -83,7 +89,11 @@ export default function Navbar() {
                 <Link href={ROUTES.DASHBOARD}>
                   <Button
                     variant="ghost"
-                    className="flex gap-2"
+                    className={cn(
+                      "flex gap-2",
+                      isActive(ROUTES.DASHBOARD) &&
+                        "bg-accent text-primary font-semibold",
+                    )}
                     disabled={isSigningOut}
                   >
                     <Home className="h-4 w-4" />
@@ -93,7 +103,11 @@ export default function Navbar() {
                 <Link href={ROUTES.PROJECTS}>
                   <Button
                     variant="ghost"
-                    className="flex gap-2"
+                    className={cn(
+                      "flex gap-2",
+                      isActive(ROUTES.PROJECTS) &&
+                        "bg-accent text-primary font-semibold",
+                    )}
                     disabled={isSigningOut}
                   >
                     <FolderKanban className="h-4 w-4" />

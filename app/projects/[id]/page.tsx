@@ -6,16 +6,23 @@ import { File as PrismaFile } from "@/generated/prisma";
 import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Clock, FileDown, FileText, User } from "lucide-react";
+import {
+  CalendarClock,
+  ChevronLeft,
+  Clock,
+  FileDown,
+  FileText,
+  User,
+} from "lucide-react";
 import { ProjectWithRelations } from "@/app/projects/_utils/types";
 import { formatFileSize } from "@/app/projects/_utils/formatFileSize";
-import { formatDate } from "@/app/projects/_utils/dateUtils";
+import { formatDate, formatDueDate } from "@/app/projects/_utils/dateUtils";
 import { useProjectDetails } from "@/app/projects/_hooks/useProjectDetails";
 import {
   ErrorMessage,
   ProjectDetails,
   ProjectDetailSkeleton,
+  StatusBadge,
 } from "@/app/components/projects";
 
 interface Props {
@@ -60,7 +67,7 @@ export default function ProjectDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto max-w-5xl py-4 px-4 sm:px-6 lg:px-8">
       <ProjectHeader
         project={project}
         canManage={canManageProject(project)}
@@ -78,7 +85,7 @@ export default function ProjectDetailPage({ params }: Props) {
               {project.description ? (
                 <p className="whitespace-pre-line">{project.description}</p>
               ) : (
-                <p className="text-gray-500 italic">Sin descripción</p>
+                <p className="text-muted-foreground italic">Sin descripción</p>
               )}
             </CardContent>
           </Card>
@@ -96,7 +103,7 @@ export default function ProjectDetailPage({ params }: Props) {
                   isDownloading={isDownloading}
                 />
               ) : (
-                <p className="text-gray-500 italic">No hay archivos adjuntos</p>
+                <p className="text-muted-foreground italic">No hay archivos adjuntos</p>
               )}
             </CardContent>
           </Card>
@@ -106,7 +113,7 @@ export default function ProjectDetailPage({ params }: Props) {
         <div>
           <ProjectDetails project={project} />
 
-          <div className="mt-10">
+          <div className="mt-4">
             <Button
               variant="outline"
               className="w-full"
@@ -131,22 +138,31 @@ const ProjectHeader = ({
   canManage: boolean;
   onEdit: () => void;
 }) => (
-  <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
-    <div>
-      <h1 className="text-3xl font-bold">{project.title}</h1>
-      <div className="flex items-center space-x-4 mt-2">
-        <p className="text-sm text-gray-500">
-          <Clock className="inline mr-1 h-4 w-4" />
-          Creado: {formatDate(project.createdAt.toString())}
-        </p>
+  <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+    <div className="space-y-2.5">
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-3xl font-bold">{project.title}</h1>
+        <StatusBadge status={project.status} />
+      </div>
 
-        {project.assignedTo ? (
-          <Badge variant="outline" className="bg-green-50 dark:bg-green-950">
-            <User className="mr-1 h-3 w-3" />
-            Asignado a: {project.assignedTo.name || project.assignedTo.email}
-          </Badge>
-        ) : (
-          <Badge variant="outline">Sin asignar</Badge>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock className="h-4 w-4" />
+          Creado {formatDate(project.createdAt.toString())}
+        </span>
+
+        <span className="inline-flex items-center gap-1.5">
+          <User className="h-4 w-4" />
+          {project.assignedTo
+            ? project.assignedTo.name || project.assignedTo.email
+            : "Sin asignar"}
+        </span>
+
+        {project.dueDate && (
+          <span className="inline-flex items-center gap-1.5">
+            <CalendarClock className="h-4 w-4" />
+            Vence {formatDueDate(project.dueDate)}
+          </span>
         )}
       </div>
     </div>
@@ -168,10 +184,10 @@ const FilesList = ({
     {files.map((file) => (
       <li key={file.id} className="py-3 flex justify-between items-center">
         <div className="flex items-center">
-          <FileText className="mr-2 h-4 w-4 text-gray-500" />
+          <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
           <div>
             <p className="font-medium">{file.filename}</p>
-            <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
+            <p className="text-sm text-muted-foreground">{formatFileSize(file.size)}</p>
           </div>
         </div>
 

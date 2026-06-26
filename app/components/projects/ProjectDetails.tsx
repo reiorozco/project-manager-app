@@ -1,7 +1,28 @@
-import { Clock, FileText, User } from "lucide-react";
+import { CalendarClock, CalendarOff, Clock, FileText, Tag, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProjectWithRelations } from "@/app/projects/_utils/types";
-import { formatDate } from "@/app/projects/_utils/dateUtils";
+import { formatDate, formatDueDate } from "@/app/projects/_utils/dateUtils";
+import StatusBadge from "@/app/components/projects/StatusBadge";
+
+const DetailRow = ({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <div className="flex items-start gap-3 py-3">
+    <span className="mt-0.5 text-muted-foreground [&_svg]:size-4">{icon}</span>
+    <div className="min-w-0 space-y-0.5">
+      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="text-sm font-medium">{children}</dd>
+    </div>
+  </div>
+);
 
 export const ProjectDetails = ({
   project,
@@ -10,56 +31,47 @@ export const ProjectDetails = ({
 }) => (
   <Card>
     <CardHeader>
-      <CardTitle className="text-lg">Detalles</CardTitle>
+      <CardTitle className="text-base">Detalles</CardTitle>
     </CardHeader>
 
     <CardContent>
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-sm font-medium text-gray-500">
-            <User className="inline mr-1 h-4 w-4" />
-            Creado por
-          </h3>
-          <p>{project.createdBy.name || project.createdBy.email}</p>
-        </div>
+      <dl className="divide-y divide-border/60">
+        <DetailRow icon={<Tag />} label="Estado">
+          <StatusBadge status={project.status} />
+        </DetailRow>
 
-        <div>
-          <h3 className="text-sm font-medium text-gray-500">
-            <Clock className="inline mr-1 h-4 w-4" />
-            Fecha de creación
-          </h3>
-          <p>{formatDate(project.createdAt.toString())}</p>
-        </div>
+        <DetailRow
+          icon={project.dueDate ? <CalendarClock /> : <CalendarOff />}
+          label="Fecha límite"
+        >
+          {project.dueDate ? (
+            formatDueDate(project.dueDate)
+          ) : (
+            <span className="font-normal text-muted-foreground">
+              Sin fecha
+            </span>
+          )}
+        </DetailRow>
 
-        <div>
-          <h3 className="text-sm font-medium text-gray-500">
-            <Clock className="inline mr-1 h-4 w-4" />
-            Última actualización
-          </h3>
-          <p>
-            {formatDate(
-              project.updatedAt?.toString() || project.createdAt.toString(),
-            )}
-          </p>
-        </div>
+        <DetailRow icon={<User />} label="Creado por">
+          {project.createdBy.name || project.createdBy.email}
+        </DetailRow>
 
-        <div>
-          <h3 className="text-sm font-medium text-gray-500">Estado</h3>
-          <p>
-            {project.assignedTo
-              ? `Asignado a ${project.assignedTo.name || project.assignedTo.email}`
-              : "Sin asignar"}
-          </p>
-        </div>
+        <DetailRow icon={<Clock />} label="Creado">
+          {formatDate(project.createdAt.toString())}
+        </DetailRow>
 
-        <div>
-          <h3 className="text-sm font-medium text-gray-500">
-            <FileText className="inline mr-1 h-4 w-4" />
-            Archivos
-          </h3>
-          <p>{project.files.length} archivos</p>
-        </div>
-      </div>
+        <DetailRow icon={<CalendarClock />} label="Última actualización">
+          {formatDate(
+            project.updatedAt?.toString() || project.createdAt.toString(),
+          )}
+        </DetailRow>
+
+        <DetailRow icon={<FileText />} label="Archivos">
+          {project.files.length}{" "}
+          {project.files.length === 1 ? "archivo" : "archivos"}
+        </DetailRow>
+      </dl>
     </CardContent>
   </Card>
 );

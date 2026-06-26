@@ -8,13 +8,13 @@ export default function NotFound() {
     <div className="container mx-auto max-w-3xl py-8">
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Page Not Found</AlertTitle>
+        <AlertTitle>Página no encontrada</AlertTitle>
 
         <AlertDescription>
-          Could not find requested resource
+          No encontramos la página que buscas.
           <Link href="/">
             <Button className="mt-4" variant="outline">
-              <ChevronLeft className="h-4 w-4" /> Volver a proyectos
+              <ChevronLeft className="h-4 w-4" /> Volver al inicio
             </Button>
           </Link>
         </AlertDescription>

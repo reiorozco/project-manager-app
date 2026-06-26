@@ -29,7 +29,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="bg-blue-50 rounded-md p-4 text-blue-700">
+          <div className="rounded-md bg-primary/10 p-4 text-primary">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 inline-block mr-2"
@@ -50,7 +50,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
             y haz clic en el enlace de confirmación para activar tu cuenta.
           </p>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Si no encuentras el correo, revisa tu carpeta de spam o correo no
             deseado.
           </p>
@@ -61,7 +61,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
             <Link href="/auth/login">Ir a iniciar sesión</Link>
           </Button>
 
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-muted-foreground text-center">
             Una vez que hayas confirmado tu correo, podrás iniciar sesión con
             tus credenciales.
           </p>

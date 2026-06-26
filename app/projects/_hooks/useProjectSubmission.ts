@@ -44,24 +44,17 @@ export function useProjectSubmission({
       );
 
       // 2. Crear el proyecto con los archivos subidos
-      return await projectService.createProject(
-        values.title,
-        values.description || "",
-        uploadedFiles,
-      );
+      return await projectService.createProject({
+        title: values.title,
+        description: values.description || "",
+        status: values.status,
+        dueDate: values.dueDate || null,
+        files: uploadedFiles,
+      });
     },
     onSuccess: (data) => {
-      // Actualizar consulta de proyectos
-      queryClient.setQueryData<{ projects: ProjectWithRelations[] }>(
-        ["projects", user?.id],
-        (old) => {
-          const oldProjects = old?.projects ?? [];
-
-          return {
-            projects: [data?.project, ...oldProjects],
-          };
-        },
-      );
+      // Refrescar la lista de proyectos (refetch al volver a /projects)
+      void queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       router.push(ROUTES.PROJECTS);
 
@@ -106,31 +99,22 @@ export function useProjectSubmission({
       return await projectService.updateProject(projectId, {
         title: values.title,
         description: values.description || "",
+        status: values.status,
+        dueDate: values.dueDate || null,
         assignedToId:
           values.assignedToId === "sin-asignar" ? null : values.assignedToId,
         files: uploadedFiles,
       });
     },
     onSuccess: (data) => {
-      // Actualizar consultas de proyectos y la del proyecto específico
-      queryClient.setQueryData<{ projects: ProjectWithRelations[] }>(
-        ["projects", user?.id],
-        (old) => {
-          if (!old) return { projects: [] };
-
-          const updatedProjects = old.projects.map((p) =>
-            p.id === data?.project?.id ? data?.project : p,
-          );
-
-          return { projects: updatedProjects };
-        },
-      );
+      // Actualizar la caché del proyecto específico y refrescar la lista
       queryClient.setQueryData<{ project: ProjectWithRelations }>(
         ["project", data?.project?.id],
         () => ({
           project: data?.project,
         }),
       );
+      void queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       router.push(ROUTES.PROJECT_DETAILS(data?.project?.id));
 

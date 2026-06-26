@@ -1,39 +1,55 @@
 import React from "react";
+import Link from "next/link";
+import { FolderPlus } from "lucide-react";
 import { UserRole } from "@/generated/prisma";
-import { ROLE_DISPLAY_MAP } from "@/lib/constants";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  ROLE_DISPLAY_MAP,
+  ROLES_CAN_CREATE_PROJECTS,
+  ROUTES,
+} from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   userRole: UserRole;
 }
 
+const ROLE_SUBTITLE: Record<UserRole, string> = {
+  [UserRole.PROJECT_MANAGER]:
+    "Supervisa, asigna y haz avanzar los proyectos del equipo.",
+  [UserRole.CLIENT]: "Crea proyectos y sigue su avance en un solo lugar.",
+  [UserRole.DESIGNER]: "Revisa los proyectos asignados y entrégalos a tiempo.",
+};
+
 function DashboardHeader({ userRole }: Props) {
-  // Obtener el texto del rol del usuario desde el mapa constante
   const roleText = ROLE_DISPLAY_MAP[userRole];
+  const canCreate = ROLES_CAN_CREATE_PROJECTS.includes(
+    userRole as "CLIENT" | "PROJECT_MANAGER",
+  );
 
   return (
-    <Card className="border-none shadow-md">
-      <CardContent className="px-6 py-10 md:px-12 text-center md:text-left">
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-          Bienvenido a Project Manager
-        </h1>
-
-        <p className="mt-3 text-xl text-gray-500">
-          Panel de gestión de proyectos de diseño
-        </p>
-
-        <div className="mt-4 flex items-center justify-center md:justify-start">
-          <span className="text-sm text-gray-500 mr-2">
-            Estás conectado como
-          </span>
-
-          <Badge variant="outline" className="font-medium">
+    <header className="flex flex-wrap items-end justify-between gap-4 border-b pb-6">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+            Panel
+          </h1>
+          <Badge variant="secondary" className="font-medium">
             {roleText}
           </Badge>
         </div>
-      </CardContent>
-    </Card>
+        <p className="text-muted-foreground">{ROLE_SUBTITLE[userRole]}</p>
+      </div>
+
+      {canCreate && (
+        <Button asChild>
+          <Link href={ROUTES.NEW_PROJECT}>
+            <FolderPlus className="h-4 w-4" />
+            Crear proyecto
+          </Link>
+        </Button>
+      )}
+    </header>
   );
 }
 

@@ -174,9 +174,9 @@ export default function RegisterPage() {
                           disabled={isSigningUp}
                         >
                           {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-500" />
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
                           ) : (
-                            <Eye className="h-4 w-4 text-gray-500" />
+                            <Eye className="h-4 w-4 text-muted-foreground" />
                           )}
                         </button>
                       </div>
@@ -223,11 +223,11 @@ export default function RegisterPage() {
         </CardContent>
 
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             ¿Ya tienes una cuenta?{" "}
             <Link
               href="/auth/login"
-              className="text-blue-600 hover:underline"
+              className="font-medium text-primary hover:underline"
               tabIndex={isSigningUp ? -1 : 0}
             >
               Inicia sesión

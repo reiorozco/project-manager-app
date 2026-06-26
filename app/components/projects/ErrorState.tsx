@@ -1,8 +1,14 @@
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 function ErrorState({ error }: { error: string }) {
   return (
-    <div className="p-6 bg-red-50 text-red-600 rounded-lg max-w-3xl mx-auto my-8">
-      <h2 className="text-lg font-semibold">Error</h2>
-      <p>{error}</p>
+    <div className="container mx-auto max-w-3xl py-8 px-4">
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Algo salió mal</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     </div>
   );
 }

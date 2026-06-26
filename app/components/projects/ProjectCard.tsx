@@ -15,8 +15,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { File, MoreVertical, User } from "lucide-react";
+import { CalendarClock, File, MoreVertical, User } from "lucide-react";
 import { ProjectWithRelations } from "@/app/projects/_utils/types";
+import { formatDueDate } from "@/app/projects/_utils/dateUtils";
+import StatusBadge from "@/app/components/projects/StatusBadge";
 
 interface ProjectCardProps {
   project: ProjectWithRelations;
@@ -57,9 +59,9 @@ function ProjectCard({
       : "NA";
 
   return (
-    <Card className="overflow-hidden border-muted hover:shadow-md transition-shadow duration-300 h-full flex flex-col">
+    <Card className="flex h-full flex-col overflow-hidden transition-all duration-200 hover:border-primary/30 hover:shadow-md">
       <CardHeader>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start gap-2">
           <CardTitle className="text-lg font-semibold">
             {project.title}
           </CardTitle>
@@ -70,6 +72,7 @@ function ProjectCard({
             />
           )}
         </div>
+        <StatusBadge status={project.status} className="mt-1" />
       </CardHeader>
 
       <CardContent className="flex flex-col justify-between flex-grow">
@@ -111,13 +114,17 @@ function ProjectCard({
           </div>
 
           <div className="flex justify-between items-center">
-            <Badge
-              variant="outline"
-              className="flex items-center bg-blue-50 dark:bg-blue-950"
-            >
-              <File className="h-3 w-3 mr-1" />
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <File className="h-3 w-3" />
               {project.files.length} archivos
             </Badge>
+
+            {project.dueDate && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <CalendarClock className="h-3 w-3" />
+                {formatDueDate(project.dueDate)}
+              </span>
+            )}
           </div>
         </div>
       </CardContent>

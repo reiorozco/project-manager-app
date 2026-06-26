@@ -142,11 +142,11 @@ export default function LoginPage() {
         </CardContent>
 
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             ¿No tienes una cuenta?{" "}
             <Link
               href="/auth/register"
-              className="text-blue-600 hover:underline"
+              className="font-medium text-primary hover:underline"
               tabIndex={isSigningIn ? -1 : 0}
             >
               Regístrate

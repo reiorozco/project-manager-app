@@ -63,6 +63,8 @@ export async function POST(request: NextRequest) {
     const project = await ProjectService.createProject({
       title: body.title,
       description: body.description,
+      status: body.status,
+      dueDate: body.dueDate,
       userId,
       files,
     });

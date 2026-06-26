@@ -16,6 +16,7 @@ import { ProjectForm } from "@/app/components/form/ProjectForm";
 
 import { useProjectSubmission } from "@/app/projects/_hooks/useProjectSubmission";
 import { useProjectDetails } from "@/app/projects/_hooks/useProjectDetails";
+import { toDateInputValue } from "@/app/projects/_utils/dateUtils";
 
 interface ProjectParams {
   params: Promise<{ id: string }>;
@@ -138,6 +139,8 @@ export default function EditProjectPage({ params }: ProjectParams) {
   const initialValues = {
     title: project.title,
     description: project.description || "",
+    status: project.status,
+    dueDate: toDateInputValue(project.dueDate),
     assignedToId: project.assignedToId || "",
   };
 

@@ -25,6 +25,13 @@ enum UserRole {
   DESIGNER
 }
 
+enum ProjectStatus {
+  DRAFT
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -39,11 +46,13 @@ model User {
 }
 
 model Project {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      ProjectStatus @default(DRAFT)
+  dueDate     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   // Relations
   createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])

@@ -39,9 +39,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { FileUploader } from "@/app/components/form/FileUploader";
 
-import { File as PrismaFile, User } from "@/generated/prisma";
+import { File as PrismaFile, ProjectStatus, User } from "@/generated/prisma";
 import { ProjectFormValues, projectSchema } from "@/app/projects/_utils/types";
 import { formatFileSize } from "@/app/projects/_utils/formatFileSize";
+import { PROJECT_STATUS_ORDER, STATUS_DISPLAY_MAP } from "@/lib/constants";
 
 interface ProjectFormProps {
   onSubmit: (
@@ -85,6 +86,8 @@ export function ProjectForm({
     defaultValues: initialValues || {
       title: "",
       description: "",
+      status: ProjectStatus.DRAFT,
+      dueDate: "",
       assignedToId: "",
       files: [],
     },
@@ -164,6 +167,55 @@ export function ProjectForm({
                 )}
               />
 
+              {/* Estado y fecha límite */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Seleccionar estado" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {PROJECT_STATUS_ORDER.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {STATUS_DISPLAY_MAP[status]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fecha límite</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               {/* Campo de asignación a diseñador (solo para project managers) */}
               {canAssignToDesigner && (
                 <FormField
@@ -211,7 +263,7 @@ export function ProjectForm({
                       >
                         <div className="flex-1 truncate">
                           <p className="text-sm font-medium">{file.filename}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             {formatFileSize(file.size)}
                           </p>
                         </div>
@@ -293,7 +345,7 @@ export function ProjectForm({
             </AlertDialogCancel>
 
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-destructive text-white hover:bg-destructive/90"
               onClick={handleDeleteConfirm}
               disabled={isSubmitting}
             >

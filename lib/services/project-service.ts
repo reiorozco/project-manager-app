@@ -1,5 +1,5 @@
 // lib/services/project-service.ts
-import { Prisma, UserRole } from "@/generated/prisma";
+import { Prisma, ProjectStatus, UserRole } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -9,6 +9,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export interface CreateProjectInput {
   title: string;
   description?: string;
+  status?: ProjectStatus;
+  dueDate?: string | Date | null;
   userId: string;
   files?: FileUpload[];
 }
@@ -280,6 +282,8 @@ export async function createProject(data: CreateProjectInput) {
     data: {
       title: data.title,
       description: data.description || "",
+      status: data.status,
+      dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
       createdBy: { connect: { id: data.userId } },
       files: createFileObjects(data.files),
     },
@@ -293,6 +297,8 @@ export async function createProject(data: CreateProjectInput) {
 export interface UpdateProjectInput {
   title?: string;
   description?: string;
+  status?: ProjectStatus;
+  dueDate?: string | Date | null;
   assignedToId?: string | null;
   files?: FileUpload[];
 }
@@ -321,6 +327,10 @@ function createProjectUpdateData(data: UpdateProjectInput) {
   return {
     ...(data.title && { title: data.title }),
     ...(data.description !== undefined && { description: data.description }),
+    ...(data.status !== undefined && { status: data.status }),
+    ...(data.dueDate !== undefined && {
+      dueDate: data.dueDate ? new Date(data.dueDate) : null,
+    }),
     ...(data.assignedToId !== undefined && {
       assignedTo: createAssignedToObject(data.assignedToId),
     }),

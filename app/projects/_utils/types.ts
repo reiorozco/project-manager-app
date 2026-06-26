@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { File as PrismaFile, Prisma, Project } from "@/generated/prisma";
+import {
+  File as PrismaFile,
+  Prisma,
+  Project,
+  ProjectStatus,
+} from "@/generated/prisma";
 
 // Constantes para validación de archivos
 export const MAX_FILES = 5;
@@ -16,6 +21,8 @@ export const projectSchema = z.object({
     .string()
     .max(500, { message: "La descripción no puede exceder los 500 caracteres" })
     .optional(),
+  status: z.nativeEnum(ProjectStatus),
+  dueDate: z.string().optional().nullable(),
   assignedToId: z.string().optional().nullable(),
   files: z
     .array(z.instanceof(File))

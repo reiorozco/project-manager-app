@@ -53,7 +53,7 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <div className="min-h-screen bg-gray-50 dark:bg-black">
+              <div className="min-h-screen bg-muted/40">
                 {/* Navegación superior */}
                 <Navbar />
 
