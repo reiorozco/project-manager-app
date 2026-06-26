@@ -114,6 +114,35 @@ class ProjectService {
     }
   }
 
+  async updateStatus(
+    projectId: string,
+    status: ProjectStatus,
+  ): Promise<{ project: ProjectWithRelations }> {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error ||
+            errorData.message ||
+            "Failed to update the status",
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error in updateStatus:", error);
+      throw error;
+    }
+  }
+
   async deleteProject(projectId: string): Promise<string> {
     try {
       const response = await fetch(`/api/projects/${projectId}`, {

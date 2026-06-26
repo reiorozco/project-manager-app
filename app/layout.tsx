@@ -25,13 +25,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Project Manager — Multi-Role Project Management",
     description:
-      "Full-stack project management app (Next.js, Prisma, Supabase) with role-based access, Row-Level Security and file storage.",
+      "Full-stack project management app (Next.js, Prisma, Supabase) with role-based access, a project lifecycle and file storage.",
     url: "https://project-manager-app-cyan.vercel.app",
     type: "website",
-    images: ["/og.png"],
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Project Manager — multi-role project management for design teams",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
+    title: "Project Manager — Multi-Role Project Management",
+    description:
+      "Multi-role project management for design teams — from draft to sign-off.",
+    images: ["/og.png"],
   },
 };
 

@@ -1,221 +1,122 @@
-# Design Project Management System
+# Project Manager
+
+> A multi-role project management app for design teams — clients brief work, project managers assign it, and designers deliver, all through one role-aware workflow.
 
 <p align="center">
   <a href="https://project-manager-app-cyan.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo"/></a>
-  <img src="https://img.shields.io/badge/Next.js_16-000?style=for-the-badge&logo=nextdotjs&logoColor=white"/>
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white"/>
-  <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Next.js_16-000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 16"/>
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/Tailwind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS v4"/>
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma"/>
+  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"/>
 </p>
 
-> 🔗 **Live demo:** [project-manager-app-cyan.vercel.app](https://project-manager-app-cyan.vercel.app)
+## Live Demo
 
-## 🔑 Demo Credentials
+**[project-manager-app-cyan.vercel.app](https://project-manager-app-cyan.vercel.app)**
 
-Try the live demo with these ready-to-use accounts (one per role) — no sign-up required:
+Sign in with any of the accounts below to explore the app. Each one lands on a different role-based experience — what you can see, create, assign, and approve changes per role.
 
 | Role | Email | Password |
 |------|-------|----------|
-| 👤 Client | `client@demo.com` | `demo1234` |
-| 🧑‍💼 Project Manager | `manager@demo.com` | `demo1234` |
-| 🎨 Designer | `designer@demo.com` | `demo1234` |
+| Project Manager | `manager@demo.com` | `demo1234` |
+| Client | `client@demo.com` | `demo1234` |
+| Designer | `designer@demo.com` | `demo1234` |
 
-Each role sees a different dashboard and set of permissions.
+## Tech Stack
 
-A web application developed with Next.js 16, Tailwind CSS, Prisma, and Supabase that allows different types of users (Clients, Project Managers, and Designers) to manage design projects securely, intuitively, and functionally.
+- **Framework** — [Next.js 16](https://nextjs.org/) (App Router, React Server Components)
+- **Language** — TypeScript 5, React 19
+- **Styling** — Tailwind CSS v4, [shadcn/ui](https://ui.shadcn.com/) (new-york), Lucide icons
+- **ORM** — Prisma 6
+- **Backend** — Supabase (Postgres + Auth + Storage)
+- **Data fetching** — TanStack React Query 5
+- **Forms & validation** — React Hook Form + Zod
 
-## Main Features
+## Key Features
 
-- **Role-based authentication and authorization**
-- **Complete project management** (create, read, update, delete)
-- **File upload and management** with Supabase Storage
-- **Responsive and modern interface** with Tailwind CSS and ShadCN UI
-- **Project assignment** to designers
+- **Role-based access** for three roles — Clients, Project Managers, and Designers — each with a tailored view and permission set. Project Managers see everything; Clients see the projects they created; Designers see only projects assigned to them.
+- **Project lifecycle** with a four-stage status (`Draft` → `In progress` → `In review` → `Done`) and optional due dates.
+- **Role-aware status workflow** — Designers can move work forward and submit it for review, while only the Project Manager or the owning Client can give final approval and mark a project as `Done`. Enforced server-side, not just in the UI.
+- **Search, filter, and sort** on the projects list — search by title or description, filter by status, and sort projects across the workflow.
+- **File uploads to Supabase Storage** with drag-and-drop, plus client-side validation of file count, size, and type.
+- **Light / dark theme** via `next-themes`, with a no-flash toggle.
+- **Responsive design** that holds up from mobile to desktop.
 
-## Technologies Used
+## Architecture Notes
 
-- **Frontend**: Next.js 16 (App Router)
-- **Styling**: Tailwind CSS + ShadCN UI
-- **Backend**: Next.js API Routes
-- **Database**: PostgreSQL (Supabase)
-- **ORM**: Prisma
-- **Authentication**: Supabase Auth
-- **Storage**: Supabase Storage
-- **State and Cache Management**: React Query
-- **Form Validation**: Zod + React Hook Form
+- **Application-level authorization in a service layer.** All access rules live in [`lib/services/project-service.ts`](lib/services/project-service.ts) (`canViewProject`, `canManageProject`, `canUpdateProjectStatus`, `updateProjectStatus`). Permissions are resolved server-side so every API route shares the same source of truth — including the workflow rule that reserves the final `Done` sign-off for managers and clients.
+- **Type-safe data with Prisma + Zod.** Prisma models the domain (`User`, `Project`, `File`) end to end, while Zod schemas validate form input via the React Hook Form resolver.
+- **Optimistic-friendly data fetching with React Query.** Server state is fetched and mutated through TanStack Query hooks (`app/projects/_hooks/`), keeping caches in sync after create / update / delete and during status changes.
+- **Design tokens & theming via CSS variables.** Colors are defined as OKLCH custom properties in `app/globals.css` (including dedicated `--status-*` tokens) and mapped through Tailwind v4's `@theme`, so light/dark and status colors stay consistent across the UI.
 
-## Local Setup Instructions
+## Screenshots
+
+<!-- Screenshots to be added -->
+
+![Dashboard showing project stats and recent projects across roles](docs/screenshot-dashboard.png)
+
+![Projects list with search, status filter, and sorting controls](docs/screenshot-projects.png)
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18.x or higher
-- npm or yarn
-- [Supabase](https://supabase.com/) account
+- Node.js 20+
+- A [Supabase](https://supabase.com/) project (provides Postgres, Auth, and Storage)
 
-### Step 1: Clone the repository
-
-```bash
-git clone https://github.com/reiorozco/project-manager-app.git
-cd project-manager-app
-```
-
-### Step 2: Install dependencies
+### 1. Install dependencies
 
 ```bash
 npm install
-# or if you use yarn
-yarn install
 ```
 
-### Step 3: Configure Supabase
+### 2. Configure environment variables
 
-1. Create a new project in Supabase
-
-2. Configure authentication:
-    - In "Authentication" > "Providers", enable "Email"
-    - In "URL Configuration", set Site URL as `http://localhost:3000`
-    - Add `http://localhost:3000/auth/callback` as a redirect URL
-
-3. Create a bucket for files:
-    - In "Storage", create a new bucket called `project-files`
-    - Set appropriate RLS permissions or make it public for testing
-
-### Step 4: Configure environment variables
-
-Create a `.env.local` file in the project root with the following content:
-
-```
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-DIRECT_URL=postgresql://postgres:your-password@db.your-project.supabase.co:5432/postgres
-DATABASE_URL=postgresql://postgres:your-password@db.your-project.supabase.co:5432/postgres
-```
-
-### Step 5: Configure Prisma and synchronize the schema
+Create a `.env.local` file in the project root:
 
 ```bash
-npx prisma db push
+# Postgres connection (from your Supabase project settings)
+DATABASE_URL=
+DIRECT_URL=
+
+# Supabase API
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-### Step 6: Run the development server
+In your Supabase project, enable the Email auth provider and create a Storage bucket named `project-files` for uploads.
+
+### 3. Set up the database
+
+```bash
+npx prisma generate   # generate the Prisma client
+npx prisma db push    # sync the schema to your database
+```
+
+### 4. Run the app
 
 ```bash
 npm run dev
-# or with yarn
-yarn dev
 ```
 
-Now you can access the application at [http://localhost:3000](http://localhost:3000/).
-
-## Technical Explanation of the Solution
-
-### General Architecture
-
-The project is built following the Next.js App Router architecture, which allows the combination of server-side and client-side components. The application follows an API-first approach, where client components communicate with API endpoints to perform CRUD operations.
-
-### Authentication and Authorization
-
-- **Authentication**: Implemented using Supabase Auth, which provides a complete system for registration, login, and session management.
-
-- **Authentication flow**:
-    1. The user registers or logs in through forms built with React Hook Form and validated with Zod
-    2. Supabase handles authentication and returns a JWT token
-    3. The token is stored in cookies using the Supabase client for Next.js
-    4. A middleware verifies authentication on protected routes
-
-- **Role-based authorization**:
-    - Three roles were defined: Client, Project Manager, and Designer
-    - Each role has different permissions and access to functionalities
-    - Authorization is verified both in the frontend and backend
-    - Project Managers can manage all projects
-    - Clients can only manage their own projects
-    - Designers can only view projects assigned to them
-
-### Project Management (CRUD)
-
-![DBML Schema](https://github.com/reiorozco/project-manager-app/blob/master/public/schema.svg)
-
-A complete project management system was implemented with the following functionalities:
-
-- **Create**: Form to create projects with title, description, and files
-- **Read**: List view and detailed view of projects
-- **Update**: Project editing, including assignment to designers
-- **Delete**: Project deletion with confirmation
-
-Each operation is protected by authorization checks to ensure that only users with appropriate permissions can make changes.
-
-### State and Cache Management with React Query
-
-React Query was used to efficiently manage server state:
-- Smart caching to reduce unnecessary requests
-- Automatic cache invalidation when data changes
-- Retry of failed requests
-- Loading and error states to improve UX
-- Optimistic mutations for instant updates
-
-### File Management
-
-- File uploads are handled through Supabase Storage
-- Multiple file uploads are supported
-- File size and type validation is implemented
-- Unique names are generated to avoid collisions
-- Files are organized in folders by user and project
-
-### User Interface
-
-The interface was built with Tailwind CSS and ShadCN UI components to create a modern and coherent experience:
-
-- Responsive design that works on mobile and desktop devices
-- Intuitive forms with real-time validation
-- Visual feedback for asynchronous operations
-- Confirmation modals for destructive actions
-- Clear and consistent navigation
-
-### Security
-
-Several security layers were implemented:
-
-- Authentication with JWT tokens
-- Authorization verification at each API endpoint
-- Input validation on client and server
-- Row Level Security (RLS) policies in Supabase
-- Data sanitization before storage
+Open [http://localhost:3000](http://localhost:3000). For a production build, run `npm run build` followed by `npm run start`.
 
 ## Project Structure
 
 ```
-├── app/                     # Application structure (App Router)
-│   ├── api/                 # API endpoints
-│   ├── auth/                # Authentication pages
-│       └── auth-context.tsx # Authentication context
-│   ├── components/          # Reusable components
-│       └── dashboard/       # UI Components (ShadCN)
-│       └── form/            # UI Components (ShadCN)
-│       └── projects/        # UI Components (ShadCN)
-│   ├── projects/            # Project management
-│   └── page.tsx             # Home page
-├── components/              # Reusable components
-│   └── ui/                  # UI Components (ShadCN)
-├── generated/               # Prisma generated
-├── lib/                     # Utilities and services
-│   ├── services/            # Application services
-│   ├── supabase/            # Supabase client
-│   └── prisma.ts            # Prisma client
-├── prisma/                  # Prisma configuration
-│   └── schema.prisma        # Database schema
-├── public/                  # Static files
-├── .env.local               # Environment variables (not included in repo)
-├── middleware.ts            # Authentication middleware
-├── next.config.js           # Next.js configuration
-└── package.json             # Project dependencies
+app/
+  api/              # Route handlers (projects, files, status, designers)
+  auth/             # Login, register, callback/confirm routes, auth context
+  components/       # Feature UI (dashboard, forms, projects, navbar, theme)
+  projects/         # Project routes + colocated hooks and utils
+  globals.css       # OKLCH design tokens and Tailwind theme
+components/ui/      # shadcn/ui primitives
+lib/
+  services/         # Application/authorization service layer
+  supabase/         # Server, client, and middleware Supabase setup
+  prisma.ts         # Prisma client singleton
+prisma/
+  schema.prisma     # User, Project, File models + enums
+middleware.ts       # Session refresh / route protection
 ```
-
-## Potential Future Improvements
-
-- Implementation of real-time notifications
-- Project comment system
-- Analytics dashboard for Project Managers
-- Filtering, sorting, and pagination for projects page
-- Implementation of automated tests

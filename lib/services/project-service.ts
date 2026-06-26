@@ -146,6 +146,69 @@ export async function canViewProject(userId: string, projectId: string) {
 }
 
 /**
+ * Check if a user can change a project's status. Project Managers and the
+ * project's creator (Client) can act on their projects; the assigned Designer
+ * can act on the project assigned to them.
+ */
+export async function canUpdateProjectStatus(
+  userId: string,
+  projectId: string,
+) {
+  const userRole = await getUserRole(userId);
+  if (userRole === UserRole.PROJECT_MANAGER) {
+    return true;
+  }
+
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { createdById: true, assignedToId: true },
+  });
+  if (!project) {
+    return false;
+  }
+
+  if (project.createdById === userId) {
+    return true;
+  }
+
+  return userRole === UserRole.DESIGNER && project.assignedToId === userId;
+}
+
+/**
+ * Update only a project's status, enforcing role-based rules: marking a project
+ * as DONE (final approval / sign-off) is reserved for the Project Manager or
+ * the client who created it. A Designer can move work forward (e.g. submit for
+ * review) but cannot approve it.
+ */
+export async function updateProjectStatus(
+  projectId: string,
+  userId: string,
+  status: ProjectStatus,
+) {
+  const canAct = await canUpdateProjectStatus(userId, projectId);
+  if (!canAct) {
+    throw new ProjectServiceError(
+      "You don't have permission to change this project's status",
+    );
+  }
+
+  if (status === ProjectStatus.DONE) {
+    const canApprove = await canManageProject(userId, projectId);
+    if (!canApprove) {
+      throw new ProjectServiceError(
+        "Only a project manager or the client can mark a project as done",
+      );
+    }
+  }
+
+  return prisma.project.update({
+    where: { id: projectId },
+    data: { status },
+    include: getProjectInclude(),
+  });
+}
+
+/**
  * Project retrieval functions
  */
 

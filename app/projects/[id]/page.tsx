@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { File as PrismaFile } from "@/generated/prisma";
+import { File as PrismaFile, ProjectStatus } from "@/generated/prisma";
 import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +22,7 @@ import {
   ErrorMessage,
   ProjectDetails,
   ProjectDetailSkeleton,
-  StatusBadge,
+  StatusControl,
 } from "@/app/components/projects";
 
 interface Props {
@@ -40,6 +40,9 @@ export default function ProjectDetailPage({ params }: Props) {
     loading,
     error,
     canManageProject,
+    allowedStatusTargets,
+    updateStatus,
+    isUpdatingStatus,
     downloadFile,
     isDownloading,
   } = useProjectDetails(projectId);
@@ -71,6 +74,9 @@ export default function ProjectDetailPage({ params }: Props) {
       <ProjectHeader
         project={project}
         canManage={canManageProject(project)}
+        statusTargets={allowedStatusTargets(project)}
+        onChangeStatus={updateStatus}
+        isUpdatingStatus={isUpdatingStatus}
         onEdit={() => router.push(ROUTES.EDIT_PROJECT(projectId))}
       />
 
@@ -132,17 +138,28 @@ export default function ProjectDetailPage({ params }: Props) {
 const ProjectHeader = ({
   project,
   canManage,
+  statusTargets,
+  onChangeStatus,
+  isUpdatingStatus,
   onEdit,
 }: {
   project: ProjectWithRelations;
   canManage: boolean;
+  statusTargets: ProjectStatus[];
+  onChangeStatus: (status: ProjectStatus) => void;
+  isUpdatingStatus: boolean;
   onEdit: () => void;
 }) => (
   <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
     <div className="space-y-2.5">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-3xl font-bold">{project.title}</h1>
-        <StatusBadge status={project.status} />
+        <StatusControl
+          status={project.status}
+          targets={statusTargets}
+          onChange={onChangeStatus}
+          isUpdating={isUpdatingStatus}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
