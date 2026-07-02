@@ -28,6 +28,20 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@types/*"
         update-types: ["version-update:semver-major"]
+      # majors con breaking real que requieren migracion dedicada, no un bump:
+      #  - prisma 7: elimina url/directUrl del schema, obliga a prisma.config.ts
+      #  - zod 4: cambia API de validacion y acopla con @hookform/resolvers v4
+      #  - lucide-react 1: major de la lib de iconos
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "zod"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@hookform/resolvers"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "lucide-react"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
