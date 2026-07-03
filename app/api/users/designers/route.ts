@@ -1,9 +1,8 @@
 // app/api/users/designers/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, UserRole } from "@/generated/prisma";
+import { UserRole } from "@/generated/prisma";
 import { createClient } from "@/lib/supabase/server";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
