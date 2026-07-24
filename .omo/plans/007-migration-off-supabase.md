@@ -787,19 +787,19 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: After the deploy is READY, `curl -sI https://project-manager-app-cyan.vercel.app` returns 200 or 307; login still works for all three demos.
   - Commit strategy: This is the Fase 5 commit.
 
-- [~] 79. Supabase Dashboard → Project `hslsqmuhkctcjftwnive` → Settings → General → Danger Zone → Delete Project. IRREVERSIBLE. Enter the project name to confirm. Wait for confirmation email if applicable - expect project no longer listed in Supabase account.
+- [x] 79. Supabase Dashboard → Project `hslsqmuhkctcjftwnive` → Settings → General → Danger Zone → Delete Project. IRREVERSIBLE. Enter the project name to confirm. Wait for confirmation email if applicable - expect project no longer listed in Supabase account.
   - Files: none.
   - Acceptance: Supabase Dashboard shows the project as deleted or absent; the account's active-project count is now < 2 (slot free for matchday-dev).
   - QA: Visiting `https://hslsqmuhkctcjftwnive.supabase.co` returns a Supabase "project not found" or generic 404 page.
   - Commit strategy: n/a.
 
-- [~] 80. Verify Supabase MCP entry no longer resolves anywhere (already deleted in todo 74 as `.mcp.json`). Confirm the agent's tool list in a fresh session does not include a `supabase` MCP server - expect no `mcp_supabase_*` tools available in the executor's environment.
+- [x] 80. Verify Supabase MCP entry no longer resolves anywhere (already deleted in todo 74 as `.mcp.json`). Confirm the agent's tool list in a fresh session does not include a `supabase` MCP server - expect no `mcp_supabase_*` tools available in the executor's environment.
   - Files: none.
   - Acceptance: Restart / re-list the agent's tools; no Supabase MCP tool appears.
   - QA: n/a (agent-runtime observation).
   - Commit strategy: n/a.
 
-- [~] 81. GATE — Fase 5 complete. Print final summary: (a) Supabase deleted (slot free), (b) all deps and code removed, (c) MCP removed, (d) docs updated, (e) production still green. Then run the FINAL VERIFICATION WAVE (below).
+- [x] 81. GATE — Fase 5 complete. Print final summary: (a) Supabase deleted (slot free), (b) all deps and code removed, (c) MCP removed, (d) docs updated, (e) production still green. Then run the FINAL VERIFICATION WAVE (below).
 
 ## Final verification wave
 
@@ -815,7 +815,7 @@ from being declared complete and requires targeted remediation before closing.
 - [x] F7. Vercel Blob store has at least as many blobs as File rows: `vercel blob list <store-name> --json | jq 'length'` returns >= `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"File\""`.
 - [x] F8. Production login works for all three demo users on https://project-manager-app-cyan.vercel.app — each shows the correct role-based dashboard, zero DevTools console errors.
 - [x] F9. Production upload + download + delete round-trip works: upload a test PDF, verify appears in project detail, download and verify byte identity, delete and verify gone from both UI and Blob store.
-- [~] F10. Supabase account has 1 active project (the other one). The matchday-dev slot is free.
+- [x] F10. Supabase account has 1 active project (the other one). The matchday-dev slot is free.
 - [x] F11. Git history shows 6 commits on the migration path with the expected prefixes: `git log --oneline main | head -8 | grep -cE 'fase-(0|1|2|3|4|5)/5'` returns 6 (or 5 if Fase 4's merge was squashed — accept squash as one commit covering fases 1-4).
 
 ## Rollback playbook
