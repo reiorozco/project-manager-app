@@ -84,13 +84,13 @@ redirect fix is P0 and ships on its own gate.
 
 ### Fase 1 — P0: restore post-auth redirect
 
-- [ ] 1. `specs/008-post-migration-fixes.md`: Copy this plan verbatim from `.omo/plans/008-post-migration-fixes.md` so the project's `specs/` convention holds - expect the two files are byte-identical.
+- [x] 1. `specs/008-post-migration-fixes.md`: Copy this plan verbatim from `.omo/plans/008-post-migration-fixes.md` so the project's `specs/` convention holds - expect the two files are byte-identical.
   - Files: `specs/008-post-migration-fixes.md` (new)
   - Acceptance: `diff .omo/plans/008-post-migration-fixes.md specs/008-post-migration-fixes.md` produces empty output.
   - QA: `diff .omo/plans/008-post-migration-fixes.md specs/008-post-migration-fixes.md && echo IDENTICAL` prints `IDENTICAL`.
   - Commit strategy: Group with Fase 1 commit.
 
-- [ ] 2. `git`: Create and check out branch `fix/008-post-migration` from a clean, up-to-date `main` - expect branch exists and tracks current origin/main.
+- [x] 2. `git`: Create and check out branch `fix/008-post-migration` from a clean, up-to-date `main` - expect branch exists and tracks current origin/main.
   - Files: none
   - Acceptance: `git branch --show-current` returns `fix/008-post-migration`; `git log --oneline -1` matches the current tip of origin/main (`a4c223f` or later).
   - QA: `git rev-parse --abbrev-ref HEAD` returns `fix/008-post-migration`.
@@ -134,19 +134,19 @@ redirect fix is P0 and ships on its own gate.
   - QA: `node /tmp/qa-008-auth-redirect.mjs; echo "exit=$?"` prints `exit=0` and three `PASS` lines. Save the full output to `/tmp/qa-008-results.txt`.
   - Commit strategy: Script is transient; do not commit.
 
-- [ ] 7. Commit Fase 1: `git add specs/008-post-migration-fixes.md .omo/ app/auth/login/page.tsx app/auth/register/page.tsx app/components/Navbar.tsx && git commit -m "fix(auth): redirect to dashboard after sign-in and sign-up"` - expect one commit.
+- [x] 7. Commit Fase 1: `git add specs/008-post-migration-fixes.md .omo/ app/auth/login/page.tsx app/auth/register/page.tsx app/components/Navbar.tsx && git commit -m "fix(auth): redirect to dashboard after sign-in and sign-up"` - expect one commit.
   - Files: staged and committed.
   - Acceptance: `git log --oneline -1` matches; `git show --stat HEAD` lists the auth page(s).
   - QA: `git show --stat HEAD | grep -c 'app/auth/login/page.tsx'` returns 1.
   - Commit strategy: This is the Fase 1 commit.
 
-- [ ] 8. Push, open PR, merge, verify in production. Push `fix/008-post-migration`, wait for the Vercel preview to reach READY, re-run the todo 6 Playwright script against the PREVIEW URL (change the base URL), confirm exit 0, then merge to `main` and wait for the production deploy. Finally re-run the script against `https://project-manager-app-cyan.vercel.app` and confirm exit 0 - expect the redirect works in production for all three roles.
+- [x] 8. Push, open PR, merge, verify in production. Push `fix/008-post-migration`, wait for the Vercel preview to reach READY, re-run the todo 6 Playwright script against the PREVIEW URL (change the base URL), confirm exit 0, then merge to `main` and wait for the production deploy. Finally re-run the script against `https://project-manager-app-cyan.vercel.app` and confirm exit 0 - expect the redirect works in production for all three roles.
   - Files: none.
   - Acceptance: Script exits 0 against both preview and production. Save outputs to `/tmp/qa-008-preview.txt` and `/tmp/qa-008-prod.txt`.
   - QA: Both files end with three `PASS` lines and `exit=0`.
   - Commit strategy: n/a (PR merge).
 
-- [ ] 9. GATE — Fase 1 complete (P0 resolved). Print summary: (a) files changed, (b) local QA output, (c) preview QA output, (d) production QA output, (e) merge SHA. Then PAUSE. Fases 2 and 3 are optional tech debt — do NOT begin them without explicit user "OK".
+- [x] 9. GATE — Fase 1 complete (P0 resolved). Print summary: (a) files changed, (b) local QA output, (c) preview QA output, (d) production QA output, (e) merge SHA. Then PAUSE. Fases 2 and 3 are optional tech debt — do NOT begin them without explicit user "OK".
 
 ### Fase 2 — P2: Next.js 16 proxy convention
 
