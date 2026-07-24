@@ -18,11 +18,11 @@ export function useProjectSubmission({
   onSuccess,
   onError,
 }: UseProjectSubmissionProps = {}) {
-  const { user, supabase } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const fileUploadService = new FileUploadService(supabase);
+  const fileUploadService = new FileUploadService();
 
   // Mutation to create a project
   const createProjectMutation = useMutation({
@@ -41,6 +41,7 @@ export function useProjectSubmission({
       const uploadedFiles = await fileUploadService.uploadMultipleFiles(
         files,
         user.id,
+        "new",
       );
 
       // 2. Create the project with the uploaded files
@@ -53,7 +54,6 @@ export function useProjectSubmission({
       });
     },
     onSuccess: (data) => {
-      // Refresh the project list (refetch when returning to /projects)
       void queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       router.push(ROUTES.PROJECTS);
@@ -89,6 +89,7 @@ export function useProjectSubmission({
       const uploadedFiles = await fileUploadService.uploadMultipleFiles(
         files,
         user.id,
+        projectId,
       );
 
       // 2. Update the project with the uploaded files
@@ -103,7 +104,6 @@ export function useProjectSubmission({
       });
     },
     onSuccess: (data) => {
-      // Update the cache for this specific project and refresh the list
       queryClient.setQueryData<{ project: ProjectWithRelations }>(
         ["project", data?.project?.id],
         () => ({

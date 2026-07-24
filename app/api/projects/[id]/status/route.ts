@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ProjectStatus } from "@/generated/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
 import * as ProjectService from "@/lib/services/project-service";
 
 type Params = Promise<{ id: string }>;
@@ -12,12 +12,8 @@ export async function PATCH(
   try {
     const { id: projectId } = await params;
 
-    const supabase = await createClient(request);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -31,7 +27,7 @@ export async function PATCH(
     try {
       const project = await ProjectService.updateProjectStatus(
         projectId,
-        user.id,
+        session.user.id,
         status,
       );
       return NextResponse.json({ project });

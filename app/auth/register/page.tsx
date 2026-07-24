@@ -26,13 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const registerSchema = z.object({
@@ -43,9 +36,6 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
-  role: z.enum(["CLIENT", "PROJECT_MANAGER", "DESIGNER"], {
-    message: "Select a valid role",
-  }),
 });
 
 export default function RegisterPage() {
@@ -60,7 +50,6 @@ export default function RegisterPage() {
       fullName: "",
       email: "",
       password: "",
-      role: "CLIENT",
     },
   });
 
@@ -68,21 +57,9 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      // Register the user in Supabase Auth
       const { error: authError } = await signUp(
-        {
-          email: values.email,
-          password: values.password,
-          fullName: values.fullName,
-          role: values.role,
-        },
-        {
-          onSuccess: () => {
-            router.replace(
-              `/auth/register/confirm?email=${encodeURIComponent(values.email)}`,
-            );
-          },
-        },
+        { email: values.email, password: values.password, name: values.fullName },
+        { onSuccess: () => { router.replace("/"); } },
       );
 
       if (authError) {
@@ -179,35 +156,6 @@ export default function RegisterPage() {
                         </button>
                       </div>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={isSigningUp}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="CLIENT">Client</SelectItem>
-                        <SelectItem value="PROJECT_MANAGER">
-                          Project Manager
-                        </SelectItem>
-                        <SelectItem value="DESIGNER">Designer</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

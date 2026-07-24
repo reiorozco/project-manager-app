@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { UserRole } from "@/generated/prisma";
 import { getProjectsForUser } from "@/lib/services/project-service";
 import {
   DashboardHeader,
@@ -8,26 +10,19 @@ import {
 } from "@/app/components/dashboard";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({ headers: await headers() });
 
-  if (!user) {
+  if (!session) {
     return redirect("/auth/login");
   }
-  const {
-    user_metadata: { role },
-  } = user;
 
-  const projects = await getProjectsForUser(user.id);
+  const role = session.user.role as UserRole;
+  const projects = await getProjectsForUser(session.user.id);
 
   return (
     <div className="container mx-auto max-w-5xl py-4 px-4 sm:px-6 lg:px-8">
       <DashboardHeader userRole={role} />
-
       <ProjectStats projects={projects} />
-
       <RecentProjects projects={projects} />
     </div>
   );

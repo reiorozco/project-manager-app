@@ -1,7 +1,7 @@
 // lib/services/project-service.ts
 import { Prisma, ProjectStatus, UserRole } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { del } from "@vercel/blob";
 
 /**
  * Types and interfaces
@@ -439,22 +439,10 @@ export async function updateProject(
  * File operations
  */
 
-/**
- * Delete files from Supabase storage
- * @param files - Array of file objects
- * @param supabaseAdmin - Supabase client with admin privileges
- */
-async function deleteFilesFromStorage(
-  files: { path: string }[],
-  supabaseAdmin: SupabaseClient,
-) {
-  if (!files || files.length === 0) {
-    return;
-  }
-
+async function deleteFilesFromStorage(files: { path: string }[]) {
+  if (!files || files.length === 0) return;
   for (const file of files) {
-    const path = file.path.replace("public/", "");
-    await supabaseAdmin.storage.from("project-files").remove([path]);
+    await del(file.path);
   }
 }
 
@@ -462,15 +450,10 @@ async function deleteFilesFromStorage(
  * Delete a project and its associated files
  * @param projectId - The ID of the project
  * @param userId - The ID of the user making the deletion
- * @param supabaseAdmin - Supabase client with admin privileges
  * @returns The deleted project
  * @throws ProjectServiceError if the user doesn't have permission
  */
-export async function deleteProject(
-  projectId: string,
-  userId: string,
-  supabaseAdmin: SupabaseClient,
-) {
+export async function deleteProject(projectId: string, userId: string) {
   const canManage = await canManageProject(userId, projectId);
 
   if (!canManage) {
@@ -489,8 +472,8 @@ export async function deleteProject(
     throw new ProjectServiceError("Project not found");
   }
 
-  // Delete files from Supabase storage
-  await deleteFilesFromStorage(project.files, supabaseAdmin);
+  // Delete files from Vercel Blob storage
+  await deleteFilesFromStorage(project.files);
 
   // Delete project (and its related files thanks to onDelete: Cascade)
   return prisma.project.delete({
@@ -537,15 +520,10 @@ export async function addFilesToProject(
  * Remove a file from a project and delete it from storage
  * @param fileId - The ID of the file
  * @param userId - The ID of the user removing the file
- * @param supabaseAdmin - Supabase client with admin privileges
  * @returns The deleted file
  * @throws ProjectServiceError if the user doesn't have permission or file not found
  */
-export async function removeFileFromProject(
-  fileId: string,
-  userId: string,
-  supabaseAdmin: SupabaseClient,
-) {
+export async function removeFileFromProject(fileId: string, userId: string) {
   const file = await prisma.file.findUnique({
     where: { id: fileId },
     include: { project: true },
@@ -563,9 +541,8 @@ export async function removeFileFromProject(
     );
   }
 
-  // Delete file from Supabase storage
-  const path = file.path.replace("public/", "");
-  await supabaseAdmin.storage.from("project-files").remove([path]);
+  // Delete file from Vercel Blob storage
+  await del(file.path);
 
   // Delete reference in the database
   return prisma.file.delete({
