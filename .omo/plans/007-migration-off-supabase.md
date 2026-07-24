@@ -781,7 +781,7 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 5 commit.
 
-- [~] 78. Commit Fase 5 cleanup: `git add . && git commit -m "chore(fase-5/5): remove Supabase code, deps, docs, and MCP entry"` and push to `main` - expect one commit on main.
+- [x] 78. Commit Fase 5 cleanup: `git add . && git commit -m "chore(fase-5/5): remove Supabase code, deps, docs, and MCP entry"` and push to `main` - expect one commit on main.
   - Files: all Fase 5 changes staged and committed.
   - Acceptance: `git log --oneline -1` on `main` matches; `git push origin main` succeeds; Vercel triggers a final production deploy which must succeed (no runtime references to Supabase).
   - QA: After the deploy is READY, `curl -sI https://project-manager-app-cyan.vercel.app` returns 200 or 307; login still works for all three demos.
@@ -806,7 +806,7 @@ Fase 3's backfill script, then removed in Fase 5.
 Run this wave AFTER todo 81. Every check below must pass; any failure blocks the migration
 from being declared complete and requires targeted remediation before closing.
 
-- [~] F1. Zero Supabase references remain in the codebase: `grep -ri "supabase" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.mjs" --include="*.json" --include="*.md" app/ lib/ scripts/ middleware.ts prisma/ next.config.ts package.json README.md PRODUCT.md .env.example 2>/dev/null` returns 0 hits. Any lingering hit is a bug — trace and remove.
+- [x] F1. Zero Supabase references remain in the codebase: `grep -ri "supabase" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.mjs" --include="*.json" --include="*.md" app/ lib/ scripts/ middleware.ts prisma/ next.config.ts package.json README.md PRODUCT.md .env.example 2>/dev/null` returns 0 hits. Any lingering hit is a bug — trace and remove.
 - [x] F2. Neon has the expected six tables: `psql "$DIRECT_URL" -c "\dt public.*"` shows exactly `User`, `Project`, `File`, `Session`, `Account`, `Verification`.
 - [x] F3. Demo users are seeded pre-verified: `psql "$DIRECT_URL" -c "SELECT email, role, \"emailVerified\" FROM \"User\" WHERE email LIKE '%@demo.com' ORDER BY email"` returns exactly 3 rows, all `emailVerified = t`, roles `PROJECT_MANAGER` / `CLIENT` / `DESIGNER`.
 - [x] F4. Prisma schema validates cleanly: `npx prisma validate` prints "The schema is valid" and exits 0.
@@ -816,7 +816,7 @@ from being declared complete and requires targeted remediation before closing.
 - [x] F8. Production login works for all three demo users on https://project-manager-app-cyan.vercel.app — each shows the correct role-based dashboard, zero DevTools console errors.
 - [x] F9. Production upload + download + delete round-trip works: upload a test PDF, verify appears in project detail, download and verify byte identity, delete and verify gone from both UI and Blob store.
 - [~] F10. Supabase account has 1 active project (the other one). The matchday-dev slot is free.
-- [~] F11. Git history shows 6 commits on the migration path with the expected prefixes: `git log --oneline main | head -8 | grep -cE 'fase-(0|1|2|3|4|5)/5'` returns 6 (or 5 if Fase 4's merge was squashed — accept squash as one commit covering fases 1-4).
+- [x] F11. Git history shows 6 commits on the migration path with the expected prefixes: `git log --oneline main | head -8 | grep -cE 'fase-(0|1|2|3|4|5)/5'` returns 6 (or 5 if Fase 4's merge was squashed — accept squash as one commit covering fases 1-4).
 
 ## Rollback playbook
 
