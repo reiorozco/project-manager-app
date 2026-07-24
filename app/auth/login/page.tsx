@@ -53,22 +53,18 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const { error: authError } = await signIn(
-        {
-          email: values.email,
-          password: values.password,
-        },
-        {
-          onSuccess: () => {
-            router.replace(ROUTES.DASHBOARD);
-          },
-        },
-      );
+      const { error: authError } = await signIn({
+        email: values.email,
+        password: values.password,
+      });
 
       if (authError) {
         setError(authError.message);
         return;
       }
+
+      router.push("/");
+      router.refresh();
     } catch (err) {
       setError("Something went wrong. Please try again later.");
       console.error("Unexpected error during sign in:", err);

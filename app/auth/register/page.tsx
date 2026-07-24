@@ -57,15 +57,19 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      const { error: authError } = await signUp(
-        { email: values.email, password: values.password, name: values.fullName },
-        { onSuccess: () => { router.replace("/"); } },
-      );
+      const { error: authError } = await signUp({
+        email: values.email,
+        password: values.password,
+        name: values.fullName,
+      });
 
       if (authError) {
         setError(authError.message);
         return;
       }
+
+      router.push("/");
+      router.refresh();
     } catch (err) {
       setError("Something went wrong. Please try again later.");
       console.error("Unexpected error during sign up:", err);
