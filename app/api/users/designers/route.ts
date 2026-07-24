@@ -1,23 +1,17 @@
-// app/api/users/designers/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { UserRole } from "@/generated/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient(request);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = user.id;
+    const userId = session.user.id;
 
-    // Check whether the user is a Project Manager
     const userRole = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
@@ -30,7 +24,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get all designers
     const designers = await prisma.user.findMany({
       where: { role: UserRole.DESIGNER },
       select: {

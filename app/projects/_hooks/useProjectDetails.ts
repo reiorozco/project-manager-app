@@ -6,11 +6,11 @@ import {
   UserRole,
 } from "@/generated/prisma";
 import { useAuth } from "@/app/auth/auth-context";
-import { BUCKET_NAME, ProjectWithRelations } from "@/app/projects/_utils/types";
+import { ProjectWithRelations } from "@/app/projects/_utils/types";
 import { projectService } from "@/app/projects/_utils/projectService";
 
 export const useProjectDetails = (projectId: string) => {
-  const { user, userRole, supabase } = useAuth();
+  const { user, userRole } = useAuth();
   const queryClient = useQueryClient();
 
   // Project query
@@ -19,7 +19,7 @@ export const useProjectDetails = (projectId: string) => {
   }>({
     queryKey: ["project", projectId],
     queryFn: async () => await projectService.getProject(projectId),
-    enabled: !!projectId, // Only run when there is a projectId
+    enabled: !!projectId,
   });
 
   // Function to check permissions
@@ -66,21 +66,15 @@ export const useProjectDetails = (projectId: string) => {
   // Mutation to download files
   const downloadFileMutation = useMutation({
     mutationFn: async (file: PrismaFile): Promise<void> => {
-      const { data, error: downloadError } = await supabase.storage
-        .from(BUCKET_NAME)
-        .download(file.path);
-
-      if (downloadError) throw downloadError;
-
-      // Create a blob URL and simulate a click to download
-      const url = URL.createObjectURL(data);
+      const response = await fetch(`/api/files/${encodeURIComponent(file.path)}`);
+      if (!response.ok) throw new Error("Failed to download file");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = file.filename;
       document.body.appendChild(a);
       a.click();
-
-      // Clean up resources
       URL.revokeObjectURL(url);
       a.remove();
     },

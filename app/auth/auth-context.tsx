@@ -5,440 +5,113 @@ import React, {
   PropsWithChildren,
   useCallback,
   useContext,
-  useEffect,
-  useRef,
+  useState,
 } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { authClient } from "@/lib/auth-client";
 import { UserRole } from "@/generated/prisma";
-import { ROUTES } from "@/lib/constants";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  UseQueryResult,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-type SignInParams = {
+type SignInParams = { email: string; password: string };
+type SignUpParams = { email: string; password: string; name: string };
+type AuthOptions = { onSuccess?: () => void; onError?: (error: Error) => void };
+
+type SessionUser = {
+  id: string;
   email: string;
-  password: string;
-};
-
-type SignUpParams = {
-  email: string;
-  password: string;
-  fullName: string;
-  role: UserRole;
-};
-
-type ResetPasswordParams = {
-  email: string;
-};
-
-type UpdatePasswordParams = {
-  password: string;
-};
-
-type AuthOptions = {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
+  name?: string | null;
+  emailVerified: boolean;
+  image?: string | null;
+  role?: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type AuthContextType = {
-  user: User | null;
+  user: SessionUser | null;
   userRole: UserRole | null;
   isLoading: boolean;
   isError: boolean;
   isSigningIn: boolean;
   isSigningUp: boolean;
   isSigningOut: boolean;
-  isResettingPassword: boolean;
-  isUpdatingPassword: boolean;
-  signIn: (
-    params: SignInParams,
-    options?: AuthOptions,
-  ) => Promise<{ error: Error | null }>;
-  signUp: (
-    params: SignUpParams,
-    options?: AuthOptions,
-  ) => Promise<{ error: Error | null }>;
+  signIn: (params: SignInParams, options?: AuthOptions) => Promise<{ error: Error | null }>;
+  signUp: (params: SignUpParams, options?: AuthOptions) => Promise<{ error: Error | null }>;
   signOut: (options?: AuthOptions) => Promise<void>;
-  resetPassword: (
-    params: ResetPasswordParams,
-    options?: AuthOptions,
-  ) => Promise<{ error: Error | null }>;
-  updatePassword: (
-    params: UpdatePasswordParams,
-    options?: AuthOptions,
-  ) => Promise<{ error: Error | null }>;
   refreshUser: () => Promise<void>;
-  supabase: ReturnType<typeof createClient>;
 };
-
-// Query keys
-const queryKeys = {
-  user: ["auth", "user"] as const,
-  userRole: ["auth", "userRole"] as const,
-};
-
-// Create a single Supabase client instance for the whole app
-const supabase = createClient();
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const queryClient = useQueryClient();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
-  // Get the current user
-  const userQuery: UseQueryResult<User | null> = useQuery({
-    queryKey: queryKeys.user,
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase.auth.getUser();
-        if (error) throw error;
-        return data.user;
-      } catch (error) {
-        console.log("Error fetching user:", error);
-        return null;
+  const { data: session, isPending: isLoading, error, refetch } = authClient.useSession();
+
+  const user = (session?.user as SessionUser | undefined) ?? null;
+  const userRole = (user?.role as UserRole | undefined) ?? null;
+  const isError = !!error;
+
+  const signIn = useCallback(async (params: SignInParams, options?: AuthOptions) => {
+    setIsSigningIn(true);
+    try {
+      const result = await authClient.signIn.email({ email: params.email, password: params.password });
+      if (result.error) {
+        const err = new Error(result.error.message || "Sign in failed");
+        options?.onError?.(err);
+        return { error: err };
       }
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+      options?.onSuccess?.();
+      return { error: null };
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Sign in failed");
+      options?.onError?.(error);
+      return { error };
+    } finally {
+      setIsSigningIn(false);
+    }
+  }, []);
 
-  const userId = userQuery.data?.id;
-
-  // Get the user role when there is an authenticated user
-  const userRoleQuery: UseQueryResult<UserRole | null> = useQuery({
-    queryKey: [...queryKeys.userRole, userId],
-    queryFn: async () => {
-      if (!userId) return null;
-
-      try {
-        const { data, error } = await supabase
-          .from("User")
-          .select("role")
-          .eq("id", userId)
-          .single();
-
-        if (error) throw error;
-        return data?.role || null;
-      } catch (error) {
-        console.error("Error fetching user role:", error);
-        return null;
+  const signUp = useCallback(async (params: SignUpParams, options?: AuthOptions) => {
+    setIsSigningUp(true);
+    try {
+      const result = await authClient.signUp.email({ email: params.email, password: params.password, name: params.name });
+      if (result.error) {
+        const err = new Error(result.error.message || "Sign up failed");
+        options?.onError?.(err);
+        return { error: err };
       }
-    },
-    enabled: !!userId, // Only run when there is a user
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+      options?.onSuccess?.();
+      return { error: null };
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Sign up failed");
+      options?.onError?.(error);
+      return { error };
+    } finally {
+      setIsSigningUp(false);
+    }
+  }, []);
 
-  // Variables to store external callbacks
-  // We use refs to keep references stable across renders
-  const signInSuccessCallback = useRef<(() => void) | undefined>(undefined);
-  const signInErrorCallback = useRef<((error: Error) => void) | undefined>(
-    undefined,
-  );
-
-  // Mutation: sign in
-  const { mutateAsync: signInAsync, isPending: isSigningIn } = useMutation({
-    mutationFn: async ({ email, password }: SignInParams) => {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      return { error: error as Error | null };
-    },
-    onSuccess: (result) => {
-      // Invalidate queries to refresh data
-      void queryClient.invalidateQueries({ queryKey: queryKeys.user });
-
-      if (!result.error && signInSuccessCallback.current) {
-        signInSuccessCallback.current();
-      }
-      signInSuccessCallback.current = undefined;
-    },
-    onError: (error) => {
-      if (signInErrorCallback.current) {
-        signInErrorCallback.current(error as Error);
-      }
-      signInErrorCallback.current = undefined;
-    },
-  });
-
-  const signUpSuccessCallback = useRef<(() => void) | undefined>(undefined);
-  const signUpErrorCallback = useRef<((error: Error) => void) | undefined>(
-    undefined,
-  );
-
-  const { mutateAsync: signUpAsync, isPending: isSigningUp } = useMutation({
-    mutationFn: async ({ email, password, fullName, role }: SignUpParams) => {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role: role,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-      return { error: error as Error | null };
-    },
-    onSuccess: (result) => {
-      if (!result.error && signUpSuccessCallback.current) {
-        signUpSuccessCallback.current();
-      }
-      signUpSuccessCallback.current = undefined;
-    },
-    onError: (error) => {
-      if (signUpErrorCallback.current) {
-        signUpErrorCallback.current(error as Error);
-      }
-      signUpErrorCallback.current = undefined;
-    },
-  });
-
-  const signOutSuccessCallback = useRef<(() => void) | undefined>(undefined);
-  const signOutErrorCallback = useRef<((error: Error) => void) | undefined>(
-    undefined,
-  );
-
-  const { mutateAsync: signOutAsync, isPending: isSigningOut } = useMutation({
-    mutationFn: async () => {
-      console.log("Signing out...");
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        console.error("Error during sign out:", error);
-        throw error;
-      }
-
-      console.log("Sign out successful");
-    },
-    onSuccess: () => {
-      // Reset the state manually and immediately
-      queryClient.setQueryData(queryKeys.user, null);
-      queryClient.setQueryData(queryKeys.userRole, null);
-
+  const signOut = useCallback(async (options?: AuthOptions) => {
+    setIsSigningOut(true);
+    try {
+      await authClient.signOut();
       queryClient.removeQueries({ queryKey: ["projects"] });
-
-      if (signOutSuccessCallback.current) {
-        signOutSuccessCallback.current();
-      }
-      signOutSuccessCallback.current = undefined;
-    },
-    onError: (error) => {
-      if (signOutErrorCallback.current) {
-        signOutErrorCallback.current(error as Error);
-      }
-      signOutErrorCallback.current = undefined;
-    },
-  });
-
-  const resetPasswordSuccessCallback = useRef<(() => void) | undefined>(
-    undefined,
-  );
-  const resetPasswordErrorCallback = useRef<
-    ((error: Error) => void) | undefined
-  >(undefined);
-
-  const { mutateAsync: resetPasswordAsync, isPending: isResettingPassword } =
-    useMutation({
-      mutationFn: async ({ email }: ResetPasswordParams) => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
-        });
-        return { error: error as Error | null };
-      },
-      onSuccess: (result) => {
-        if (!result.error && resetPasswordSuccessCallback.current) {
-          resetPasswordSuccessCallback.current();
-        }
-        resetPasswordSuccessCallback.current = undefined;
-      },
-      onError: (error) => {
-        if (resetPasswordErrorCallback.current) {
-          resetPasswordErrorCallback.current(error as Error);
-        }
-        resetPasswordErrorCallback.current = undefined;
-      },
-    });
-
-  const updatePasswordSuccessCallback = useRef<(() => void) | undefined>(
-    undefined,
-  );
-  const updatePasswordErrorCallback = useRef<
-    ((error: Error) => void) | undefined
-  >(undefined);
-
-  const { mutateAsync: updatePasswordAsync, isPending: isUpdatingPassword } =
-    useMutation({
-      mutationFn: async ({ password }: UpdatePasswordParams) => {
-        const { error } = await supabase.auth.updateUser({
-          password,
-        });
-        return { error: error as Error | null };
-      },
-      onSuccess: (result) => {
-        void queryClient.invalidateQueries({ queryKey: queryKeys.user });
-
-        if (!result.error && updatePasswordSuccessCallback.current) {
-          updatePasswordSuccessCallback.current();
-        }
-        updatePasswordSuccessCallback.current = undefined;
-      },
-      onError: (error) => {
-        if (updatePasswordErrorCallback.current) {
-          updatePasswordErrorCallback.current(error as Error);
-        }
-        updatePasswordErrorCallback.current = undefined;
-      },
-    });
-
-  // Listen for authentication changes
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-
-      if (event === "SIGNED_OUT") {
-        // Reset state immediately
-        queryClient.setQueryData(queryKeys.user, null);
-        queryClient.setQueryData(queryKeys.userRole, null);
-
-        // Clear user-related data
-        queryClient.removeQueries({ queryKey: ["projects"] });
-      } else {
-        // For other events, invalidate queries
-        void queryClient.invalidateQueries({ queryKey: queryKeys.user });
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+      options?.onSuccess?.();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Sign out failed");
+      options?.onError?.(error);
+    } finally {
+      setIsSigningOut(false);
+    }
   }, [queryClient]);
 
-  // Functions exposed to the context with callback support
-  const signIn = useCallback(
-    async (params: SignInParams, options?: AuthOptions) => {
-      try {
-        const result = await signInAsync(params);
-
-        // If authentication succeeded
-        if (!result.error) {
-          // Then, a short pause to let React process the state changes
-          setTimeout(() => {
-            // Success callback if it exists
-            if (options?.onSuccess) {
-              options.onSuccess();
-            }
-
-            // Fallback: if after 500ms we're still on the same page, force navigation
-            const redirectTimeout = setTimeout(() => {
-              // Check whether we're still on an auth page
-              if (window.location.pathname.includes("/auth/")) {
-                window.location.href = ROUTES.DASHBOARD;
-              }
-            }, 500);
-
-            // Clear the timeout if the component unmounts
-            return () => clearTimeout(redirectTimeout);
-          }, 50);
-        } else if (options?.onError) {
-          options.onError(result.error);
-        }
-
-        return result;
-      } catch (error) {
-        if (options?.onError) {
-          options.onError(error as Error);
-        }
-        return { error: error as Error };
-      }
-    },
-    [signInAsync],
-  );
-
-  const signUp = useCallback(
-    async (params: SignUpParams, options?: AuthOptions) => {
-      signUpSuccessCallback.current = options?.onSuccess;
-      signUpErrorCallback.current = options?.onError;
-
-      return signUpAsync(params);
-    },
-    [signUpAsync],
-  );
-
-  const signOut = useCallback(
-    async (options?: AuthOptions) => {
-      signOutSuccessCallback.current = options?.onSuccess;
-      signOutErrorCallback.current = options?.onError;
-
-      await signOutAsync();
-    },
-    [signOutAsync],
-  );
-
-  const resetPassword = useCallback(
-    async (params: ResetPasswordParams, options?: AuthOptions) => {
-      resetPasswordSuccessCallback.current = options?.onSuccess;
-      resetPasswordErrorCallback.current = options?.onError;
-
-      return resetPasswordAsync(params);
-    },
-    [resetPasswordAsync],
-  );
-
-  const updatePassword = useCallback(
-    async (params: UpdatePasswordParams, options?: AuthOptions) => {
-      updatePasswordSuccessCallback.current = options?.onSuccess;
-      updatePasswordErrorCallback.current = options?.onError;
-
-      return updatePasswordAsync(params);
-    },
-    [updatePasswordAsync],
-  );
-
-  const refreshUser = useCallback(async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: queryKeys.user }),
-      queryClient.invalidateQueries({ queryKey: queryKeys.userRole }),
-    ]);
-  }, [queryClient]);
-
-  // Determine combined loading state for queries
-  const isLoading =
-    userQuery.isLoading ||
-    userRoleQuery.isLoading ||
-    userQuery.isFetching ||
-    userRoleQuery.isFetching;
-
-  // Determine combined error state
-  const isError = userQuery.isError || userRoleQuery.isError;
+  const refreshUser = useCallback(async () => { await refetch(); }, [refetch]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user: userQuery.data || null,
-        userRole: userRoleQuery.data || null,
-        isLoading,
-        isError,
-        isSigningIn,
-        isSigningUp,
-        isSigningOut,
-        isResettingPassword,
-        isUpdatingPassword,
-        signIn,
-        signUp,
-        signOut,
-        resetPassword,
-        updatePassword,
-        refreshUser,
-        supabase,
-      }}
-    >
+    <AuthContext.Provider value={{ user, userRole, isLoading, isError, isSigningIn, isSigningUp, isSigningOut, signIn, signUp, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -446,9 +119,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-
+  if (context === undefined) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
