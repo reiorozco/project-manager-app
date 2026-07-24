@@ -1,0 +1,174 @@
+{
+  "schema_version": 2,
+  "active_work_id": "008-post-migration-fixes-1750b292",
+  "works": {
+    "007-migration-off-supabase-7f1344ff": {
+      "work_id": "007-migration-off-supabase-7f1344ff",
+      "active_plan": "/Users/reiorozco/Dev/project-manager-app/.omo/plans/007-migration-off-supabase.md",
+      "plan_name": "007-migration-off-supabase",
+      "status": "completed",
+      "started_at": "2026-07-24T14:48:54.649Z",
+      "updated_at": "2026-07-24T18:38:12.624Z",
+      "session_ids": [
+        "opencode:ses_06b6635ceffeysrk0hCpHK44ky"
+      ],
+      "session_origins": {
+        "opencode:ses_06b6635ceffeysrk0hCpHK44ky": "direct"
+      },
+      "agent": "atlas",
+      "task_sessions": {
+        "todo:1": {
+          "task_key": "todo:1",
+          "task_label": "1",
+          "task_title": "`specs/007-migration-off-supabase.md`: Copy this plan file verbatim from `.omo/plans/007-migration-off-supabase.md` so the project's `specs/` convention is preserved and the plan is discoverable at the expected path - expect `diff .omo/plans/007-migration-off-supabase.md specs/007-migration-off-supabase.md` shows zero difference.",
+          "session_id": "opencode:ses_06b62b1b6ffem1Z9h6UYEhFMvd",
+          "agent": "Sisyphus-Junior",
+          "category": "unspecified-high",
+          "updated_at": "2026-07-24T14:59:13.420Z",
+          "started_at": "2026-07-24T14:57:19.574Z",
+          "status": "completed",
+          "ended_at": "2026-07-24T14:59:13.420Z",
+          "elapsed_ms": 113846
+        },
+        "todo:23": {
+          "task_key": "todo:23",
+          "task_label": "23",
+          "task_title": "`prisma/schema.prisma`: Extend `User` model with Better Auth-required fields (`emailVerified Boolean @default(false)`, `image String?`) and add three new models `Session`, `Account`, `Verification` following Better Auth's Prisma adapter shape. Use PascalCase `@@map` on all four Better Auth models to match existing convention (`@@map(\"User\")`, `@@map(\"Session\")`, `@@map(\"Account\")`, `@@map(\"Verification\")`). Preserve existing `role: UserRole` field on `User` - expect `npx prisma format && npx prisma validate` both succeed.",
+          "session_id": "opencode:ses_06b3a9bfdffeKeRoFwN9A4mB6b",
+          "agent": "Sisyphus-Junior",
+          "category": "unspecified-high",
+          "updated_at": "2026-07-24T17:13:49.423Z",
+          "started_at": "2026-07-24T17:10:28.122Z",
+          "status": "completed",
+          "ended_at": "2026-07-24T17:13:49.423Z",
+          "elapsed_ms": 201301
+        },
+        "todo:32": {
+          "task_key": "todo:32",
+          "task_label": "32",
+          "task_title": "`app/auth/auth-context.tsx`: Rewrite to use `authClient` from `@/lib/auth-client` instead of Supabase. Replace: `userQuery` uses `authClient.useSession()`; `userRoleQuery` reads `session.user.role` (from additionalFields) instead of querying Supabase PostgREST; `signIn` → `authClient.signIn.email`; `signUp` → `authClient.signUp.email`; `signOut` → `authClient.signOut`; REMOVE `resetPassword` and `updatePassword` mutations entirely (no email provider means no reset flow); remove `onAuthStateChange` listener (replaced by React Query invalidation on sign-in/out mutation success) - expect `npx tsc --noEmit` clean, `grep supabase app/auth/auth-context.tsx` returns 0.",
+          "session_id": "opencode:ses_06ab6b5adffex7PpkrXik7M5e0",
+          "agent": "Sisyphus-Junior",
+          "category": "quick",
+          "started_at": "2026-07-24T17:56:53.213Z",
+          "status": "running",
+          "updated_at": "2026-07-24T18:11:53.671Z"
+        },
+        "todo:46": {
+          "task_key": "todo:46",
+          "task_label": "46",
+          "task_title": "Commit Fase 2: `git add prisma/ lib/ app/ middleware.ts scripts/seed-demo-users.ts .env.example && git commit -m \"feat(fase-2/5): migrate Auth from Supabase to Better Auth + seed demo users\"` - expect one commit.",
+          "session_id": "opencode:ses_06a961b65ffeg74dLCwhfSpDd2",
+          "agent": "Sisyphus-Junior",
+          "category": "quick",
+          "updated_at": "2026-07-24T18:37:23.162Z",
+          "started_at": "2026-07-24T18:37:02.163Z",
+          "status": "completed",
+          "ended_at": "2026-07-24T18:37:23.162Z",
+          "elapsed_ms": 20999
+        }
+      },
+      "ended_at": "2026-07-24T18:38:12.624Z",
+      "elapsed_ms": 13757975
+    },
+    "008-post-migration-fixes-9d8c527f": {
+      "work_id": "008-post-migration-fixes-9d8c527f",
+      "active_plan": "/Users/reiorozco/Dev/project-manager-app/.omo/plans/008-post-migration-fixes.md",
+      "plan_name": "008-post-migration-fixes",
+      "status": "active",
+      "started_at": "2026-07-24T21:28:06.696Z",
+      "updated_at": "2026-07-24T21:28:06.696Z",
+      "session_ids": [
+        "opencode:ses_069f8bb09ffefxEtfmcHcOadF1"
+      ],
+      "session_origins": {
+        "opencode:ses_069f8bb09ffefxEtfmcHcOadF1": "direct"
+      },
+      "agent": "atlas",
+      "task_sessions": {}
+    },
+    "008-post-migration-fixes-1750b292": {
+      "work_id": "008-post-migration-fixes-1750b292",
+      "active_plan": "/Users/reiorozco/Dev/project-manager-app/.omo/plans/008-post-migration-fixes.md",
+      "plan_name": "008-post-migration-fixes",
+      "status": "active",
+      "started_at": "2026-07-24T21:28:06.703Z",
+      "updated_at": "2026-07-24T22:14:31.197Z",
+      "session_ids": [
+        "opencode:ses_069f8bb09ffefxEtfmcHcOadF1"
+      ],
+      "session_origins": {
+        "opencode:ses_069f8bb09ffefxEtfmcHcOadF1": "direct"
+      },
+      "agent": "atlas",
+      "task_sessions": {
+        "todo:1": {
+          "task_key": "todo:1",
+          "task_label": "1",
+          "task_title": "`specs/008-post-migration-fixes.md`: Copy this plan verbatim from `.omo/plans/008-post-migration-fixes.md` so the project's `specs/` convention holds - expect the two files are byte-identical.",
+          "session_id": "opencode:ses_069db7cf9ffeR1p7N2FJVJl8A7",
+          "agent": "Sisyphus-Junior",
+          "category": "visual-engineering",
+          "started_at": "2026-07-24T21:29:07.281Z",
+          "ended_at": "2026-07-24T21:29:23.561Z",
+          "elapsed_ms": 16280,
+          "status": "running",
+          "updated_at": "2026-07-24T22:14:31.197Z"
+        },
+        "todo:3": {
+          "task_key": "todo:3",
+          "task_label": "3",
+          "task_title": "`app/auth/login/page.tsx`: Add a post-success redirect. Import `useRouter` from `next/navigation`. On successful sign-in, call `router.push(\"/\")` then `router.refresh()`. Use Better Auth's documented fetch-option callbacks if `signIn` from `useAuth()` forwards them; otherwise await the `signIn` result, check that no error was returned, and redirect on the success branch. Preserve all existing error handling and loading/disabled states - expect submitting valid credentials navigates to `/`.",
+          "session_id": "opencode:ses_069f6f2baffe49e3SOktvdsPYB",
+          "agent": "Sisyphus-Junior",
+          "category": "quick",
+          "updated_at": "2026-07-24T21:49:01.663Z",
+          "started_at": "2026-07-24T21:48:08.846Z",
+          "status": "completed",
+          "ended_at": "2026-07-24T21:49:01.663Z",
+          "elapsed_ms": 52817
+        }
+      }
+    }
+  },
+  "active_plan": "/Users/reiorozco/Dev/project-manager-app/.omo/plans/008-post-migration-fixes.md",
+  "started_at": "2026-07-24T21:28:06.703Z",
+  "status": "active",
+  "updated_at": "2026-07-24T22:14:31.197Z",
+  "session_ids": [
+    "opencode:ses_069f8bb09ffefxEtfmcHcOadF1"
+  ],
+  "session_origins": {
+    "opencode:ses_069f8bb09ffefxEtfmcHcOadF1": "direct"
+  },
+  "plan_name": "008-post-migration-fixes",
+  "task_sessions": {
+    "todo:1": {
+      "task_key": "todo:1",
+      "task_label": "1",
+      "task_title": "`specs/008-post-migration-fixes.md`: Copy this plan verbatim from `.omo/plans/008-post-migration-fixes.md` so the project's `specs/` convention holds - expect the two files are byte-identical.",
+      "session_id": "opencode:ses_069db7cf9ffeR1p7N2FJVJl8A7",
+      "agent": "Sisyphus-Junior",
+      "category": "visual-engineering",
+      "started_at": "2026-07-24T21:29:07.281Z",
+      "ended_at": "2026-07-24T21:29:23.561Z",
+      "elapsed_ms": 16280,
+      "status": "running",
+      "updated_at": "2026-07-24T22:14:31.197Z"
+    },
+    "todo:3": {
+      "task_key": "todo:3",
+      "task_label": "3",
+      "task_title": "`app/auth/login/page.tsx`: Add a post-success redirect. Import `useRouter` from `next/navigation`. On successful sign-in, call `router.push(\"/\")` then `router.refresh()`. Use Better Auth's documented fetch-option callbacks if `signIn` from `useAuth()` forwards them; otherwise await the `signIn` result, check that no error was returned, and redirect on the success branch. Preserve all existing error handling and loading/disabled states - expect submitting valid credentials navigates to `/`.",
+      "session_id": "opencode:ses_069f6f2baffe49e3SOktvdsPYB",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-07-24T21:49:01.663Z",
+      "started_at": "2026-07-24T21:48:08.846Z",
+      "status": "completed",
+      "ended_at": "2026-07-24T21:49:01.663Z",
+      "elapsed_ms": 52817
+    }
+  },
+  "agent": "atlas"
+}
