@@ -745,37 +745,37 @@ Fase 3's backfill script, then removed in Fase 5.
 
 ### Fase 5 — Teardown (irreversible; only after Fase 4 confirmed OK)
 
-- [~] 72. Vercel Dashboard → Environment Variables → Production, Preview, Development: Remove `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from ALL three environments. Also remove any stale `DATABASE_URL` or `DIRECT_URL` entries that still point to Supabase (should be none after todos 61-63, but double-check) - expect `vercel env ls production | grep -i supabase` returns 0 and no Supabase host in DB URLs.
+- [x] 72. Vercel Dashboard → Environment Variables → Production, Preview, Development: Remove `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from ALL three environments. Also remove any stale `DATABASE_URL` or `DIRECT_URL` entries that still point to Supabase (should be none after todos 61-63, but double-check) - expect `vercel env ls production | grep -i supabase` returns 0 and no Supabase host in DB URLs.
   - Files: none.
   - Acceptance: `for e in production preview development; do vercel env ls $e | grep -ic supabase; done` all return 0.
   - QA: Same as acceptance.
   - Commit strategy: n/a.
 
-- [~] 73. `npm uninstall @supabase/ssr @supabase/supabase-js` - expect both entries removed from `package.json`.
+- [x] 73. `npm uninstall @supabase/ssr @supabase/supabase-js` - expect both entries removed from `package.json`.
   - Files: `package.json`, `package-lock.json` (modified)
   - Acceptance: `jq -r '.dependencies["@supabase/ssr"]' package.json` returns `null`; same for `@supabase/supabase-js`.
   - QA: `grep -c "@supabase" package.json` returns 0.
   - Commit strategy: Group with Fase 5 commit.
 
-- [~] 74. Delete `.mcp.json` and `.env.local.supabase-backup` - expect files gone.
+- [x] 74. Delete `.mcp.json` and `.env.local.supabase-backup` - expect files gone.
   - Files: two deletions (the second is not committed, but should be cleaned up).
   - Acceptance: `test ! -e .mcp.json && test ! -e .env.local.supabase-backup` exits 0.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 5 commit (only `.mcp.json` is tracked).
 
-- [~] 75. `.env.example`: Remove `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` lines (and any related comments); keep `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` - expect final example has 5 vars.
+- [x] 75. `.env.example`: Remove `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` lines (and any related comments); keep `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` - expect final example has 5 vars.
   - Files: `.env.example` (modified)
   - Acceptance: `grep -c "SUPABASE" .env.example` returns 0; `grep -cE '^[A-Z_]+=' .env.example` returns 5.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 5 commit.
 
-- [~] 76. `README.md`: Update tech stack section — remove any "Supabase" mentions, replace with "Vercel Postgres (Neon)", "Vercel Blob", "Better Auth". Update "Setup" section: remove the Supabase bucket creation step; add steps to link Vercel Postgres + Blob and pull env vars. Confirm demo credentials table is still accurate (`manager@demo.com` / `client@demo.com` / `designer@demo.com` with `demo1234`). If the seed script had to change the password for any reason, update the table in the SAME commit - expect `grep -ic supabase README.md` returns 0.
+- [x] 76. `README.md`: Update tech stack section — remove any "Supabase" mentions, replace with "Vercel Postgres (Neon)", "Vercel Blob", "Better Auth". Update "Setup" section: remove the Supabase bucket creation step; add steps to link Vercel Postgres + Blob and pull env vars. Confirm demo credentials table is still accurate (`manager@demo.com` / `client@demo.com` / `designer@demo.com` with `demo1234`). If the seed script had to change the password for any reason, update the table in the SAME commit - expect `grep -ic supabase README.md` returns 0.
   - Files: `README.md` (modified)
   - Acceptance: `grep -c -i "supabase" README.md` returns 0; demo credentials table unchanged unless the seed changed passwords.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 5 commit.
 
-- [~] 77. `PRODUCT.md`: Remove "Supabase" from the product purpose paragraph. Update any references so the stack narrative reads "Next.js + Prisma + Vercel Postgres + Better Auth + Vercel Blob" - expect `grep -ic supabase PRODUCT.md` returns 0.
+- [x] 77. `PRODUCT.md`: Remove "Supabase" from the product purpose paragraph. Update any references so the stack narrative reads "Next.js + Prisma + Vercel Postgres + Better Auth + Vercel Blob" - expect `grep -ic supabase PRODUCT.md` returns 0.
   - Files: `PRODUCT.md` (modified)
   - Acceptance: `grep -c -i "supabase" PRODUCT.md` returns 0.
   - QA: Same as acceptance.

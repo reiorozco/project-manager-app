@@ -15,7 +15,7 @@ Contexto de uso: escritorio y móvil, sesiones cortas y orientadas a tarea (crea
 
 ## Product Purpose
 
-App full-stack de gestión de proyectos de diseño con acceso multi-rol, Row-Level Security y almacenamiento de archivos (Next.js + Prisma + Supabase). Existe como **proyecto insignia de portafolio** de Rei Orozco (Full Stack + AI/MCP) — la que más miran reclutadores —, por lo que la UI debe transmitir criterio de producto, no de plantilla. Éxito = un reclutador fluido en buenas herramientas (Linear, Notion, Stripe) confía en la interfaz a primera vista.
+App full-stack de gestión de proyectos de diseño con acceso multi-rol, autorización a nivel de aplicación y almacenamiento de archivos (Next.js + Prisma + Vercel Postgres + Better Auth + Vercel Blob). Existe como **proyecto insignia de portafolio** de Rei Orozco (Full Stack + AI/MCP) — la que más miran reclutadores —, por lo que la UI debe transmitir criterio de producto, no de plantilla. Éxito = un reclutador fluido en buenas herramientas (Linear, Notion, Stripe) confía en la interfaz a primera vista.
 
 ## Brand Personality
 

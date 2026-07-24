@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
   <img src="https://img.shields.io/badge/Tailwind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS v4"/>
   <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma"/>
-  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"/>
+
 </p>
 
 ## Live Demo
@@ -29,7 +29,9 @@ Sign in with any of the accounts below to explore the app. Each one lands on a d
 - **Language** — TypeScript 5, React 19
 - **Styling** — Tailwind CSS v4, [shadcn/ui](https://ui.shadcn.com/) (new-york), Lucide icons
 - **ORM** — Prisma 6
-- **Backend** — Supabase (Postgres + Auth + Storage)
+- **Database** — Vercel Postgres (Neon)
+- **Auth** — Better Auth (self-hosted)
+- **Storage** — Vercel Blob
 - **Data fetching** — TanStack React Query 5
 - **Forms & validation** — React Hook Form + Zod
 
@@ -39,7 +41,7 @@ Sign in with any of the accounts below to explore the app. Each one lands on a d
 - **Project lifecycle** with a four-stage status (`Draft` → `In progress` → `In review` → `Done`) and optional due dates.
 - **Role-aware status workflow** — Designers can move work forward and submit it for review, while only the Project Manager or the owning Client can give final approval and mark a project as `Done`. Enforced server-side, not just in the UI.
 - **Search, filter, and sort** on the projects list — search by title or description, filter by status, and sort projects across the workflow.
-- **File uploads to Supabase Storage** with drag-and-drop, plus client-side validation of file count, size, and type.
+- **File uploads to Vercel Blob** with drag-and-drop, plus client-side validation of file count, size, and type.
 - **Light / dark theme** via `next-themes`, with a no-flash toggle.
 - **Responsive design** that holds up from mobile to desktop.
 
@@ -63,7 +65,7 @@ Sign in with any of the accounts below to explore the app. Each one lands on a d
 ### Prerequisites
 
 - Node.js 20+
-- A [Supabase](https://supabase.com/) project (provides Postgres, Auth, and Storage)
+- A [Vercel](https://vercel.com/) account with Postgres (Neon) and Blob storage provisioned
 
 ### 1. Install dependencies
 
@@ -76,16 +78,23 @@ npm install
 Create a `.env.local` file in the project root:
 
 ```bash
-# Postgres connection (from your Supabase project settings)
+# Postgres connection (Neon)
 DATABASE_URL=
 DIRECT_URL=
 
-# Supabase API
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+# Vercel Blob read/write token
+BLOB_READ_WRITE_TOKEN=
+
+# Better Auth configuration
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=
 ```
 
-In your Supabase project, enable the Email auth provider and create a Storage bucket named `project-files` for uploads.
+Pull environment variables from Vercel:
+
+```bash
+vercel env pull
+```
 
 ### 3. Set up the database
 
@@ -114,7 +123,8 @@ app/
 components/ui/      # shadcn/ui primitives
 lib/
   services/         # Application/authorization service layer
-  supabase/         # Server, client, and middleware Supabase setup
+  auth.ts           # Better Auth server setup
+  auth-client.ts    # Better Auth client setup
   prisma.ts         # Prisma client singleton
 prisma/
   schema.prisma     # User, Project, File models + enums

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Project Manager — Multi-Role Project Management",
     description:
-      "Full-stack project management app (Next.js, Prisma, Supabase) with role-based access, a project lifecycle and file storage.",
+      "Full-stack project management app (Next.js, Prisma, Neon, Better Auth) with role-based access, a project lifecycle and file storage.",
     url: "https://project-manager-app-cyan.vercel.app",
     type: "website",
     images: [
