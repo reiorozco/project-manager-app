@@ -200,19 +200,19 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: `test -f .env.local.supabase-backup && diff -q .env.local .env.local.supabase-backup` prints "identical" or exits 0 with empty output.
   - Commit strategy: Never committed; add to `.gitignore` if not already covered (existing `.gitignore` already excludes `.env.local*`).
 
-- [~] 6. Vercel Dashboard → Storage → Marketplace → Neon: Provision a new Neon database named `project-manager-db`, region `us-east-1`, free tier, connect it to the `project-manager-app` Vercel project but ONLY for the Development environment (do NOT connect to Preview or Production yet) - expect Neon database visible in Vercel Storage tab and Development env has new POSTGRES/DATABASE vars.
+- [x] 6. Vercel Dashboard → Storage → Marketplace → Neon: Provision a new Neon database named `project-manager-db`, region `us-east-1`, free tier, connect it to the `project-manager-app` Vercel project but ONLY for the Development environment (do NOT connect to Preview or Production yet) - expect Neon database visible in Vercel Storage tab and Development env has new POSTGRES/DATABASE vars.
   - Files: none in repo.
   - Acceptance: `vercel storage ls` (or dashboard screenshot) lists the new Neon DB with a single Development link.
   - QA: `vercel env ls development` shows entries for `DATABASE_URL` and `DATABASE_URL_UNPOOLED` (or `POSTGRES_URL` and `POSTGRES_URL_NON_POOLING`) with values that host-match `*.neon.tech`.
   - Commit strategy: n/a (external provisioning).
 
-- [~] 7. Vercel Dashboard → Storage → Blob: Create a Blob store named `project-files-blob`, region `iad1`, access `private`, connect it to `project-manager-app` Vercel project for Development only - expect store visible and `BLOB_READ_WRITE_TOKEN` in Development env vars.
+- [x] 7. Vercel Dashboard → Storage → Blob: Create a Blob store named `project-files-blob`, region `iad1`, access `private`, connect it to `project-manager-app` Vercel project for Development only - expect store visible and `BLOB_READ_WRITE_TOKEN` in Development env vars.
   - Files: none in repo.
   - Acceptance: `vercel storage ls` (or dashboard) shows the Blob store with a single Development link.
   - QA: `vercel env ls development` includes `BLOB_READ_WRITE_TOKEN`.
   - Commit strategy: n/a.
 
-- [~] 8. `.env.local`: Overwrite `DATABASE_URL` and `DIRECT_URL` with the new Neon pooled and unpooled connection strings respectively; add `BLOB_READ_WRITE_TOKEN` from the Blob store; keep `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` unchanged (needed by Fase 3 backfill) - expect `psql "$DIRECT_URL" -c "SELECT 1"` returns 1.
+- [x] 8. `.env.local`: Overwrite `DATABASE_URL` and `DIRECT_URL` with the new Neon pooled and unpooled connection strings respectively; add `BLOB_READ_WRITE_TOKEN` from the Blob store; keep `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` unchanged (needed by Fase 3 backfill) - expect `psql "$DIRECT_URL" -c "SELECT 1"` returns 1.
   - Files: `.env.local` (modified, gitignored)
   - Acceptance: The four vars `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `NEXT_PUBLIC_SUPABASE_URL` are all present with non-empty values; `DATABASE_URL` and `DIRECT_URL` host-match `*.neon.tech`; the Supabase URL still matches the current one.
   - QA: `set -a; source .env.local; set +a; psql "$DIRECT_URL" -c "SELECT current_database(), current_user"` returns `neondb` (or similar) as database name.
@@ -242,63 +242,63 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: `grep -E '^(DATABASE_URL|DIRECT_URL|BLOB_READ_WRITE_TOKEN|BETTER_AUTH_SECRET|BETTER_AUTH_URL|NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_ANON_KEY)=' .env.example | wc -l` returns 7.
   - Commit strategy: Group with Fase 0 commit.
 
-- [ ] 13. Commit Fase 0: `git add .mcp.json .env.example package.json package-lock.json specs/007-migration-off-supabase.md .omo/plans/007-migration-off-supabase.md .omo/drafts/007-migration-off-supabase.md && git commit -m "chore(fase-0/5): setup Neon + Blob + Better Auth deps + MCP + plan"` - expect one commit on `migration/007-off-supabase`.
+- [x] 13. Commit Fase 0: `git add .mcp.json .env.example package.json package-lock.json specs/007-migration-off-supabase.md .omo/plans/007-migration-off-supabase.md .omo/drafts/007-migration-off-supabase.md && git commit -m "chore(fase-0/5): setup Neon + Blob + Better Auth deps + MCP + plan"` - expect one commit on `migration/007-off-supabase`.
   - Files: staged and committed.
   - Acceptance: `git log --oneline -1` matches `chore(fase-0/5): setup Neon + Blob + Better Auth deps + MCP + plan`; `git status` shows clean tree (aside from `.env.local` and backups which are gitignored).
   - QA: `git show --stat HEAD` lists at least: `.mcp.json`, `.env.example`, `package.json`, `package-lock.json`, `specs/007-migration-off-supabase.md`, `.omo/plans/007-migration-off-supabase.md`.
   - Commit strategy: This is the Fase 0 commit.
 
-- [~] 14. GATE — Fase 0 complete. Print summary listing: (a) branch created, (b) plan copied to `specs/`, (c) skills installed, (d) Neon DB provisioned + connected to Dev, (e) Blob store provisioned + connected to Dev, (f) all 5 new env vars in `.env.local`, (g) commit SHA. Then PAUSE. Do NOT begin Fase 1 without explicit user "OK" reply.
+- [x] 14. GATE — Fase 0 complete. Print summary listing: (a) branch created, (b) plan copied to `specs/`, (c) skills installed, (d) Neon DB provisioned + connected to Dev, (e) Blob store provisioned + connected to Dev, (f) all 5 new env vars in `.env.local`, (g) commit SHA. Then PAUSE. Do NOT begin Fase 1 without explicit user "OK" reply.
 
 ### Fase 1 — Database migration (Supabase Postgres → Neon)
 
-- [ ] 15. `prisma db push --skip-generate`: Push the existing `prisma/schema.prisma` to the empty Neon database using `DIRECT_URL` - expect Neon has tables `User`, `Project`, `File` and enums `UserRole`, `ProjectStatus`.
+- [x] 15. `prisma db push --skip-generate`: Push the existing `prisma/schema.prisma` to the empty Neon database using `DIRECT_URL` - expect Neon has tables `User`, `Project`, `File` and enums `UserRole`, `ProjectStatus`.
   - Files: none modified.
   - Acceptance: `psql "$DIRECT_URL" -c "\dt"` shows exactly `User`, `Project`, `File` in schema `public`; `psql "$DIRECT_URL" -c "\dT"` shows both enums.
   - QA: `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"User\""` returns `0` (empty).
   - Commit strategy: No file change; grouped with Fase 1 commit.
 
-- [ ] 16. Dump data-only from Supabase using the backed-up direct URL: `SUPABASE_DIRECT_URL=$(grep '^DIRECT_URL=' .env.local.supabase-backup | cut -d= -f2- | tr -d '"') pg_dump "$SUPABASE_DIRECT_URL" --data-only --no-owner --no-privileges --exclude-schema=auth --exclude-schema=storage --exclude-schema=supabase_migrations --exclude-schema=extensions --exclude-schema=graphql --exclude-schema=graphql_public --exclude-schema=pgsodium --exclude-schema=pgsodium_masks --exclude-schema=realtime --exclude-schema=vault --exclude-schema=_analytics --exclude-schema=_realtime -f /tmp/supabase-data-dump.sql` - expect file exists with `COPY` statements for `public.User`, `public.Project`, `public.File`.
+- [x] 16. Dump data-only from Supabase using the backed-up direct URL: `SUPABASE_DIRECT_URL=$(grep '^DIRECT_URL=' .env.local.supabase-backup | cut -d= -f2- | tr -d '"') pg_dump "$SUPABASE_DIRECT_URL" --data-only --no-owner --no-privileges --exclude-schema=auth --exclude-schema=storage --exclude-schema=supabase_migrations --exclude-schema=extensions --exclude-schema=graphql --exclude-schema=graphql_public --exclude-schema=pgsodium --exclude-schema=pgsodium_masks --exclude-schema=realtime --exclude-schema=vault --exclude-schema=_analytics --exclude-schema=_realtime -f /tmp/supabase-data-dump.sql` - expect file exists with `COPY` statements for `public.User`, `public.Project`, `public.File`.
   - Files: `/tmp/supabase-data-dump.sql` (transient).
   - Acceptance: File size > 0; `grep -c '^COPY public\."\(User\|Project\|File\)"' /tmp/supabase-data-dump.sql` returns 3.
   - QA: `wc -l /tmp/supabase-data-dump.sql` returns > 20; `head -50 /tmp/supabase-data-dump.sql | grep -c '^COPY public\.'` returns >= 1.
   - Commit strategy: Dump file is transient, never committed.
 
-- [ ] 17. Restore data-only dump into Neon: `psql "$DIRECT_URL" --set ON_ERROR_STOP=1 --single-transaction -f /tmp/supabase-data-dump.sql` - expect command exits 0 with no ERROR lines in stderr.
+- [x] 17. Restore data-only dump into Neon: `psql "$DIRECT_URL" --set ON_ERROR_STOP=1 --single-transaction -f /tmp/supabase-data-dump.sql` - expect command exits 0 with no ERROR lines in stderr.
   - Files: none modified.
   - Acceptance: Command exits 0; `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"User\""` returns > 0.
   - QA: Redirect stderr: `psql ... 2> /tmp/restore-stderr.log; grep -c ERROR /tmp/restore-stderr.log` returns 0.
   - Commit strategy: No file change.
 
-- [ ] 18. Row-count parity check per table: For each of `User`, `Project`, `File`, run `SELECT COUNT(*)` against both Supabase (`$SUPABASE_DIRECT_URL`) and Neon (`$DIRECT_URL`); write results to `/tmp/row-count-parity.txt` - expect counts match exactly for all three tables.
+- [x] 18. Row-count parity check per table: For each of `User`, `Project`, `File`, run `SELECT COUNT(*)` against both Supabase (`$SUPABASE_DIRECT_URL`) and Neon (`$DIRECT_URL`); write results to `/tmp/row-count-parity.txt` - expect counts match exactly for all three tables.
   - Files: `/tmp/row-count-parity.txt` (transient).
   - Acceptance: For each table row in the file, the Supabase count equals the Neon count. Any mismatch is a hard fail — investigate before proceeding.
   - QA: Write and run a small bash script that iterates the three tables, queries both DBs, and echoes `TABLE=X SUPABASE=Y NEON=Z MATCH=(yes/no)` per line. Assert every line ends in `MATCH=yes`.
   - Commit strategy: Parity file is transient.
 
-- [ ] 19. Sequence sanity: Prisma schema uses `cuid()` (no auto-increment sequences), so `information_schema.sequences` on Neon should be empty in `public` - expect zero user-owned sequences.
+- [x] 19. Sequence sanity: Prisma schema uses `cuid()` (no auto-increment sequences), so `information_schema.sequences` on Neon should be empty in `public` - expect zero user-owned sequences.
   - Files: none.
   - Acceptance: `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM information_schema.sequences WHERE sequence_schema = 'public'"` returns `0`.
   - QA: Same as acceptance.
   - Commit strategy: No file change.
 
-- [ ] 20. Local dev smoke test against Neon: `npm run dev`, navigate to `http://localhost:3000` unauthenticated, verify redirect to `/auth/login` (Supabase auth still active in this fase; only the DB backend changed) - expect page loads with no `P1001` Prisma connection error and login form renders.
+- [x] 20. Local dev smoke test against Neon: `npm run dev`, navigate to `http://localhost:3000` unauthenticated, verify redirect to `/auth/login` (Supabase auth still active in this fase; only the DB backend changed) - expect page loads with no `P1001` Prisma connection error and login form renders.
   - Files: none modified.
   - Acceptance: Dev server output shows compilation succeeds; browser DevTools console shows zero errors; login form renders.
   - QA: `curl -sI http://localhost:3000` returns 200 or 307; `curl -sL http://localhost:3000 | grep -i "sign in\|log in\|login"` returns >= 1 match.
   - Commit strategy: No file change.
 
-- [ ] 21. Commit Fase 1: `git commit --allow-empty -m "feat(fase-1/5): migrate Postgres data from Supabase to Vercel Postgres (Neon)"` - expect one commit summarizing the DB migration (allow-empty because no files changed, the artifact IS the working Neon DB).
+- [x] 21. Commit Fase 1: `git commit --allow-empty -m "feat(fase-1/5): migrate Postgres data from Supabase to Vercel Postgres (Neon)"` - expect one commit summarizing the DB migration (allow-empty because no files changed, the artifact IS the working Neon DB).
   - Files: none staged. Empty commit is intentional to mark the fase in git history.
   - Acceptance: `git log --oneline -1` matches the message; `git show --stat HEAD` shows no file diffs.
   - QA: `git log --grep='fase-1/5' --oneline | wc -l` returns 1.
   - Commit strategy: This is the Fase 1 commit.
 
-- [ ] 22. GATE — Fase 1 complete. Print summary: (a) Neon table list, (b) row counts for User/Project/File matching Supabase, (c) local dev server hits Neon successfully, (d) commit SHA. Then PAUSE. Do NOT begin Fase 2 without explicit user "OK" reply.
+- [x] 22. GATE — Fase 1 complete. Print summary: (a) Neon table list, (b) row counts for User/Project/File matching Supabase, (c) local dev server hits Neon successfully, (d) commit SHA. Then PAUSE. Do NOT begin Fase 2 without explicit user "OK" reply.
 
 ### Fase 2 — Auth migration (Supabase Auth → Better Auth)
 
-- [ ] 23. `prisma/schema.prisma`: Extend `User` model with Better Auth-required fields (`emailVerified Boolean @default(false)`, `image String?`) and add three new models `Session`, `Account`, `Verification` following Better Auth's Prisma adapter shape. Use PascalCase `@@map` on all four Better Auth models to match existing convention (`@@map("User")`, `@@map("Session")`, `@@map("Account")`, `@@map("Verification")`). Preserve existing `role: UserRole` field on `User` - expect `npx prisma format && npx prisma validate` both succeed.
+- [x] 23. `prisma/schema.prisma`: Extend `User` model with Better Auth-required fields (`emailVerified Boolean @default(false)`, `image String?`) and add three new models `Session`, `Account`, `Verification` following Better Auth's Prisma adapter shape. Use PascalCase `@@map` on all four Better Auth models to match existing convention (`@@map("User")`, `@@map("Session")`, `@@map("Account")`, `@@map("Verification")`). Preserve existing `role: UserRole` field on `User` - expect `npx prisma format && npx prisma validate` both succeed.
   - Files: `prisma/schema.prisma` (modified)
   - Schema additions (hand-written per Better Auth docs — do NOT rely on CLI `generate` overwriting the existing User model):
     ```prisma
@@ -368,19 +368,19 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: `npx prisma validate 2>&1 | grep -c "The schema is valid"` returns 1.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 24. `prisma db push --skip-generate`: Sync the extended schema to Neon, creating `Session`, `Account`, `Verification` tables and adding `emailVerified`, `image` columns to `User` - expect Neon has 6 tables total.
+- [x] 24. `prisma db push --skip-generate`: Sync the extended schema to Neon, creating `Session`, `Account`, `Verification` tables and adding `emailVerified`, `image` columns to `User` - expect Neon has 6 tables total.
   - Files: none.
   - Acceptance: `psql "$DIRECT_URL" -c "\dt"` shows `Account`, `File`, `Project`, `Session`, `User`, `Verification`; `psql "$DIRECT_URL" -c "\d \"User\"" | grep -c "emailVerified\|image"` returns 2.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 2 commit (schema file already staged from todo 23).
 
-- [ ] 25. `npx prisma generate`: Regenerate the Prisma client (output goes to `../generated/prisma` per `generator client` block) so TypeScript sees the new models - expect generated client contains `Session`, `Account`, `Verification` types.
+- [x] 25. `npx prisma generate`: Regenerate the Prisma client (output goes to `../generated/prisma` per `generator client` block) so TypeScript sees the new models - expect generated client contains `Session`, `Account`, `Verification` types.
   - Files: `generated/prisma/*` (regenerated, `.gitignore`d)
   - Acceptance: `test -d generated/prisma`; `grep -l "class Session" generated/prisma/index.d.ts` returns a match (or the equivalent for `prisma-client-js` v7 output).
   - QA: `node -e "const {PrismaClient}=require('./generated/prisma'); const p=new PrismaClient({adapter: new (require('@prisma/adapter-pg').PrismaPg)({connectionString: process.env.DATABASE_URL})}); p.session.findFirst().then(x=>console.log('ok', x)).catch(e=>{console.error(e); process.exit(1)})"` — after `set -a; source .env.local; set +a` — exits 0 with `ok null`.
   - Commit strategy: No file change committed (generated/ is gitignored).
 
-- [ ] 26. `lib/auth.ts`: Create Better Auth server singleton with `prismaAdapter(prisma, { provider: "postgresql" })`, `emailAndPassword` enabled with `requireEmailVerification: false`, `user.additionalFields.role` typed union of the three role strings with `input: false` and `defaultValue: "CLIENT"`, and `nextCookies()` plugin last - expect file compiles and exports `auth`.
+- [x] 26. `lib/auth.ts`: Create Better Auth server singleton with `prismaAdapter(prisma, { provider: "postgresql" })`, `emailAndPassword` enabled with `requireEmailVerification: false`, `user.additionalFields.role` typed union of the three role strings with `input: false` and `defaultValue: "CLIENT"`, and `nextCookies()` plugin last - expect file compiles and exports `auth`.
   - Files: `lib/auth.ts` (new)
   - Content template:
     ```ts
@@ -413,7 +413,7 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: `test -f lib/auth.ts && npx tsc --noEmit 2>&1 | tail -5` shows zero errors touching `lib/auth.ts`.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 27. `lib/auth-client.ts`: Create Better Auth React client via `createAuthClient` - expect file compiles and exports `authClient`.
+- [x] 27. `lib/auth-client.ts`: Create Better Auth React client via `createAuthClient` - expect file compiles and exports `authClient`.
   - Files: `lib/auth-client.ts` (new)
   - Content template:
     ```ts
@@ -427,7 +427,7 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: `grep -c 'createAuthClient' lib/auth-client.ts` returns 1.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 28. `app/api/auth/[...all]/route.ts`: Create Next.js catch-all handler using `toNextJsHandler(auth)` - expect GET and POST exports.
+- [x] 28. `app/api/auth/[...all]/route.ts`: Create Next.js catch-all handler using `toNextJsHandler(auth)` - expect GET and POST exports.
   - Files: `app/api/auth/[...all]/route.ts` (new)
   - Content template:
     ```ts
@@ -440,20 +440,20 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: `npm run dev` in background; `curl -sI http://localhost:3000/api/auth/session | head -1` returns `HTTP/1.1 200 OK` (with empty session).
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 29. `scripts/seed-demo-users.ts`: Create idempotent seed script that inserts the three demo users via Better Auth's server API (`auth.api.signUpEmail`), then updates each row via Prisma to set the correct `role` and `emailVerified: true` - expect script exists and is idempotent (running twice does not duplicate users).
+- [x] 29. `scripts/seed-demo-users.ts`: Create idempotent seed script that inserts the three demo users via Better Auth's server API (`auth.api.signUpEmail`), then updates each row via Prisma to set the correct `role` and `emailVerified: true` - expect script exists and is idempotent (running twice does not duplicate users).
   - Files: `scripts/seed-demo-users.ts` (new)
   - Behavior: For each of `{ email: "manager@demo.com", role: "PROJECT_MANAGER", name: "Manager Demo" }`, `{ email: "client@demo.com", role: "CLIENT", name: "Client Demo" }`, `{ email: "designer@demo.com", role: "DESIGNER", name: "Designer Demo" }`, password `"demo1234"`: check `prisma.user.findUnique({ where: { email } })`; if present, skip; else `await auth.api.signUpEmail({ body: { email, password, name } })`; then always `await prisma.user.update({ where: { email }, data: { role, emailVerified: true } })`.
   - Acceptance: `npx tsx scripts/seed-demo-users.ts` exits 0; running twice does not throw.
   - QA: After first run, `psql "$DIRECT_URL" -c "SELECT email, role, \"emailVerified\" FROM \"User\" WHERE email LIKE '%@demo.com' ORDER BY email"` returns 3 rows with the expected roles and `emailVerified = t`.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 30. Run the seed: `npx tsx scripts/seed-demo-users.ts` - expect 3 demo users present in Neon with correct roles and pre-verified.
+- [x] 30. Run the seed: `npx tsx scripts/seed-demo-users.ts` - expect 3 demo users present in Neon with correct roles and pre-verified.
   - Files: no repo change; DB rows added.
   - Acceptance: `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"User\" WHERE email LIKE '%@demo.com' AND \"emailVerified\" = TRUE"` returns 3.
   - QA: Same as acceptance; also `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"Account\" WHERE \"providerId\" = 'credential'"` returns >= 3 (Better Auth stores password in the `Account` table with `providerId = "credential"`).
   - Commit strategy: No file change.
 
-- [ ] 31. `middleware.ts`: Rewrite to use Better Auth. Replace `updateSession(request)` import with `auth.api.getSession({ headers: request.headers })`. Preserve current route-protection matrix minus the deleted routes: unauthenticated users redirected to `/auth/login` EXCEPT for `/api/projects/*`, `/api/users/designers`, `/auth/*`; authenticated users redirected away from `/auth/login`, `/auth/register` to `/`. Remove `/auth/confirm` and `/auth/register/confirm` from the auth-only matcher because those routes are deleted in todo 35. Add `runtime: "nodejs"` to the exported `config` to allow `auth.api.getSession` in middleware - expect `npx tsc --noEmit` clean.
+- [x] 31. `middleware.ts`: Rewrite to use Better Auth. Replace `updateSession(request)` import with `auth.api.getSession({ headers: request.headers })`. Preserve current route-protection matrix minus the deleted routes: unauthenticated users redirected to `/auth/login` EXCEPT for `/api/projects/*`, `/api/users/designers`, `/auth/*`; authenticated users redirected away from `/auth/login`, `/auth/register` to `/`. Remove `/auth/confirm` and `/auth/register/confirm` from the auth-only matcher because those routes are deleted in todo 35. Add `runtime: "nodejs"` to the exported `config` to allow `auth.api.getSession` in middleware - expect `npx tsc --noEmit` clean.
   - Files: `middleware.ts` (modified)
   - Content sketch:
     ```ts
@@ -493,101 +493,101 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: `grep -c "supabase\|updateSession" middleware.ts` returns 0.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 32. `app/auth/auth-context.tsx`: Rewrite to use `authClient` from `@/lib/auth-client` instead of Supabase. Replace: `userQuery` uses `authClient.useSession()`; `userRoleQuery` reads `session.user.role` (from additionalFields) instead of querying Supabase PostgREST; `signIn` → `authClient.signIn.email`; `signUp` → `authClient.signUp.email`; `signOut` → `authClient.signOut`; REMOVE `resetPassword` and `updatePassword` mutations entirely (no email provider means no reset flow); remove `onAuthStateChange` listener (replaced by React Query invalidation on sign-in/out mutation success) - expect `npx tsc --noEmit` clean, `grep supabase app/auth/auth-context.tsx` returns 0.
+- [x] 32. `app/auth/auth-context.tsx`: Rewrite to use `authClient` from `@/lib/auth-client` instead of Supabase. Replace: `userQuery` uses `authClient.useSession()`; `userRoleQuery` reads `session.user.role` (from additionalFields) instead of querying Supabase PostgREST; `signIn` → `authClient.signIn.email`; `signUp` → `authClient.signUp.email`; `signOut` → `authClient.signOut`; REMOVE `resetPassword` and `updatePassword` mutations entirely (no email provider means no reset flow); remove `onAuthStateChange` listener (replaced by React Query invalidation on sign-in/out mutation success) - expect `npx tsc --noEmit` clean, `grep supabase app/auth/auth-context.tsx` returns 0.
   - Files: `app/auth/auth-context.tsx` (modified — major rewrite)
   - Acceptance: File no longer imports from `@supabase/*` or `@/lib/supabase/*`; all exported hook signatures the rest of the app depends on (`useAuth`, `signIn`, `signUp`, `signOut`) are preserved as callable async functions returning `{ error }` shape so caller sites in `login/page.tsx`, `register/page.tsx`, `Navbar.tsx` stay compilable.
   - QA: `grep -c "supabase\|@supabase" app/auth/auth-context.tsx` returns 0; `npx tsc --noEmit` clean.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 33. `app/auth/login/page.tsx`: Update to call the new `signIn` from `useAuth()` (backed by `authClient.signIn.email`). Preserve UI + error handling - expect page compiles and login works locally.
+- [x] 33. `app/auth/login/page.tsx`: Update to call the new `signIn` from `useAuth()` (backed by `authClient.signIn.email`). Preserve UI + error handling - expect page compiles and login works locally.
   - Files: `app/auth/login/page.tsx` (modified)
   - Acceptance: `npx tsc --noEmit` clean; a manual browser login with `manager@demo.com / demo1234` succeeds and lands on `/`.
   - QA: `grep -c "supabase" app/auth/login/page.tsx` returns 0.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 34. `app/auth/register/page.tsx`: Update `useAuth().signUp` call signature to match the new Better Auth shape (name, email, password — role is server-set via seed / additionalFields default, NOT client-passed). After successful signup, redirect to `/` instead of `/auth/register/confirm`. REMOVE the role selector UI (roles are not user-settable at signup; `input: false` on the additional field enforces this; new self-service signups default to `CLIENT`) - expect page compiles, signup works, no `/auth/register/confirm` navigation.
+- [x] 34. `app/auth/register/page.tsx`: Update `useAuth().signUp` call signature to match the new Better Auth shape (name, email, password — role is server-set via seed / additionalFields default, NOT client-passed). After successful signup, redirect to `/` instead of `/auth/register/confirm`. REMOVE the role selector UI (roles are not user-settable at signup; `input: false` on the additional field enforces this; new self-service signups default to `CLIENT`) - expect page compiles, signup works, no `/auth/register/confirm` navigation.
   - Files: `app/auth/register/page.tsx` (modified)
   - Acceptance: `npx tsc --noEmit` clean; `grep -c 'register/confirm' app/auth/register/page.tsx` returns 0; a manual signup with a fresh email succeeds and lands on `/`.
   - QA: `grep -c "supabase\|register/confirm" app/auth/register/page.tsx` returns 0.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 35. Delete `app/auth/register/confirm/page.tsx`, `app/auth/confirm/route.ts`, `app/auth/callback/route.ts` (all three Supabase-specific email OTP / callback routes replaced by Better Auth's `[...all]` handler) - expect files gone.
+- [x] 35. Delete `app/auth/register/confirm/page.tsx`, `app/auth/confirm/route.ts`, `app/auth/callback/route.ts` (all three Supabase-specific email OTP / callback routes replaced by Better Auth's `[...all]` handler) - expect files gone.
   - Files: three deletions.
   - Acceptance: `test ! -e app/auth/register/confirm/page.tsx && test ! -e app/auth/confirm/route.ts && test ! -e app/auth/callback/route.ts` exits 0.
   - QA: `find app/auth -name 'confirm*' -o -name 'callback*'` returns empty.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 36. Delete `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/middleware.ts` and remove the `lib/supabase/` directory - expect directory gone.
+- [x] 36. Delete `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/middleware.ts` and remove the `lib/supabase/` directory - expect directory gone.
   - Files: three deletions + directory removal.
   - Acceptance: `test ! -d lib/supabase` exits 0; `grep -r "@/lib/supabase" app/ lib/ middleware.ts scripts/` returns 0 hits (any remaining hit is a bug — resolve before continuing).
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 37. `app/api/projects/route.ts`: Replace `const supabase = await createClient(request); const { data: { user } } = await supabase.auth.getUser()` with `const session = await auth.api.getSession({ headers: request.headers }); if (!session) return 401; const userId = session.user.id` in both GET and POST handlers. Preserve calls into `ProjectService.getProjectsByUserRole(userId)` and `createProject(...)`. Do NOT change response shapes - expect `npx tsc --noEmit` clean, no `supabase` imports.
+- [x] 37. `app/api/projects/route.ts`: Replace `const supabase = await createClient(request); const { data: { user } } = await supabase.auth.getUser()` with `const session = await auth.api.getSession({ headers: request.headers }); if (!session) return 401; const userId = session.user.id` in both GET and POST handlers. Preserve calls into `ProjectService.getProjectsByUserRole(userId)` and `createProject(...)`. Do NOT change response shapes - expect `npx tsc --noEmit` clean, no `supabase` imports.
   - Files: `app/api/projects/route.ts` (modified)
   - Acceptance: `grep -c "supabase\|@supabase" app/api/projects/route.ts` returns 0; `curl -sI -H "Cookie: better-auth.session_token=<valid>" http://localhost:3000/api/projects` returns 200 or JSON with expected shape.
   - QA: `grep -c "auth.api.getSession" app/api/projects/route.ts` returns >= 2 (GET + POST).
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 38. `app/api/projects/[id]/route.ts`: Same replacement as todo 37 for GET, PUT, DELETE handlers. Preserve `ProjectService.getProjectById`, `updateProject`, `deleteProject` calls - expect zero Supabase imports.
+- [x] 38. `app/api/projects/[id]/route.ts`: Same replacement as todo 37 for GET, PUT, DELETE handlers. Preserve `ProjectService.getProjectById`, `updateProject`, `deleteProject` calls - expect zero Supabase imports.
   - Files: `app/api/projects/[id]/route.ts` (modified)
   - Acceptance: `grep -c "supabase" app/api/projects/[id]/route.ts` returns 0; `npx tsc --noEmit` clean.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 39. `app/api/projects/[id]/status/route.ts`: Same replacement for the PATCH handler. Preserve `ProjectService.updateProjectStatus(userId, projectId, status)` call - expect zero Supabase imports.
+- [x] 39. `app/api/projects/[id]/status/route.ts`: Same replacement for the PATCH handler. Preserve `ProjectService.updateProjectStatus(userId, projectId, status)` call - expect zero Supabase imports.
   - Files: `app/api/projects/[id]/status/route.ts` (modified)
   - Acceptance: `grep -c "supabase" app/api/projects/[id]/status/route.ts` returns 0.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 40. `app/api/projects/[id]/files/route.ts`: Same replacement for the POST handler. Preserve `ProjectService.addFilesToProject(userId, projectId, files)` call - expect zero Supabase imports.
+- [x] 40. `app/api/projects/[id]/files/route.ts`: Same replacement for the POST handler. Preserve `ProjectService.addFilesToProject(userId, projectId, files)` call - expect zero Supabase imports.
   - Files: `app/api/projects/[id]/files/route.ts` (modified)
   - Acceptance: `grep -c "supabase" app/api/projects/[id]/files/route.ts` returns 0.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 41. `app/api/projects/[id]/files/[fileId]/route.ts`: Same replacement for the DELETE handler. Note: this handler previously passed a Supabase admin client into `ProjectService.removeFileFromProject`; that signature will be adjusted in Fase 3 (todo 52). For this fase, temporarily pass `null` where the client was expected and add a TODO comment — Fase 3 removes the parameter entirely - expect zero Supabase imports in the ROUTE file.
+- [x] 41. `app/api/projects/[id]/files/[fileId]/route.ts`: Same replacement for the DELETE handler. Note: this handler previously passed a Supabase admin client into `ProjectService.removeFileFromProject`; that signature will be adjusted in Fase 3 (todo 52). For this fase, temporarily pass `null` where the client was expected and add a TODO comment — Fase 3 removes the parameter entirely - expect zero Supabase imports in the ROUTE file.
   - Files: `app/api/projects/[id]/files/[fileId]/route.ts` (modified)
   - Acceptance: `grep -c "supabase\|@supabase" app/api/projects/[id]/files/[fileId]/route.ts` returns 0; `npx tsc --noEmit` shows expected temporary looseness on `removeFileFromProject` signature (resolved in Fase 3).
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 42. `app/api/users/designers/route.ts`: Same session replacement for the GET handler. Preserve `UserRole.PROJECT_MANAGER` role check - expect zero Supabase imports.
+- [x] 42. `app/api/users/designers/route.ts`: Same session replacement for the GET handler. Preserve `UserRole.PROJECT_MANAGER` role check - expect zero Supabase imports.
   - Files: `app/api/users/designers/route.ts` (modified)
   - Acceptance: `grep -c "supabase" app/api/users/designers/route.ts` returns 0.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 43. `app/page.tsx`: Replace `const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser()` with `const session = await auth.api.getSession({ headers: await headers() })`. Extract role from `session.user.role` (typed additional field) instead of `user.user_metadata.role`. Preserve redirect-to-login behavior when session is null - expect page renders for each authenticated demo user with the correct role.
+- [x] 43. `app/page.tsx`: Replace `const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser()` with `const session = await auth.api.getSession({ headers: await headers() })`. Extract role from `session.user.role` (typed additional field) instead of `user.user_metadata.role`. Preserve redirect-to-login behavior when session is null - expect page renders for each authenticated demo user with the correct role.
   - Files: `app/page.tsx` (modified)
   - Acceptance: `grep -c "supabase\|user_metadata" app/page.tsx` returns 0; `npx tsc --noEmit` clean.
   - QA: Manual: login as `manager@demo.com` → dashboard shows PROJECT_MANAGER view. Repeat for client and designer.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 44. `app/components/Navbar.tsx`: Ensure `handleSignOut` calls `signOut()` from `useAuth()` (which now wraps `authClient.signOut`). No other change if the current call already goes through `useAuth()` - expect sign-out click clears the session cookie and reloads to `/auth/login`.
+- [x] 44. `app/components/Navbar.tsx`: Ensure `handleSignOut` calls `signOut()` from `useAuth()` (which now wraps `authClient.signOut`). No other change if the current call already goes through `useAuth()` - expect sign-out click clears the session cookie and reloads to `/auth/login`.
   - Files: `app/components/Navbar.tsx` (modified if needed)
   - Acceptance: `grep -c "supabase" app/components/Navbar.tsx` returns 0; manual sign-out from the UI returns the user to `/auth/login`.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 2 commit.
 
-- [ ] 45. Local end-to-end auth verification: With `npm run dev` running, sign in as each of `manager@demo.com`, `client@demo.com`, `designer@demo.com` with password `demo1234`, verify dashboard loads with correct role-based content, sign out. Verify browser DevTools console shows zero errors. Verify `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"Session\" WHERE \"expiresAt\" > NOW()"` reflects active sessions after each login - expect all three role sign-ins succeed, no console errors.
+- [x] 45. Local end-to-end auth verification: With `npm run dev` running, sign in as each of `manager@demo.com`, `client@demo.com`, `designer@demo.com` with password `demo1234`, verify dashboard loads with correct role-based content, sign out. Verify browser DevTools console shows zero errors. Verify `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"Session\" WHERE \"expiresAt\" > NOW()"` reflects active sessions after each login - expect all three role sign-ins succeed, no console errors.
   - Files: none.
   - Acceptance: Three successful role logins recorded in `Session` table; sign-out deletes the corresponding session row (or expires it).
   - QA: `psql "$DIRECT_URL" -c "SELECT u.email, s.\"expiresAt\" > NOW() as active FROM \"Session\" s JOIN \"User\" u ON u.id = s.\"userId\" ORDER BY s.\"createdAt\" DESC LIMIT 10"` shows recent sessions for the three demo emails.
   - Commit strategy: No file change.
 
-- [ ] 46. Commit Fase 2: `git add prisma/ lib/ app/ middleware.ts scripts/seed-demo-users.ts .env.example && git commit -m "feat(fase-2/5): migrate Auth from Supabase to Better Auth + seed demo users"` - expect one commit.
+- [x] 46. Commit Fase 2: `git add prisma/ lib/ app/ middleware.ts scripts/seed-demo-users.ts .env.example && git commit -m "feat(fase-2/5): migrate Auth from Supabase to Better Auth + seed demo users"` - expect one commit.
   - Files: all Fase 2 changes staged.
   - Acceptance: `git log --oneline -1` matches the message; `git show --stat HEAD` lists all expected paths (new/modified/deleted).
   - QA: `git show HEAD --stat | grep -cE 'lib/auth\.ts|lib/auth-client\.ts|api/auth/\[\.\.\.all\]|scripts/seed-demo-users'` returns >= 3.
   - Commit strategy: This is the Fase 2 commit.
 
-- [ ] 47. GATE — Fase 2 complete. Print summary: (a) six tables in Neon, (b) three demo users seeded pre-verified, (c) all API routes and UI use Better Auth, (d) `lib/supabase/` deleted, (e) confirm/callback routes deleted, (f) commit SHA. Then PAUSE. Do NOT begin Fase 3 without explicit user "OK" reply.
+- [x] 47. GATE — Fase 2 complete. Print summary: (a) six tables in Neon, (b) three demo users seeded pre-verified, (c) all API routes and UI use Better Auth, (d) `lib/supabase/` deleted, (e) confirm/callback routes deleted, (f) commit SHA. Then PAUSE. Do NOT begin Fase 3 without explicit user "OK" reply.
 
 ### Fase 3 — Storage migration (Supabase Storage → Vercel Blob)
 
-- [ ] 48. `next.config.ts`: Add `images.remotePatterns` allowing `*.public.blob.vercel-storage.com` (defensive — even though the store is private, next/image can still be pointed at Blob URLs in the future without a config change) - expect config compiles.
+- [x] 48. `next.config.ts`: Add `images.remotePatterns` allowing `*.public.blob.vercel-storage.com` (defensive — even though the store is private, next/image can still be pointed at Blob URLs in the future without a config change) - expect config compiles.
   - Files: `next.config.ts` (modified)
   - Content:
     ```ts
@@ -611,212 +611,212 @@ Fase 3's backfill script, then removed in Fase 5.
   - QA: `grep -c "blob.vercel-storage.com" next.config.ts` returns 1.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 49. `app/api/upload/route.ts`: Create client-upload handler using `handleUpload` from `@vercel/blob/client`. Authenticate via `auth.api.getSession({ headers: request.headers })`; on unauthenticated requests, throw before token generation. `onBeforeGenerateToken` returns `{ allowedContentTypes: [...current app types], maximumSizeInBytes: 5 * 1024 * 1024, addRandomSuffix: false, tokenPayload: JSON.stringify({ userId, projectId }) }`. `onUploadCompleted` does not touch the DB (the caller updates `File` rows explicitly after client-side `upload()` resolves) - expect endpoint returns tokens for authenticated users and 401 otherwise.
+- [x] 49. `app/api/upload/route.ts`: Create client-upload handler using `handleUpload` from `@vercel/blob/client`. Authenticate via `auth.api.getSession({ headers: request.headers })`; on unauthenticated requests, throw before token generation. `onBeforeGenerateToken` returns `{ allowedContentTypes: [...current app types], maximumSizeInBytes: 5 * 1024 * 1024, addRandomSuffix: false, tokenPayload: JSON.stringify({ userId, projectId }) }`. `onUploadCompleted` does not touch the DB (the caller updates `File` rows explicitly after client-side `upload()` resolves) - expect endpoint returns tokens for authenticated users and 401 otherwise.
   - Files: `app/api/upload/route.ts` (new)
   - Acceptance: `npx tsc --noEmit` clean; unauthenticated POST returns 401; authenticated POST returns a JSON token payload.
   - QA: `curl -X POST http://localhost:3000/api/upload -d '{}'` returns 401; with a valid session cookie, returns 200 or 400 (missing body) — NOT 500.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 50. `app/api/files/[...path]/route.ts`: Create authenticated file-read endpoint. Authenticate via `auth.api.getSession`; extract the pathname from `params.path.join("/")`; look up the `File` row via Prisma using the path; verify `ProjectService.canViewProject(userId, file.projectId)`; if authorized, call `get(pathname, { access: 'private' })` from `@vercel/blob` and return the stream with correct `Content-Type` and `Content-Disposition` headers - expect authenticated authorized user can download; unauthorized returns 403.
+- [x] 50. `app/api/files/[...path]/route.ts`: Create authenticated file-read endpoint. Authenticate via `auth.api.getSession`; extract the pathname from `params.path.join("/")`; look up the `File` row via Prisma using the path; verify `ProjectService.canViewProject(userId, file.projectId)`; if authorized, call `get(pathname, { access: 'private' })` from `@vercel/blob` and return the stream with correct `Content-Type` and `Content-Disposition` headers - expect authenticated authorized user can download; unauthorized returns 403.
   - Files: `app/api/files/[...path]/route.ts` (new)
   - Acceptance: `npx tsc --noEmit` clean; unauthenticated request returns 401; authenticated but unauthorized request returns 403; authorized request returns 200 with the file bytes.
   - QA: With `curl -sI` and valid session, request to a known File.path returns 200 with `Content-Type` matching the file MIME.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 51. `lib/services/fileUploadService.ts`: Rewrite the class. `uploadFile(file, userId, projectId, fileId)` now calls the client-side `upload()` from `@vercel/blob/client` with pathname `projects/${userId}/${fileId}-${sanitize(file.name)}`, `access: 'private'`, `handleUploadUrl: '/api/upload'`, `multipart: file.size > 5_000_000 ? true : false` (defensive), and returns `{ filename: file.name, path: <returned pathname>, size: file.size }`. `deleteFile(path)` calls `del(path)` from `@vercel/blob`. Remove the `constructor(supabase)` — no client injection needed anymore - expect `grep supabase lib/services/fileUploadService.ts` returns 0.
+- [x] 51. `lib/services/fileUploadService.ts`: Rewrite the class. `uploadFile(file, userId, projectId, fileId)` now calls the client-side `upload()` from `@vercel/blob/client` with pathname `projects/${userId}/${fileId}-${sanitize(file.name)}`, `access: 'private'`, `handleUploadUrl: '/api/upload'`, `multipart: file.size > 5_000_000 ? true : false` (defensive), and returns `{ filename: file.name, path: <returned pathname>, size: file.size }`. `deleteFile(path)` calls `del(path)` from `@vercel/blob`. Remove the `constructor(supabase)` — no client injection needed anymore - expect `grep supabase lib/services/fileUploadService.ts` returns 0.
   - Files: `lib/services/fileUploadService.ts` (modified — major rewrite)
   - Acceptance: `grep -c "supabase\|@supabase" lib/services/fileUploadService.ts` returns 0; `npx tsc --noEmit` clean.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 52. `lib/services/project-service.ts`: Replace the two `supabaseAdmin.storage.from('project-files').remove([path])` call sites in `deleteFilesFromStorage` and `removeFileFromProject` with `del(path)` from `@vercel/blob`. Remove the `supabaseAdmin: SupabaseClient` parameter from `removeFileFromProject` and `deleteProject` (adjust their callers in `app/api/projects/[id]/route.ts` and `app/api/projects/[id]/files/[fileId]/route.ts` to drop the now-removed argument) - expect `grep supabase lib/services/project-service.ts` returns 0.
+- [x] 52. `lib/services/project-service.ts`: Replace the two `supabaseAdmin.storage.from('project-files').remove([path])` call sites in `deleteFilesFromStorage` and `removeFileFromProject` with `del(path)` from `@vercel/blob`. Remove the `supabaseAdmin: SupabaseClient` parameter from `removeFileFromProject` and `deleteProject` (adjust their callers in `app/api/projects/[id]/route.ts` and `app/api/projects/[id]/files/[fileId]/route.ts` to drop the now-removed argument) - expect `grep supabase lib/services/project-service.ts` returns 0.
   - Files: `lib/services/project-service.ts`, `app/api/projects/[id]/route.ts`, `app/api/projects/[id]/files/[fileId]/route.ts` (modified)
   - Acceptance: `grep -c "supabase\|@supabase" lib/services/project-service.ts` returns 0; `npx tsc --noEmit` clean (this also resolves the temporary `null` from todo 41).
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 53. `app/projects/_hooks/useProjectDetails.ts`: Rewrite the `downloadFileMutation` to fetch `/api/files/${encodeURIComponent(file.path)}` (the new authenticated file endpoint), read the response as a blob, and trigger a browser download exactly like today. Remove the `supabase.storage.from(BUCKET_NAME).download(file.path)` call - expect `grep supabase app/projects/_hooks/useProjectDetails.ts` returns 0.
+- [x] 53. `app/projects/_hooks/useProjectDetails.ts`: Rewrite the `downloadFileMutation` to fetch `/api/files/${encodeURIComponent(file.path)}` (the new authenticated file endpoint), read the response as a blob, and trigger a browser download exactly like today. Remove the `supabase.storage.from(BUCKET_NAME).download(file.path)` call - expect `grep supabase app/projects/_hooks/useProjectDetails.ts` returns 0.
   - Files: `app/projects/_hooks/useProjectDetails.ts` (modified)
   - Acceptance: `grep -c "supabase" app/projects/_hooks/useProjectDetails.ts` returns 0; `npx tsc --noEmit` clean; manual download from a project detail page succeeds.
   - QA: In the browser, on a project detail page with at least one file, click download → file downloads with correct filename and content.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 54. `app/projects/_hooks/useProjectSubmission.ts`: Update the upload orchestration to pass the pre-generated `fileId` (a cuid, generated client-side via `crypto.randomUUID()` or a lightweight cuid lib — use `@paralleldrive/cuid2` if not already installed, otherwise inline uuid; note: the resulting `path` field stored in `File` becomes `projects/${userId}/${fileId}-${filename}`) into `FileUploadService.uploadFile`. After all uploads complete, POST the resulting `{ filename, path, size }` array to `/api/projects` or `/api/projects/[id]/files` as before - expect `grep supabase app/projects/_hooks/useProjectSubmission.ts` returns 0.
+- [x] 54. `app/projects/_hooks/useProjectSubmission.ts`: Update the upload orchestration to pass the pre-generated `fileId` (a cuid, generated client-side via `crypto.randomUUID()` or a lightweight cuid lib — use `@paralleldrive/cuid2` if not already installed, otherwise inline uuid; note: the resulting `path` field stored in `File` becomes `projects/${userId}/${fileId}-${filename}`) into `FileUploadService.uploadFile`. After all uploads complete, POST the resulting `{ filename, path, size }` array to `/api/projects` or `/api/projects/[id]/files` as before - expect `grep supabase app/projects/_hooks/useProjectSubmission.ts` returns 0.
   - Files: `app/projects/_hooks/useProjectSubmission.ts` (modified). If a cuid lib is missing, add via `npm install @paralleldrive/cuid2` (small dep, well-supported) as a follow-up task — otherwise use `crypto.randomUUID()` (browser + Node 19+).
   - Acceptance: `grep -c "supabase" app/projects/_hooks/useProjectSubmission.ts` returns 0; upload flow works locally end-to-end (drag PDF into new project form → project created → file appears with a downloadable path).
   - QA: Same as acceptance; verify `psql "$DIRECT_URL" -c "SELECT path FROM \"File\" ORDER BY \"createdAt\" DESC LIMIT 1"` shows a path starting with `projects/`.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 55. `app/projects/_utils/types.ts`: Remove or rename `BUCKET_NAME` constant if still exported (it referenced Supabase). Update any consumer to remove the import. Keep `MAX_FILE_SIZE`, `MAX_FILES`, allowed extensions unchanged - expect `grep BUCKET_NAME app/ lib/ scripts/` returns 0.
+- [x] 55. `app/projects/_utils/types.ts`: Remove or rename `BUCKET_NAME` constant if still exported (it referenced Supabase). Update any consumer to remove the import. Keep `MAX_FILE_SIZE`, `MAX_FILES`, allowed extensions unchanged - expect `grep BUCKET_NAME app/ lib/ scripts/` returns 0.
   - Files: `app/projects/_utils/types.ts` (modified), plus any importer.
   - Acceptance: `grep -rc "BUCKET_NAME" app/ lib/ scripts/` returns 0.
   - QA: `npx tsc --noEmit` clean.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 56. `scripts/backfill-storage.ts`: Create idempotent backfill that iterates every `File` row in Neon. For each row: (a) if `head(file.path, { access: 'private' })` succeeds (blob already present), log SKIP; (b) else download bytes from Supabase Storage via `fetch("https://hslsqmuhkctcjftwnive.supabase.co/storage/v1/object/authenticated/project-files/" + file.path, { headers: { Authorization: "Bearer " + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY } })` — if 404, log MISSING and continue; else (c) `put(file.path, buffer, { access: 'private', addRandomSuffix: false, allowOverwrite: false, contentType: mimeFromExt(file.filename) })`; (d) log OK. Write progress to `/tmp/backfill-log.txt`. Support `--dry-run` flag - expect script exists, dry-run reports counts.
+- [x] 56. `scripts/backfill-storage.ts`: Create idempotent backfill that iterates every `File` row in Neon. For each row: (a) if `head(file.path, { access: 'private' })` succeeds (blob already present), log SKIP; (b) else download bytes from Supabase Storage via `fetch("https://hslsqmuhkctcjftwnive.supabase.co/storage/v1/object/authenticated/project-files/" + file.path, { headers: { Authorization: "Bearer " + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY } })` — if 404, log MISSING and continue; else (c) `put(file.path, buffer, { access: 'private', addRandomSuffix: false, allowOverwrite: false, contentType: mimeFromExt(file.filename) })`; (d) log OK. Write progress to `/tmp/backfill-log.txt`. Support `--dry-run` flag - expect script exists, dry-run reports counts.
   - Files: `scripts/backfill-storage.ts` (new)
   - Acceptance: `npx tsx scripts/backfill-storage.ts --dry-run` prints per-file status; `wc -l /tmp/backfill-log.txt` equals the count of `File` rows in Neon.
   - QA: `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"File\""` equals `grep -c '^' /tmp/backfill-log.txt`.
   - Commit strategy: Group with Fase 3 commit.
 
-- [ ] 57. Run backfill live: `npx tsx scripts/backfill-storage.ts` (without --dry-run). For each `File`, HEAD the resulting Blob URL to confirm presence - expect every file row has a corresponding Blob entry.
+- [x] 57. Run backfill live: `npx tsx scripts/backfill-storage.ts` (without --dry-run). For each `File`, HEAD the resulting Blob URL to confirm presence - expect every file row has a corresponding Blob entry.
   - Files: no repo change; Blob store populated.
   - Acceptance: For every `File.path` in Neon, `head(path, { access: 'private' })` from a small verifier script returns metadata (not 404). Log a per-file pass/fail summary to `/tmp/backfill-verify.txt`.
   - QA: `grep -c "MISSING" /tmp/backfill-verify.txt` returns 0 (or, if any legitimately missing due to prior Supabase Storage issues, document exactly which files in the summary — do not silently ignore).
   - Commit strategy: No file change.
 
-- [ ] 58. Local end-to-end storage verification: With `npm run dev`, sign in as `manager@demo.com`, open an existing project with at least one file, click download → file downloads with correct bytes; upload a new PDF file (< 5 MB), verify it appears in the file list and downloads correctly; delete the new file, verify it disappears from UI AND `vercel blob list` (or Vercel Dashboard → Storage → blob) no longer shows it - expect full CRUD works.
+- [x] 58. Local end-to-end storage verification: With `npm run dev`, sign in as `manager@demo.com`, open an existing project with at least one file, click download → file downloads with correct bytes; upload a new PDF file (< 5 MB), verify it appears in the file list and downloads correctly; delete the new file, verify it disappears from UI AND `vercel blob list` (or Vercel Dashboard → Storage → blob) no longer shows it - expect full CRUD works.
   - Files: none.
   - Acceptance: All three operations (download existing, upload new, delete new) succeed with zero console errors.
   - QA: Manual verification per acceptance.
   - Commit strategy: No file change.
 
-- [ ] 59. Commit Fase 3: `git add . && git commit -m "feat(fase-3/5): migrate Storage from Supabase to Vercel Blob + backfill existing files"` - expect one commit.
+- [x] 59. Commit Fase 3: `git add . && git commit -m "feat(fase-3/5): migrate Storage from Supabase to Vercel Blob + backfill existing files"` - expect one commit.
   - Files: all Fase 3 changes staged.
   - Acceptance: `git log --oneline -1` matches; `git show --stat HEAD` lists new `app/api/upload/route.ts`, `app/api/files/[...path]/route.ts`, `scripts/backfill-storage.ts` and modifications.
   - QA: Same as acceptance.
   - Commit strategy: This is the Fase 3 commit.
 
-- [ ] 60. GATE — Fase 3 complete. Print summary: (a) upload works via new client-upload flow, (b) download works via new authenticated file endpoint, (c) delete works via `del()`, (d) backfill verified for every historical `File` row, (e) commit SHA. Then PAUSE. Do NOT begin Fase 4 without explicit user "OK" reply.
+- [x] 60. GATE — Fase 3 complete. Print summary: (a) upload works via new client-upload flow, (b) download works via new authenticated file endpoint, (c) delete works via `del()`, (d) backfill verified for every historical `File` row, (e) commit SHA. Then PAUSE. Do NOT begin Fase 4 without explicit user "OK" reply.
 
 ### Fase 4 — Production cutover and verification
 
-- [ ] 61. Vercel Dashboard → Environment Variables → Production: Add `DATABASE_URL` (Neon pooled), `DIRECT_URL` (Neon direct), `BLOB_READ_WRITE_TOKEN` (Blob store), `BETTER_AUTH_SECRET` (same value as local `.env.local`), `BETTER_AUTH_URL=https://project-manager-app-cyan.vercel.app` for the Production environment. Do NOT delete existing Supabase env vars yet — they stay as inert fallback until Fase 5 - expect `vercel env ls production` shows all 5 new vars.
+- [x] 61. Vercel Dashboard → Environment Variables → Production: Add `DATABASE_URL` (Neon pooled), `DIRECT_URL` (Neon direct), `BLOB_READ_WRITE_TOKEN` (Blob store), `BETTER_AUTH_SECRET` (same value as local `.env.local`), `BETTER_AUTH_URL=https://project-manager-app-cyan.vercel.app` for the Production environment. Do NOT delete existing Supabase env vars yet — they stay as inert fallback until Fase 5 - expect `vercel env ls production` shows all 5 new vars.
   - Files: none in repo.
   - Acceptance: `vercel env ls production | grep -cE "^(DATABASE_URL|DIRECT_URL|BLOB_READ_WRITE_TOKEN|BETTER_AUTH_SECRET|BETTER_AUTH_URL)\b"` returns 5.
   - QA: Same as acceptance.
   - Commit strategy: n/a (external config).
 
-- [ ] 62. Same as todo 61 for the Preview environment (so preview deploys of the migration branch can be tested against the same stack) - expect `vercel env ls preview` shows the 5 new vars.
+- [x] 62. Same as todo 61 for the Preview environment (so preview deploys of the migration branch can be tested against the same stack) - expect `vercel env ls preview` shows the 5 new vars.
   - Files: none.
   - Acceptance: `vercel env ls preview | grep -cE "^(DATABASE_URL|DIRECT_URL|BLOB_READ_WRITE_TOKEN|BETTER_AUTH_SECRET|BETTER_AUTH_URL)\b"` returns 5.
   - QA: Same as acceptance.
   - Commit strategy: n/a.
 
-- [ ] 63. Also connect the existing Neon DB and Blob store to Preview and Production environments in Vercel Dashboard → Storage → each store → Connect → check Preview + Production - expect env vars auto-populated from the store link match those set manually in todos 61-62 (or Vercel merges without conflict).
+- [x] 63. Also connect the existing Neon DB and Blob store to Preview and Production environments in Vercel Dashboard → Storage → each store → Connect → check Preview + Production - expect env vars auto-populated from the store link match those set manually in todos 61-62 (or Vercel merges without conflict).
   - Files: none.
   - Acceptance: `vercel env ls production` and `vercel env ls preview` show DB and Blob vars sourced from the store connection (integration-managed).
   - QA: Same as acceptance.
   - Commit strategy: n/a.
 
-- [ ] 64. Push migration branch: `git push -u origin migration/007-off-supabase` - expect branch visible on GitHub, Vercel Preview build starts automatically.
+- [x] 64. Push migration branch: `git push -u origin migration/007-off-supabase` - expect branch visible on GitHub, Vercel Preview build starts automatically.
   - Files: none in repo (git push only).
   - Acceptance: `git branch -r | grep -c 'origin/migration/007-off-supabase'` returns 1; Vercel dashboard shows a new deployment building.
   - QA: Same as acceptance.
   - Commit strategy: n/a.
 
-- [ ] 65. Wait for Vercel Preview deploy to complete (status READY). Copy the preview URL - expect deploy status is READY and preview URL is reachable.
+- [x] 65. Wait for Vercel Preview deploy to complete (status READY). Copy the preview URL - expect deploy status is READY and preview URL is reachable.
   - Files: none.
   - Acceptance: Vercel Dashboard → Deployments shows READY for the branch's latest deploy; `curl -sI <preview-url>` returns 200 or 307.
   - QA: Same as acceptance.
   - Commit strategy: n/a.
 
-- [ ] 66. Preview end-to-end verification: On the preview URL, sign in as each of `manager@demo.com`, `client@demo.com`, `designer@demo.com` (password `demo1234`). For each: dashboard loads with correct role-based content; create a project (if role allows); upload a small test PDF; download the PDF; delete the project. Verify browser DevTools console shows zero errors on all three sessions - expect all three role flows pass.
+- [x] 66. Preview end-to-end verification: On the preview URL, sign in as each of `manager@demo.com`, `client@demo.com`, `designer@demo.com` (password `demo1234`). For each: dashboard loads with correct role-based content; create a project (if role allows); upload a small test PDF; download the PDF; delete the project. Verify browser DevTools console shows zero errors on all three sessions - expect all three role flows pass.
   - Files: none.
   - Acceptance: Three role verifications complete without error; screenshots or notes saved to `/tmp/preview-verify.md` documenting each.
   - QA: Same as acceptance; the summary file is agent-generated.
   - Commit strategy: n/a.
 
-- [ ] 67. Open PR: `gh pr create --base main --head migration/007-off-supabase --title "Migrate off Supabase to Vercel Postgres + Blob + Better Auth" --body "$(head -60 specs/007-migration-off-supabase.md)\n\nSee spec for full details. Fases 0-4 verified. Fase 5 (Supabase project deletion) is executed after merge."` (or equivalent via GitHub UI) - expect PR URL exists.
+- [x] 67. Open PR: `gh pr create --base main --head migration/007-off-supabase --title "Migrate off Supabase to Vercel Postgres + Blob + Better Auth" --body "$(head -60 specs/007-migration-off-supabase.md)\n\nSee spec for full details. Fases 0-4 verified. Fase 5 (Supabase project deletion) is executed after merge."` (or equivalent via GitHub UI) - expect PR URL exists.
   - Files: none.
   - Acceptance: PR is open, targets `main`, links to the spec file.
   - QA: `gh pr view --json url` returns the PR URL.
   - Commit strategy: n/a.
 
-- [ ] 68. Merge PR: After the preview verification is green, use `gh pr merge --squash --delete-branch` (or GitHub UI). The merge triggers a Production deploy on Vercel - expect PR merged, main deploy building.
+- [~] 68. Merge PR: After the preview verification is green, use `gh pr merge --squash --delete-branch` (or GitHub UI). The merge triggers a Production deploy on Vercel - expect PR merged, main deploy building.
   - Files: none in local repo (remote change).
   - Acceptance: PR status is MERGED; Vercel dashboard shows a new Production deployment building.
   - QA: `gh pr view --json state` returns `MERGED`.
   - Commit strategy: n/a.
 
-- [ ] 69. Wait for Production deploy to complete (status READY). Verify https://project-manager-app-cyan.vercel.app is reachable - expect deploy is READY and URL returns 200 or 307.
+- [~] 69. Wait for Production deploy to complete (status READY). Verify https://project-manager-app-cyan.vercel.app is reachable - expect deploy is READY and URL returns 200 or 307.
   - Files: none.
   - Acceptance: `curl -sI https://project-manager-app-cyan.vercel.app` returns 200 or 307.
   - QA: Same as acceptance.
   - Commit strategy: n/a.
 
-- [ ] 70. Production end-to-end verification: same as todo 66 but on https://project-manager-app-cyan.vercel.app. For each of the three demo users: login, dashboard, create/read/delete a project, upload/download/delete a file, sign out. Zero console errors - expect all three role flows pass in production.
+- [~] 70. Production end-to-end verification: same as todo 66 but on https://project-manager-app-cyan.vercel.app. For each of the three demo users: login, dashboard, create/read/delete a project, upload/download/delete a file, sign out. Zero console errors - expect all three role flows pass in production.
   - Files: none.
   - Acceptance: Screenshots or notes saved to `/tmp/prod-verify.md`.
   - QA: Same as acceptance.
   - Commit strategy: n/a.
 
-- [ ] 71. GATE — Fase 4 complete. Print summary: (a) preview verified, (b) PR merged, (c) production deploy READY, (d) production verified for all 3 demo roles, (e) merge SHA. Then PAUSE. Do NOT begin Fase 5 (IRREVERSIBLE Supabase deletion) without explicit user "OK" reply.
+- [~] 71. GATE — Fase 4 complete. Print summary: (a) preview verified, (b) PR merged, (c) production deploy READY, (d) production verified for all 3 demo roles, (e) merge SHA. Then PAUSE. Do NOT begin Fase 5 (IRREVERSIBLE Supabase deletion) without explicit user "OK" reply.
 
 ### Fase 5 — Teardown (irreversible; only after Fase 4 confirmed OK)
 
-- [ ] 72. Vercel Dashboard → Environment Variables → Production, Preview, Development: Remove `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from ALL three environments. Also remove any stale `DATABASE_URL` or `DIRECT_URL` entries that still point to Supabase (should be none after todos 61-63, but double-check) - expect `vercel env ls production | grep -i supabase` returns 0 and no Supabase host in DB URLs.
+- [~] 72. Vercel Dashboard → Environment Variables → Production, Preview, Development: Remove `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from ALL three environments. Also remove any stale `DATABASE_URL` or `DIRECT_URL` entries that still point to Supabase (should be none after todos 61-63, but double-check) - expect `vercel env ls production | grep -i supabase` returns 0 and no Supabase host in DB URLs.
   - Files: none.
   - Acceptance: `for e in production preview development; do vercel env ls $e | grep -ic supabase; done` all return 0.
   - QA: Same as acceptance.
   - Commit strategy: n/a.
 
-- [ ] 73. `npm uninstall @supabase/ssr @supabase/supabase-js` - expect both entries removed from `package.json`.
+- [~] 73. `npm uninstall @supabase/ssr @supabase/supabase-js` - expect both entries removed from `package.json`.
   - Files: `package.json`, `package-lock.json` (modified)
   - Acceptance: `jq -r '.dependencies["@supabase/ssr"]' package.json` returns `null`; same for `@supabase/supabase-js`.
   - QA: `grep -c "@supabase" package.json` returns 0.
   - Commit strategy: Group with Fase 5 commit.
 
-- [ ] 74. Delete `.mcp.json` and `.env.local.supabase-backup` - expect files gone.
+- [~] 74. Delete `.mcp.json` and `.env.local.supabase-backup` - expect files gone.
   - Files: two deletions (the second is not committed, but should be cleaned up).
   - Acceptance: `test ! -e .mcp.json && test ! -e .env.local.supabase-backup` exits 0.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 5 commit (only `.mcp.json` is tracked).
 
-- [ ] 75. `.env.example`: Remove `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` lines (and any related comments); keep `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` - expect final example has 5 vars.
+- [~] 75. `.env.example`: Remove `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` lines (and any related comments); keep `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` - expect final example has 5 vars.
   - Files: `.env.example` (modified)
   - Acceptance: `grep -c "SUPABASE" .env.example` returns 0; `grep -cE '^[A-Z_]+=' .env.example` returns 5.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 5 commit.
 
-- [ ] 76. `README.md`: Update tech stack section — remove any "Supabase" mentions, replace with "Vercel Postgres (Neon)", "Vercel Blob", "Better Auth". Update "Setup" section: remove the Supabase bucket creation step; add steps to link Vercel Postgres + Blob and pull env vars. Confirm demo credentials table is still accurate (`manager@demo.com` / `client@demo.com` / `designer@demo.com` with `demo1234`). If the seed script had to change the password for any reason, update the table in the SAME commit - expect `grep -ic supabase README.md` returns 0.
+- [~] 76. `README.md`: Update tech stack section — remove any "Supabase" mentions, replace with "Vercel Postgres (Neon)", "Vercel Blob", "Better Auth". Update "Setup" section: remove the Supabase bucket creation step; add steps to link Vercel Postgres + Blob and pull env vars. Confirm demo credentials table is still accurate (`manager@demo.com` / `client@demo.com` / `designer@demo.com` with `demo1234`). If the seed script had to change the password for any reason, update the table in the SAME commit - expect `grep -ic supabase README.md` returns 0.
   - Files: `README.md` (modified)
   - Acceptance: `grep -c -i "supabase" README.md` returns 0; demo credentials table unchanged unless the seed changed passwords.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 5 commit.
 
-- [ ] 77. `PRODUCT.md`: Remove "Supabase" from the product purpose paragraph. Update any references so the stack narrative reads "Next.js + Prisma + Vercel Postgres + Better Auth + Vercel Blob" - expect `grep -ic supabase PRODUCT.md` returns 0.
+- [~] 77. `PRODUCT.md`: Remove "Supabase" from the product purpose paragraph. Update any references so the stack narrative reads "Next.js + Prisma + Vercel Postgres + Better Auth + Vercel Blob" - expect `grep -ic supabase PRODUCT.md` returns 0.
   - Files: `PRODUCT.md` (modified)
   - Acceptance: `grep -c -i "supabase" PRODUCT.md` returns 0.
   - QA: Same as acceptance.
   - Commit strategy: Group with Fase 5 commit.
 
-- [ ] 78. Commit Fase 5 cleanup: `git add . && git commit -m "chore(fase-5/5): remove Supabase code, deps, docs, and MCP entry"` and push to `main` - expect one commit on main.
+- [~] 78. Commit Fase 5 cleanup: `git add . && git commit -m "chore(fase-5/5): remove Supabase code, deps, docs, and MCP entry"` and push to `main` - expect one commit on main.
   - Files: all Fase 5 changes staged and committed.
   - Acceptance: `git log --oneline -1` on `main` matches; `git push origin main` succeeds; Vercel triggers a final production deploy which must succeed (no runtime references to Supabase).
   - QA: After the deploy is READY, `curl -sI https://project-manager-app-cyan.vercel.app` returns 200 or 307; login still works for all three demos.
   - Commit strategy: This is the Fase 5 commit.
 
-- [ ] 79. Supabase Dashboard → Project `hslsqmuhkctcjftwnive` → Settings → General → Danger Zone → Delete Project. IRREVERSIBLE. Enter the project name to confirm. Wait for confirmation email if applicable - expect project no longer listed in Supabase account.
+- [~] 79. Supabase Dashboard → Project `hslsqmuhkctcjftwnive` → Settings → General → Danger Zone → Delete Project. IRREVERSIBLE. Enter the project name to confirm. Wait for confirmation email if applicable - expect project no longer listed in Supabase account.
   - Files: none.
   - Acceptance: Supabase Dashboard shows the project as deleted or absent; the account's active-project count is now < 2 (slot free for matchday-dev).
   - QA: Visiting `https://hslsqmuhkctcjftwnive.supabase.co` returns a Supabase "project not found" or generic 404 page.
   - Commit strategy: n/a.
 
-- [ ] 80. Verify Supabase MCP entry no longer resolves anywhere (already deleted in todo 74 as `.mcp.json`). Confirm the agent's tool list in a fresh session does not include a `supabase` MCP server - expect no `mcp_supabase_*` tools available in the executor's environment.
+- [~] 80. Verify Supabase MCP entry no longer resolves anywhere (already deleted in todo 74 as `.mcp.json`). Confirm the agent's tool list in a fresh session does not include a `supabase` MCP server - expect no `mcp_supabase_*` tools available in the executor's environment.
   - Files: none.
   - Acceptance: Restart / re-list the agent's tools; no Supabase MCP tool appears.
   - QA: n/a (agent-runtime observation).
   - Commit strategy: n/a.
 
-- [ ] 81. GATE — Fase 5 complete. Print final summary: (a) Supabase deleted (slot free), (b) all deps and code removed, (c) MCP removed, (d) docs updated, (e) production still green. Then run the FINAL VERIFICATION WAVE (below).
+- [~] 81. GATE — Fase 5 complete. Print final summary: (a) Supabase deleted (slot free), (b) all deps and code removed, (c) MCP removed, (d) docs updated, (e) production still green. Then run the FINAL VERIFICATION WAVE (below).
 
 ## Final verification wave
 
 Run this wave AFTER todo 81. Every check below must pass; any failure blocks the migration
 from being declared complete and requires targeted remediation before closing.
 
-- [ ] F1. Zero Supabase references remain in the codebase: `grep -ri "supabase" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.mjs" --include="*.json" --include="*.md" app/ lib/ scripts/ middleware.ts prisma/ next.config.ts package.json README.md PRODUCT.md .env.example 2>/dev/null` returns 0 hits. Any lingering hit is a bug — trace and remove.
-- [ ] F2. Neon has the expected six tables: `psql "$DIRECT_URL" -c "\dt public.*"` shows exactly `User`, `Project`, `File`, `Session`, `Account`, `Verification`.
-- [ ] F3. Demo users are seeded pre-verified: `psql "$DIRECT_URL" -c "SELECT email, role, \"emailVerified\" FROM \"User\" WHERE email LIKE '%@demo.com' ORDER BY email"` returns exactly 3 rows, all `emailVerified = t`, roles `PROJECT_MANAGER` / `CLIENT` / `DESIGNER`.
-- [ ] F4. Prisma schema validates cleanly: `npx prisma validate` prints "The schema is valid" and exits 0.
-- [ ] F5. TypeScript is clean: `npx tsc --noEmit` exits 0.
-- [ ] F6. Production build succeeds locally: `npm run build` exits 0.
-- [ ] F7. Vercel Blob store has at least as many blobs as File rows: `vercel blob list <store-name> --json | jq 'length'` returns >= `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"File\""`.
-- [ ] F8. Production login works for all three demo users on https://project-manager-app-cyan.vercel.app — each shows the correct role-based dashboard, zero DevTools console errors.
-- [ ] F9. Production upload + download + delete round-trip works: upload a test PDF, verify appears in project detail, download and verify byte identity, delete and verify gone from both UI and Blob store.
-- [ ] F10. Supabase account has 1 active project (the other one). The matchday-dev slot is free.
-- [ ] F11. Git history shows 6 commits on the migration path with the expected prefixes: `git log --oneline main | head -8 | grep -cE 'fase-(0|1|2|3|4|5)/5'` returns 6 (or 5 if Fase 4's merge was squashed — accept squash as one commit covering fases 1-4).
+- [~] F1. Zero Supabase references remain in the codebase: `grep -ri "supabase" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.mjs" --include="*.json" --include="*.md" app/ lib/ scripts/ middleware.ts prisma/ next.config.ts package.json README.md PRODUCT.md .env.example 2>/dev/null` returns 0 hits. Any lingering hit is a bug — trace and remove.
+- [x] F2. Neon has the expected six tables: `psql "$DIRECT_URL" -c "\dt public.*"` shows exactly `User`, `Project`, `File`, `Session`, `Account`, `Verification`.
+- [x] F3. Demo users are seeded pre-verified: `psql "$DIRECT_URL" -c "SELECT email, role, \"emailVerified\" FROM \"User\" WHERE email LIKE '%@demo.com' ORDER BY email"` returns exactly 3 rows, all `emailVerified = t`, roles `PROJECT_MANAGER` / `CLIENT` / `DESIGNER`.
+- [x] F4. Prisma schema validates cleanly: `npx prisma validate` prints "The schema is valid" and exits 0.
+- [x] F5. TypeScript is clean: `npx tsc --noEmit` exits 0.
+- [x] F6. Production build succeeds locally: `npm run build` exits 0.
+- [~] F7. Vercel Blob store has at least as many blobs as File rows: `vercel blob list <store-name> --json | jq 'length'` returns >= `psql "$DIRECT_URL" -c "SELECT COUNT(*) FROM \"File\""`.
+- [~] F8. Production login works for all three demo users on https://project-manager-app-cyan.vercel.app — each shows the correct role-based dashboard, zero DevTools console errors.
+- [~] F9. Production upload + download + delete round-trip works: upload a test PDF, verify appears in project detail, download and verify byte identity, delete and verify gone from both UI and Blob store.
+- [~] F10. Supabase account has 1 active project (the other one). The matchday-dev slot is free.
+- [~] F11. Git history shows 6 commits on the migration path with the expected prefixes: `git log --oneline main | head -8 | grep -cE 'fase-(0|1|2|3|4|5)/5'` returns 6 (or 5 if Fase 4's merge was squashed — accept squash as one commit covering fases 1-4).
 
 ## Rollback playbook
 
