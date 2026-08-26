@@ -48,3 +48,6 @@ next-env.d.ts
 
 # Playwright MCP
 .playwright-mcp/
+
+# scratch local de herramientas de agente
+.omo/
